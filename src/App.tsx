@@ -1,39 +1,7 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 
-/* =========================================================
-   Global helpers
-   ========================================================= */
-const isClient = typeof window !== "undefined";
-
-function useIsSmallScreen(breakpoint = 768) {
-    const [small, setSmall] = useState(false);
-    useEffect(() => {
-        if (!isClient) return;
-        const onResize = () => setSmall(window.innerWidth < breakpoint);
-        onResize();
-        window.addEventListener("resize", onResize);
-        return () => window.removeEventListener("resize", onResize);
-    }, [breakpoint]);
-    return small;
-}
-
-function usePrefersReducedMotion() {
-    const [reduced, setReduced] = useState(false);
-    useEffect(() => {
-        if (!isClient) return;
-        const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-        const onChange = () => setReduced(media.matches);
-        onChange();
-        media.addEventListener("change", onChange);
-        return () => media.removeEventListener("change", onChange);
-    }, []);
-    return reduced;
-}
-
-/* =========================================================
-   Background (continuous)
-   ========================================================= */
+/* ========== BACKGROUND GLOBAL (continu) ========== */
 function SiteBackground() {
     return (
         <>
@@ -43,37 +11,33 @@ function SiteBackground() {
     );
 }
 
-/* =========================================================
-   HERO (full screen)
-   - Mobile first: comfy spacing, safe-area support, larger tap targets
-   ========================================================= */
+/* ========== HERO (plein écran) ========== */
 function HeroSection() {
     return (
         <section
             id="hero"
-            className="relative flex min-h-[90vh] md:min-h-screen w-full items-center justify-center overflow-hidden text-white"
-            style={{ paddingTop: "max(env(safe-area-inset-top),1rem)", paddingBottom: "1rem" }}
+            className="relative flex min-h-screen w-full items-center justify-center overflow-hidden text-white"
         >
-            <div className="relative z-10 mx-auto w-full max-w-4xl px-4 sm:px-6 text-center">
-                <p className="mb-2 sm:mb-3 text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-zinc-400">SmartFlow</p>
-                <h1 className="text-[28px] leading-tight font-semibold sm:text-4xl md:text-6xl">
+            <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
+                <p className="mb-3 text-[11px] uppercase tracking-[0.25em] text-zinc-400">SmartFlow</p>
+                <h1 className="text-4xl font-semibold md:text-6xl">
                     Design ✕ Développement
                     <br />
                     d’expériences numériques
                 </h1>
-                <p className="mx-auto mt-3 sm:mt-4 max-w-xl text-sm sm:text-base text-zinc-300">
+                <p className="mx-auto mt-4 max-w-xl text-zinc-300">
                     Sites, logiciels et automatisations — clairs, rapides, soignés.
                 </p>
-                <div className="mt-6 sm:mt-8 inline-flex w-full flex-col sm:w-auto sm:flex-row gap-3">
+                <div className="mt-8 inline-flex gap-3">
                     <a
                         href="#dev"
-                        className="rounded-xl border border-white/15 bg-white/10 px-5 py-3 text-sm text-white hover:bg-white/15 transition w-full sm:w-auto"
+                        className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm text-white hover:bg-white/10"
                     >
                         Approche
                     </a>
                     <a
                         href="#services"
-                        className="rounded-xl border border-white/15 px-5 py-3 text-sm text-zinc-300 hover:text-white transition w-full sm:w-auto"
+                        className="rounded-xl border border-white/15 px-4 py-2 text-sm text-zinc-300 hover:text-white"
                     >
                         Services
                     </a>
@@ -83,9 +47,7 @@ function HeroSection() {
     );
 }
 
-/* =========================================================
-   Lightweight syntax highlighting (safe)
-   ========================================================= */
+/* ========== HIGHLIGHT (sécurisé) ========== */
 function escapeHtml(src: string) {
     return src.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
@@ -101,9 +63,7 @@ function highlightTS(src: string) {
     return s;
 }
 
-/* =========================================================
-   Code content
-   ========================================================= */
+/* ========== CODE : NOTRE APPROCHE ========== */
 const APPROACH_LINES: string[] = [
     "// Notre approche — claire, itérative, sans friction.",
     "const approche = {",
@@ -132,14 +92,11 @@ function sliceByBudget(lines: string[], budget: number) {
     return out;
 }
 
-/* =========================================================
-   Code line
-   ========================================================= */
 function CodeLine({ text, index, active }: { text: string; index: number; active: boolean }) {
     const html = useMemo(() => highlightTS(text), [text]);
     return (
         <motion.div
-            className="whitespace-pre leading-7 font-mono text-[12px] sm:text-[13px] md:text-[15px] text-white"
+            className="whitespace-pre leading-7 font-mono text-[13px] md:text-[15px] text-white"
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.18 }}
@@ -151,19 +108,16 @@ function CodeLine({ text, index, active }: { text: string; index: number; active
     );
 }
 
-/* =========================================================
-   Editor frame
-   ========================================================= */
 function EditorFrame({ children }: { children: React.ReactNode }) {
     return (
-        <div className="relative w-full max-w-3xl rounded-2xl shadow-2xl border border-white/10 bg-gradient-to-b from-zinc-900/80 to-zinc-950/80 backdrop-blur p-4 sm:p-5 md:p-7">
-            <div className="flex items-center gap-2 mb-3 sm:mb-4">
-                <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-400/90" />
-                <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-400/90" />
-                <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-400/90" />
-                <div className="ml-2 sm:ml-3 text-[10px] sm:text-xs tracking-widest uppercase text-zinc-400">dev / approche.ts</div>
+        <div className="relative w-full max-w-3xl rounded-2xl shadow-2xl border border-white/10 bg-gradient-to-b from-zinc-900/80 to-zinc-950/80 backdrop-blur p-5 md:p-7">
+            <div className="flex items-center gap-2 mb-4">
+                <span className="w-3 h-3 rounded-full bg-red-400/90" />
+                <span className="w-3 h-3 rounded-full bg-yellow-400/90" />
+                <span className="w-3 h-3 rounded-full bg-green-400/90" />
+                <div className="ml-3 text-xs tracking-widest uppercase text-zinc-400">dev / approche.ts</div>
             </div>
-            <div className="rounded-xl border border-white/5 bg-black/30 px-3 sm:px-4 py-4 sm:py-5 overflow-hidden">
+            <div className="rounded-xl border border-white/5 bg-black/30 px-4 py-5 overflow-hidden">
                 {children}
             </div>
             <div aria-hidden className="pointer-events-none absolute -inset-1 rounded-2xl bg-gradient-to-tr from-sky-500/10 via-orange-500/10 to-emerald-500/10 blur-xl" />
@@ -171,12 +125,6 @@ function EditorFrame({ children }: { children: React.ReactNode }) {
     );
 }
 
-/* =========================================================
-   DEV SECTION – Responsive strategy
-   - Desktop (md+): sticky scroll-driven reveal (original effect)
-   - Mobile (sm): lightweight auto-reveal (no sticky, better perf)
-   - Reduced motion: show fully expanded code
-   ========================================================= */
 function DevScrollCodeSection() {
     const sectionRef = useRef<HTMLElement | null>(null);
     const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end end"] });
@@ -194,41 +142,10 @@ function DevScrollCodeSection() {
         remain -= APPROACH_LINES[i].length; activeIdx = i;
     }
 
-    const small = useIsSmallScreen();
-    const reduced = usePrefersReducedMotion();
-
-    // Mobile / reduced-motion fallback: simple staggered reveal once on mount
-    if (small || reduced) {
-        return (
-            <section id="dev" className="relative w-full text-white py-12 sm:py-16 px-4">
-                <div className="mx-auto w-full max-w-3xl">
-                    <span className="inline-block rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] tracking-widest text-zinc-200 uppercase">Notre approche</span>
-                    <div className="mt-4 sm:mt-6">
-                        <EditorFrame>
-                            <motion.div
-                                initial="hidden"
-                                animate="show"
-                                variants={{ hidden: {}, show: { transition: { staggerChildren: 0.06 } } }}
-                            >
-                                {APPROACH_LINES.map((t, i) => (
-                                    <motion.div key={i} variants={{ hidden: { opacity: 0, y: 6 }, show: { opacity: 1, y: 0 } }}>
-                                        <CodeLine text={t} index={i} active={false} />
-                                    </motion.div>
-                                ))}
-                            </motion.div>
-                        </EditorFrame>
-                        <p className="mt-3 sm:mt-4 text-[11px] sm:text-xs text-zinc-400">Du concept au code, chaque détail compte.</p>
-                    </div>
-                </div>
-            </section>
-        );
-    }
-
-    // Desktop sticky version
     return (
-        <section id="dev" ref={sectionRef} className="relative min-h-[260vh] md:min-h-[300vh] w-full text-white">
+        <section id="dev" ref={sectionRef} className="relative min-h-[300vh] w-full text-white">
             <div className="sticky top-0 z-10 flex min-h-screen w-full flex-col items-center justify-center px-4">
-                <div className="mx-auto mb-3 sm:mb-4 w-full max-w-3xl px-2">
+                <div className="mx-auto mb-4 w-full max-w-3xl px-2">
                     <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] tracking-widest text-zinc-200 uppercase">Notre approche</span>
                 </div>
                 <EditorFrame>
@@ -238,16 +155,12 @@ function DevScrollCodeSection() {
                 </EditorFrame>
                 <p className="mt-4 text-[11px] text-zinc-400">Du concept au code, chaque détail compte.</p>
             </div>
-            <div className="h-[160vh] md:h-[220vh]" />
+            <div className="h-[220vh]" />
         </section>
     );
 }
 
-/* =========================================================
-   Services
-   - Cards become one-per-row on mobile
-   - Larger touch targets
-   ========================================================= */
+/* ========== SERVICES ========== */
 function ServicesSection() {
     const cards = [
         { k: "01", title: "Design & conception", bullets: ["UI/UX, identité, protos", "Design system épuré"], tag: "Interfaces claires" },
@@ -257,19 +170,19 @@ function ServicesSection() {
     ];
 
     return (
-        <section id="services" className="relative w-full text-white py-12 sm:py-16">
-            <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6">
-                <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-1">
-                    <h2 className="text-xl sm:text-2xl font-semibold text-white">Nos services</h2>
+        <section id="services" className="relative w-full text-white py-16">
+            <div className="relative z-10 mx-auto max-w-5xl px-6">
+                <div className="mb-8 flex items-end justify-between">
+                    <h2 className="text-2xl font-semibold text-white">Nos services</h2>
                     <span className="text-xs text-zinc-500">essentiel et structuré</span>
                 </div>
 
-                <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
                     {cards.map((c) => (
-                        <div key={c.k} className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5 hover:border-violet-400/30 transition">
-                            <div className="mb-1.5 text-[10px] sm:text-[11px] uppercase tracking-widest text-zinc-400">{c.k}</div>
-                            <h3 className="text-base sm:text-lg font-medium text-white/90">{c.title}</h3>
-                            <ul className="mt-2 sm:mt-3 space-y-1.5 text-[13px] sm:text-sm text-zinc-300">
+                        <div key={c.k} className="rounded-2xl border border-white/10 bg-white/5 p-5 hover:border-violet-400/30 transition">
+                            <div className="mb-2 text-[11px] uppercase tracking-widest text-zinc-400">{c.k}</div>
+                            <h3 className="text-lg font-medium text-white/90">{c.title}</h3>
+                            <ul className="mt-3 space-y-1.5 text-sm text-zinc-300">
                                 {c.bullets.map((b, i) => <li key={i} className="list-disc pl-4">{b}</li>)}
                             </ul>
                             <p className="mt-3 text-xs text-violet-300">{c.tag}</p>
@@ -281,9 +194,7 @@ function ServicesSection() {
     );
 }
 
-/* =========================================================
-   Works
-   ========================================================= */
+/* ========== NOS RÉALISATIONS (3 projets) ========== */
 function WorksSection() {
     const works = [
         { t: "Site vitrine premium", d: "Next.js, Tailwind, Motion", href: "#", year: "2025" },
@@ -292,20 +203,20 @@ function WorksSection() {
     ];
 
     return (
-        <section id="works" className="relative w-full text-white py-12 sm:py-16">
-            <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
-                <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-1">
-                    <h2 className="text-xl sm:text-2xl font-semibold">Nos réalisations</h2>
+        <section id="works" className="relative w-full text-white py-16">
+            <div className="relative z-10 mx-auto max-w-6xl px-6">
+                <div className="mb-8 flex items-end justify-between">
+                    <h2 className="text-2xl font-semibold">Nos réalisations</h2>
                     <a href="#contact" className="text-sm text-zinc-300 underline-offset-4 hover:text-white hover:underline">Discuter d’un projet</a>
                 </div>
 
-                <div className="grid gap-4 sm:gap-5 grid-cols-1 xs:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     {works.map((w, i) => (
-                        <a key={i} href={w.href} className="group rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5 hover:border-violet-400/30 transition">
-                            <div className="mb-3 sm:mb-4 h-36 sm:h-40 w-full overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-zinc-800/60 to-zinc-900/60" />
+                        <a key={i} href={w.href} className="group rounded-2xl border border-white/10 bg-white/5 p-5 hover:border-violet-400/30 transition">
+                            <div className="mb-4 h-40 w-full overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-zinc-800/60 to-zinc-900/60" />
                             <div className="flex items-center justify-between">
-                                <h3 className="text-base sm:text-lg font-medium text-white/90 group-hover:text-white">{w.t}</h3>
-                                <span className="text-[10px] sm:text-[11px] text-zinc-400">{w.year}</span>
+                                <h3 className="text-lg font-medium text-white/90 group-hover:text-white">{w.t}</h3>
+                                <span className="text-[11px] text-zinc-400">{w.year}</span>
                             </div>
                             <p className="mt-1 text-sm text-zinc-300">{w.d}</p>
                         </a>
@@ -316,35 +227,32 @@ function WorksSection() {
     );
 }
 
-/* =========================================================
-   Contact
-   - Inputs full-width, big tap targets, mobile keyboard friendly
-   ========================================================= */
+/* ========== CONTACT ========== */
 function ContactSection() {
     return (
-        <section id="contact" className="relative w-full text-white py-12 sm:py-16">
-            <div className="relative z-10 mx-auto max-w-3xl px-4 sm:px-6">
-                <h2 className="text-xl sm:text-2xl font-semibold">Contact</h2>
-                <p className="mt-2 text-sm sm:text-base text-zinc-300">
+        <section id="contact" className="relative w-full text-white py-16">
+            <div className="relative z-10 mx-auto max-w-3xl px-6">
+                <h2 className="text-2xl font-semibold">Contact</h2>
+                <p className="mt-2 text-zinc-300">
                     Parlez-nous de votre projet. Réponse rapide et conseils concrets.
                 </p>
 
                 <form
-                    className="mt-5 sm:mt-6 grid gap-4"
+                    className="mt-6 grid gap-4"
                     action="mailto:hello@smartflow.dev"
                     method="post"
                     encType="text/plain"
                 >
                     <div className="grid gap-4 sm:grid-cols-2">
                         <input name="nom" placeholder="Votre nom" className="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-violet-400/40" required />
-                        <input name="email" type="email" inputMode="email" placeholder="Votre email" className="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-violet-400/40" required />
+                        <input name="email" type="email" placeholder="Votre email" className="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-violet-400/40" required />
                     </div>
                     <textarea name="message" placeholder="Décrivez brièvement votre besoin…" className="min-h-[140px] rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-violet-400/40" required />
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                        <button type="submit" className="rounded-xl border border-white/15 bg-white/10 px-5 py-3 text-sm text-white hover:bg-white/15 w-full sm:w-auto">
+                    <div className="flex items-center gap-3">
+                        <button type="submit" className="rounded-xl border border-white/15 bg-white/10 px-5 py-2.5 text-sm text-white hover:bg-white/15">
                             Envoyer
                         </button>
-                        <a href="mailto:hello@smartflow.dev" className="text-sm text-zinc-300 underline-offset-4 hover:text-white hover:underline text-center">
+                        <a href="mailto:hello@smartflow.dev" className="text-sm text-zinc-300 underline-offset-4 hover:text-white hover:underline">
                             Ou écrivez-nous directement
                         </a>
                     </div>
@@ -354,25 +262,23 @@ function ContactSection() {
     );
 }
 
-/* =========================================================
-   Footer
-   ========================================================= */
+/* ========== FOOTER ========== */
 function Footer() {
     return (
-        <footer className="relative w-full text-white py-8 sm:py-10">
-            <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
+        <footer className="relative w-full text-white py-10">
+            <div className="relative z-10 mx-auto max-w-6xl px-6">
                 <div className="flex flex-col items-start justify-between gap-6 sm:flex-row">
                     <div>
-                        <div className="text-[11px] sm:text-sm uppercase tracking-[0.25em] text-zinc-400">SmartFlow</div>
-                        <p className="mt-2 text-zinc-400 text-xs sm:text-sm">Design & Développement d’expériences numériques.</p>
+                        <div className="text-sm uppercase tracking-[0.25em] text-zinc-400">SmartFlow</div>
+                        <p className="mt-2 text-zinc-400 text-sm">Design & Développement d’expériences numériques.</p>
                     </div>
-                    <div className="flex gap-5 sm:gap-6 text-sm">
+                    <div className="flex gap-6 text-sm">
                         <a href="#services" className="text-zinc-300 hover:text-white">Services</a>
                         <a href="#works" className="text-zinc-300 hover:text-white">Réalisations</a>
                         <a href="#contact" className="text-zinc-300 hover:text-white">Contact</a>
                     </div>
                 </div>
-                <div className="mt-6 sm:mt-8 border-t border-white/10 pt-5 sm:pt-6 text-[11px] sm:text-xs text-zinc-500">
+                <div className="mt-8 border-t border-white/10 pt-6 text-xs text-zinc-500">
                     © {new Date().getFullYear()} SmartFlow — Tous droits réservés.
                 </div>
             </div>
@@ -380,12 +286,10 @@ function Footer() {
     );
 }
 
-/* =========================================================
-   APP
-   ========================================================= */
+/* ========== APP ========== */
 export default function App() {
     return (
-        <main className="relative min-h-screen text-white antialiased [text-size-adjust:100%] selection:bg-white/20">
+        <main className="relative min-h-screen text-white">
             <SiteBackground />
             <HeroSection />
             <DevScrollCodeSection />
