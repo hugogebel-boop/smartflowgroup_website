@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Optionnel : lissage police */
+html, body, #root {
+    height: 100%;
+}
