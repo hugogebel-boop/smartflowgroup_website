@@ -26,10 +26,6 @@ Thumbs.db
 coverage/
 *.tsbuildinfo
 
-# --- GitHub Pages artifact ---
-.github/
-!.github/workflows/
-
 # --- OneDrive sync files ---
 ~$*
 *.lnk
