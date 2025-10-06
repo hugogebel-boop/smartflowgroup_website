@@ -45,7 +45,6 @@ function SiteBackground() {
 
 /* =========================================================
    HERO (full screen)
-   - Mobile first: comfy spacing, safe-area support, larger tap targets
    ========================================================= */
 function HeroSection() {
     return (
@@ -55,7 +54,9 @@ function HeroSection() {
             style={{ paddingTop: "max(env(safe-area-inset-top),1rem)", paddingBottom: "1rem" }}
         >
             <div className="relative z-10 mx-auto w-full max-w-4xl px-4 sm:px-6 text-center">
-                <p className="mb-2 sm:mb-3 text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-zinc-400">SmartFlow</p>
+                <p className="mb-2 sm:mb-3 text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-zinc-400">
+                    SmartFlow
+                </p>
                 <h1 className="text-[28px] leading-tight font-semibold sm:text-4xl md:text-6xl">
                     Design ✕ Développement
                     <br />
@@ -91,40 +92,56 @@ function escapeHtml(src: string) {
 }
 function highlightTS(src: string) {
     let s = escapeHtml(src);
-    s = s.replace(/(\"[^\"]*\"|'[^']*'|`[^`]*`)/g, "<span style='color:#34d399;'>$&</span>");
-    s = s.replace(/\b(export|function|return|const|let|type|interface|new|async|await)\b/g, "<span style='color:#c4b5fd;font-weight:500;'>$&</span>");
-    s = s.replace(/\b(approche|engagement)\b/g, "<span style='color:#38bdf8;font-weight:500;'>$&</span>");
-    s = s.replace(/(\/\/.*$)/gm, (full) => {
-        const inner = full.replace(/Notre approche/g, "<span style='color:#fb923c;font-weight:500;'>Notre approche</span>");
-        return `<span style='color:#71717a;'>${inner}</span>`;
-    });
+
+    // === Chaînes ===
+    s = s.replace(/("[^"]*"|'[^']*'|`[^`]*`)/g, "<span style='color:#34d399;'>$&</span>");
+
+    // === Mots-clés ===
+    s = s.replace(
+        /\b(export|function|return|const|let|type|interface|new|async|await)\b/g,
+        "<span style='color:#c4b5fd;font-weight:500;'>$&</span>"
+    );
+
+    // === start / commit en rouge ===
+    s = s.replace(/\b(start|commit)\b/g, "<span style='color:#ef4444;font-weight:700;'>$&</span>");
+
+    // === Ligne Notre approche — tout estomper sauf “Notre approche” en violet ===
+    s = s.replace(
+        /\/\*\s*(Notre approche)(.*?)\*\//,
+        `<span style="color:#71717a;opacity:0.8;">/* <span style='color:#a78bfa;font-weight:600;'>$1</span>$2*/</span>`
+    );
+
+    // === Commentaires restants ===
+    s = s.replace(/(\/\/.*$)/gm, (full) => `<span style='color:#71717a;'>${full}</span>`);
+
     return s;
 }
 
 /* =========================================================
-   Code content
+   Code content (courtes lignes)
    ========================================================= */
 const APPROACH_LINES: string[] = [
-    "// Notre approche — claire, itérative, sans friction.",
-    "const approche = {",
-    "  écoute: 'on clarifie le besoin et le contexte',",
-    "  design: 'UI/UX d’abord, protos rapides',",
-    "  dev: 'implémentation propre et performante',",
-    "  stack: ['Next.js','React','TS','Tailwind','.NET'],",
-    "  ship: 'itérations courtes, CI/CD, doc utile',",
-    "};",
+    "/* Notre approche — simple et directe. */",
+    "SmartFlow.start({",
+    '  idée: "on comprend le besoin",',
+    '  design: "on imagine une expérience fluide",',
+    '  dev: "on code avec clarté et exigence",',
+    '  suivi: "on reste proches et réactifs",',
+    '  valeur: "un rendu soigné, sans friction",',
+    "});",
     "",
-    "export function engagement() {",
-    "  console.log('Exigence et transparence');",
-    "  return approche;",
-    "}",
+    'SmartFlow.commit("livrer, apprendre, améliorer");',
+    'console.log("Chaque projet est une aventure sur mesure.");',
 ];
 
 function sliceByBudget(lines: string[], budget: number) {
     const out: string[] = [];
     let remain = Math.max(0, budget);
     for (const line of lines) {
-        if (remain <= 0) { out.push(""); continue; }
+        if (remain <= 0) {
+            out.push("");
+            continue;
+        }
         const take = Math.min(line.length, remain);
         out.push(line.slice(0, take));
         remain -= take;
@@ -144,7 +161,8 @@ function CodeLine({ text, index, active }: { text: string; index: number; active
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.18 }}
         >
-            <span className="select-none mr-2 sm:mr-3 text-zinc-500">{String(index + 1).padStart(2, "0")}</span>
+            {/* Numéros de ligne sans estompage */}
+            <span className="mr-2 sm:mr-3 text-white">{String(index + 1).padStart(2, "0")}</span>
             <span dangerouslySetInnerHTML={{ __html: html }} />
             {active && <span className="inline-block w-2 h-4 align-baseline ml-0.5 bg-zinc-200 animate-pulse" />}
         </motion.div>
@@ -161,25 +179,26 @@ function EditorFrame({ children }: { children: React.ReactNode }) {
                 <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-400/90" />
                 <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-400/90" />
                 <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-400/90" />
-                <div className="ml-2 sm:ml-3 text-[10px] sm:text-xs tracking-widest uppercase text-zinc-400">dev / approche.ts</div>
-            </div>
-            {/* Code area: allow horizontal scroll on small screens */}
-            <div className="rounded-xl border border-white/5 bg-black/30 px-2.5 sm:px-4 py-3 sm:py-5 overflow-x-auto">
-                {/* optional soft fade on edges when overflow */}
-                <div className="min-w-full [mask-image:linear-gradient(to_right,transparent,black_12px,black_calc(100%-12px),transparent)]">
-                    {children}
+                <div className="ml-2 sm:ml-3 text-[10px] sm:text-xs tracking-widest uppercase text-zinc-400">
+                    dev / approche.ts
                 </div>
             </div>
-            <div aria-hidden className="pointer-events-none absolute -inset-1 rounded-2xl bg-gradient-to-tr from-sky-500/10 via-orange-500/10 to-emerald-500/10 blur-xl" />
+
+            {/* Zone de code — plus de masque sur les bords */}
+            <div className="rounded-xl border border-white/5 bg-black/30 px-2.5 sm:px-4 py-3 sm:py-5 overflow-x-auto">
+                <div className="min-w-full">{children}</div>
+            </div>
+
+            <div
+                aria-hidden
+                className="pointer-events-none absolute -inset-1 rounded-2xl bg-gradient-to-tr from-sky-500/10 via-orange-500/10 to-emerald-500/10 blur-xl"
+            />
         </div>
     );
 }
 
 /* =========================================================
-   DEV SECTION – Responsive strategy
-   - Desktop (md+): sticky scroll-driven reveal (original effect)
-   - Mobile (sm): lightweight auto-reveal (no sticky, better perf)
-   - Reduced motion: show fully expanded code
+   DEV SECTION – Sticky reveal all sizes
    ========================================================= */
 function DevScrollCodeSection() {
     const sectionRef = useRef<HTMLElement | null>(null);
@@ -191,11 +210,19 @@ function DevScrollCodeSection() {
     const budget = Math.round(totalChars * Math.max(0, Math.min(1, p)));
     const visible = useMemo(() => sliceByBudget(APPROACH_LINES, budget), [budget]);
 
-    let remain = budget, activeIdx = 0;
+    let remain = budget,
+        activeIdx = 0;
     for (let i = 0; i < APPROACH_LINES.length; i++) {
-        if (remain <= 0) { activeIdx = i; break; }
-        if (remain < APPROACH_LINES[i].length) { activeIdx = i; break; }
-        remain -= APPROACH_LINES[i].length; activeIdx = i;
+        if (remain <= 0) {
+            activeIdx = i;
+            break;
+        }
+        if (remain < APPROACH_LINES[i].length) {
+            activeIdx = i;
+            break;
+        }
+        remain -= APPROACH_LINES[i].length;
+        activeIdx = i;
     }
 
     const reduced = usePrefersReducedMotion();
@@ -203,7 +230,9 @@ function DevScrollCodeSection() {
         return (
             <section id="dev" className="relative w-full text-white py-12 sm:py-16 px-4">
                 <div className="mx-auto w-full max-w-3xl">
-                    <span className="inline-block rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] tracking-widest text-zinc-200 uppercase">Notre approche</span>
+                    <span className="inline-block rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] tracking-widest text-zinc-200 uppercase">
+                        Notre approche
+                    </span>
                     <div className="mt-4 sm:mt-6">
                         <EditorFrame>
                             {APPROACH_LINES.map((t, i) => (
@@ -222,7 +251,9 @@ function DevScrollCodeSection() {
         <section id="dev" ref={sectionRef} className="relative min-h-[220vh] sm:min-h-[260vh] md:min-h-[300vh] w-full text-white">
             <div className="sticky top-0 z-10 flex min-h-screen w-full flex-col items-center justify-center px-3 sm:px-4">
                 <div className="mx-auto mb-3 sm:mb-4 w-full max-w-3xl px-1 sm:px-2">
-                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] tracking-widest text-zinc-200 uppercase">Notre approche</span>
+                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] tracking-widest text-zinc-200 uppercase">
+                        Notre approche
+                    </span>
                 </div>
                 <EditorFrame>
                     {visible.map((t, i) => (
@@ -238,8 +269,6 @@ function DevScrollCodeSection() {
 
 /* =========================================================
    Services
-   - Cards become one-per-row on mobile
-   - Larger touch targets
    ========================================================= */
 function ServicesSection() {
     const cards = [
@@ -263,7 +292,11 @@ function ServicesSection() {
                             <div className="mb-1.5 text-[10px] sm:text-[11px] uppercase tracking-widest text-zinc-400">{c.k}</div>
                             <h3 className="text-base sm:text-lg font-medium text-white/90">{c.title}</h3>
                             <ul className="mt-2 sm:mt-3 space-y-1.5 text-[13px] sm:text-sm text-zinc-300">
-                                {c.bullets.map((b, i) => <li key={i} className="list-disc pl-4">{b}</li>)}
+                                {c.bullets.map((b, i) => (
+                                    <li key={i} className="list-disc pl-4">
+                                        {b}
+                                    </li>
+                                ))}
                             </ul>
                             <p className="mt-3 text-xs text-violet-300">{c.tag}</p>
                         </div>
@@ -289,12 +322,18 @@ function WorksSection() {
             <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
                 <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-1">
                     <h2 className="text-xl sm:text-2xl font-semibold">Nos réalisations</h2>
-                    <a href="#contact" className="text-sm text-zinc-300 underline-offset-4 hover:text-white hover:underline">Discuter d’un projet</a>
+                    <a href="#contact" className="text-sm text-zinc-300 underline-offset-4 hover:text-white hover:underline">
+                        Discuter d’un projet
+                    </a>
                 </div>
 
                 <div className="grid gap-4 sm:gap-5 grid-cols-1 xs:grid-cols-2 lg:grid-cols-3">
                     {works.map((w, i) => (
-                        <a key={i} href={w.href} className="group rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5 hover:border-violet-400/30 transition">
+                        <a
+                            key={i}
+                            href={w.href}
+                            className="group rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5 hover:border-violet-400/30 transition"
+                        >
                             <div className="mb-3 sm:mb-4 h-36 sm:h-40 w-full overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-zinc-800/60 to-zinc-900/60" />
                             <div className="flex items-center justify-between">
                                 <h3 className="text-base sm:text-lg font-medium text-white/90 group-hover:text-white">{w.t}</h3>
@@ -311,7 +350,6 @@ function WorksSection() {
 
 /* =========================================================
    Contact
-   - Inputs full-width, big tap targets, mobile keyboard friendly
    ========================================================= */
 function ContactSection() {
     return (
@@ -322,22 +360,40 @@ function ContactSection() {
                     Parlez-nous de votre projet. Réponse rapide et conseils concrets.
                 </p>
 
-                <form
-                    className="mt-5 sm:mt-6 grid gap-4"
-                    action="mailto:hello@smartflow.dev"
-                    method="post"
-                    encType="text/plain"
-                >
+                <form className="mt-5 sm:mt-6 grid gap-4" action="mailto:hello@smartflow.dev" method="post" encType="text/plain">
                     <div className="grid gap-4 sm:grid-cols-2">
-                        <input name="nom" placeholder="Votre nom" className="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-violet-400/40" required />
-                        <input name="email" type="email" inputMode="email" placeholder="Votre email" className="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-violet-400/40" required />
+                        <input
+                            name="nom"
+                            placeholder="Votre nom"
+                            className="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-violet-400/40"
+                            required
+                        />
+                        <input
+                            name="email"
+                            type="email"
+                            inputMode="email"
+                            placeholder="Votre email"
+                            className="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-violet-400/40"
+                            required
+                        />
                     </div>
-                    <textarea name="message" placeholder="Décrivez brièvement votre besoin…" className="min-h-[140px] rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-violet-400/40" required />
+                    <textarea
+                        name="message"
+                        placeholder="Décrivez brièvement votre besoin…"
+                        className="min-h-[140px] rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-violet-400/40"
+                        required
+                    />
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                        <button type="submit" className="rounded-xl border border-white/15 bg-white/10 px-5 py-3 text-sm text-white hover:bg-white/15 w-full sm:w-auto">
+                        <button
+                            type="submit"
+                            className="rounded-xl border border-white/15 bg-white/10 px-5 py-3 text-sm text-white hover:bg-white/15 w-full sm:w-auto"
+                        >
                             Envoyer
                         </button>
-                        <a href="mailto:hello@smartflow.dev" className="text-sm text-zinc-300 underline-offset-4 hover:text-white hover:underline text-center">
+                        <a
+                            href="mailto:hello@smartflow.dev"
+                            className="text-sm text-zinc-300 underline-offset-4 hover:text-white hover:underline text-center"
+                        >
                             Ou écrivez-nous directement
                         </a>
                     </div>
@@ -360,9 +416,15 @@ function Footer() {
                         <p className="mt-2 text-zinc-400 text-xs sm:text-sm">Design & Développement d’expériences numériques.</p>
                     </div>
                     <div className="flex gap-5 sm:gap-6 text-sm">
-                        <a href="#services" className="text-zinc-300 hover:text-white">Services</a>
-                        <a href="#works" className="text-zinc-300 hover:text-white">Réalisations</a>
-                        <a href="#contact" className="text-zinc-300 hover:text-white">Contact</a>
+                        <a href="#services" className="text-zinc-300 hover:text-white">
+                            Services
+                        </a>
+                        <a href="#works" className="text-zinc-300 hover:text-white">
+                            Réalisations
+                        </a>
+                        <a href="#contact" className="text-zinc-300 hover:text-white">
+                            Contact
+                        </a>
                     </div>
                 </div>
                 <div className="mt-6 sm:mt-8 border-t border-white/10 pt-5 sm:pt-6 text-[11px] sm:text-xs text-zinc-500">
