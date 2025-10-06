@@ -781,26 +781,32 @@ function ProjectCard({
     const ref = React.useRef<HTMLAnchorElement | null>(null);
     const inView = useInView(ref, { margin: "-15% 0% -15% 0%", amount: 0.25 });
 
+    // Sur mobile (touch): actif = quand la carte est visible
+    // Sur desktop: actif = hover (comme avant)
     const active = isTouch ? inView : hovered;
+
     const c = glowHex[color];
 
     return (
         <div className="relative isolate">
-            <motion.div
-                aria-hidden
-                className="pointer-events-none absolute inset-0 -z-10"
-                style={{
-                    borderRadius: "0.9rem",
-                    boxShadow: `
-            0 0 8px 2px ${c}33,
-            0 0 20px 6px ${c}29,
-            0 0 36px 12px ${c}20
-          `,
-                    filter: "blur(4px) saturate(1.4) brightness(1.1)",
-                }}
-                animate={{ opacity: active ? 1 : 0, scale: active ? 1.01 : 0.99 }}
-                transition={{ duration: active ? 1.0 : 4.0, ease: [0.22, 1, 0.36, 1] }}
-            />
+            {/* Halo néon — UNIQUEMENT desktop (pas sur mobile/touch) */}
+            {!isTouch && (
+                <motion.div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 -z-10"
+                    style={{
+                        borderRadius: "0.9rem",
+                        boxShadow: `
+                            0 0 8px 2px ${c}33,
+                            0 0 20px 6px ${c}29,
+                            0 0 36px 12px ${c}20
+                        `,
+                        filter: "blur(4px) saturate(1.4) brightness(1.1)",
+                    }}
+                    animate={{ opacity: active ? 1 : 0, scale: active ? 1.01 : 0.99 }}
+                    transition={{ duration: active ? 1.0 : 4.0, ease: [0.22, 1, 0.36, 1] }}
+                />
+            )}
 
             <a
                 ref={ref}
@@ -813,6 +819,12 @@ function ProjectCard({
                 style={{
                     background: "linear-gradient(180deg, rgba(22,24,31,0.45) 0%, rgba(12,14,18,0.42) 100%)",
                     backdropFilter: "blur(8px)",
+                    // Bordure: sur mobile elle devient violette quand visible
+                    border: `1px solid ${isTouch
+                            ? (active ? c : "rgba(255,255,255,0.15)")
+                            : "rgba(255,255,255,0.12)"
+                        }`,
+                    transition: "border-color 300ms ease, transform 300ms ease",
                 }}
                 aria-label={`${title} – en savoir plus`}
             >
@@ -831,7 +843,6 @@ function ProjectCard({
         </div>
     );
 }
-
 function WorksSection() {
     const works = [
         { t: "Site agence de voyage", d: "Next.js, Tailwind, Motion", href: "#", color: "yellow" as GlowColor },
