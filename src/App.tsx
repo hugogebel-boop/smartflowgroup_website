@@ -76,7 +76,7 @@ function HeroSection() {
                 </h1>
 
                 <p className="mx-auto mt-3 sm:mt-4 max-w-xl text-sm sm:text-base text-zinc-300">
-                    Sites, logiciels et automatisations — clairs, rapides, soignés.
+                    Sites, logiciels et automatisations pensés pour vous simplifier la vie.
                 </p>
 
                 <div className="mt-6 sm:mt-8 inline-flex w-full flex-col sm:w-auto sm:flex-row gap-3 justify-center">
@@ -343,7 +343,7 @@ const SERVICES = [
         tag: "Gain de temps, contrôle total",
         kicker: "Excel, Power Automate, Python",
         desc:
-            "On automatise ce qui vous prend du temps : connecteurs, scripts, flux approuvés. Moins d’erreurs, plus de traçabilité — des process qui roulent seuls.",
+            "On automatise ce qui vous prend du temps : connecteurs, scripts, flux approuvés. Moins d’erreurs, plus de traçabilité et des process qui roulent seuls.",
         pillars: ["Connecteurs & APIs", "Nettoyage/ETL léger", "Workflows traçables"],
         theme: { color: "#eab308", tint: "rgba(234,179,8,0.25)", shape: "bolt" } // jaune ⚡
     }
@@ -456,33 +456,69 @@ function DecoShape({
 
 function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
     const ref = React.useRef<HTMLDivElement | null>(null);
+
+    // → déclenche le ZOOM quand la carte entre dans le viewport (scroll)
     const inView = useInView(ref, { margin: "-20% 0% -20% 0%", amount: 0.5 });
+
+    // → déclenche le NÉON seulement au survol (hover/focus/tap)
+    const [hovered, setHovered] = React.useState(false);
+
     const reduced = usePrefersReducedMotion();
 
     return (
         <motion.article
             ref={ref}
+            // NÉON: événements de survol
+            onHoverStart={() => setHovered(true)}
+            onHoverEnd={() => setHovered(false)}
+            // accessibilité clavier
+            onFocus={() => setHovered(true)}
+            onBlur={() => setHovered(false)}
+            // mobile (tap = allume, relâche = éteint)
+            onTapStart={() => setHovered(true)}
+            onTapCancel={() => setHovered(false)}
+            onTap={() => setHovered(false)}
+
+            // ZOOM: uniquement via le scroll (inView)
             initial={{ opacity: 0.75, scale: 0.97, filter: "brightness(0.92)" }}
-            animate={inView ? { opacity: 1, scale: 1, filter: "brightness(1)" } : { opacity: 0.75, scale: 0.97 }}
-            transition={reduced ? { duration: 0 } : { type: "spring", stiffness: 220, damping: 26, delay: 0.05 * i }}
-            whileHover={!reduced ? { y: -4, scale: 1.01 } : {}}
+            animate={
+                inView
+                    ? { opacity: 1, scale: 1.0, filter: "brightness(1)" }
+                    : { opacity: 0.75, scale: 0.97, filter: "brightness(0.92)" }
+            }
+            transition={
+                reduced
+                    ? { duration: 0 }
+                    : { type: "spring", stiffness: 220, damping: 26, delay: 0.05 * i }
+            }
+
+            // On peut garder un léger lift en hover, sans rescale (zoom déjà géré par inView)
+            whileHover={!reduced ? { y: -4 } : {}}
+
             className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-7"
         >
-            {/* forme néon — petite, bas/droite */}
-            <DecoShape shape={s.theme.shape} color={s.theme.color} tint={s.theme.tint} active={inView} sizePct={32} />
+            {/* NÉON — actif UNIQUEMENT quand hovered === true */}
+            <DecoShape
+                shape={s.theme.shape}
+                color={s.theme.color}
+                tint={s.theme.tint}
+                active={hovered}
+                sizePct={32}
+            />
 
-            {/* contour discret */}
+            {/* Contour : lueur seulement au hover */}
             <div
                 aria-hidden
                 className="absolute inset-0 rounded-2xl pointer-events-none"
                 style={{
-                    boxShadow: inView
-                        ? `inset 0 0 0 1px rgba(255,255,255,0.08), 0 0 24px 0 ${s.theme.color}22`
+                    boxShadow: hovered
+                        ? `inset 0 0 0 1px rgba(255,255,255,0.10), 0 0 24px 0 ${s.theme.color}22`
                         : "inset 0 0 0 1px rgba(255,255,255,0.08)",
+                    transition: "box-shadow 260ms ease",
                 }}
             />
 
-            {/* contenu */}
+            {/* Contenu */}
             <div className="relative z-10">
                 <div className="mb-1.5 flex items-center justify-between">
                     <div className="text-[10px] sm:text-[11px] uppercase tracking-widest text-zinc-400">{s.k}</div>
@@ -497,12 +533,10 @@ function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
                 <h3 className="mt-1 text-base sm:text-lg font-medium text-white/90">{s.title}</h3>
                 <p className="mt-2 text-[13px] sm:text-sm leading-relaxed text-zinc-300">{s.desc}</p>
 
-                {s.pillars?.length > 0 && (
+                {!!s.pillars?.length && (
                     <ul className="mt-3 space-y-1.5">
                         {s.pillars.map((p, idx) => (
-                            <li key={idx} className="text-[13px] sm:text-sm text-zinc-400">
-                                • {p}
-                            </li>
+                            <li key={idx} className="text-[13px] sm:text-sm text-zinc-400">• {p}</li>
                         ))}
                     </ul>
                 )}
@@ -510,7 +544,6 @@ function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
         </motion.article>
     );
 }
-
 function ServicesSection() {
     return (
         <section id="services" className="relative w-full text-white py-12 sm:py-16">
