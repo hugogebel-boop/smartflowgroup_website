@@ -304,6 +304,7 @@ const SERVICES = [
         desc:
             "On part de votre usage réel : parcours simples, hiérarchie limpide et micro-interactions utiles. Identité sobre, design system épuré et prototypes cliquables pour valider vite et bien.",
         pillars: ["Wireframes → prototypes", "Design system minimal", "Accessibilité & motion discret"],
+        theme: { color: "#a855f7", tint: "rgba(168,85,247,0.25)", shape: "diamond" } // violet
     },
     {
         k: "02",
@@ -313,6 +314,7 @@ const SERVICES = [
         desc:
             "Sites et portails performants, maintenables et élégants. Structure typée, SEO technique propre, formulaires robustes, i18n, et intégrations back-office sans friction.",
         pillars: ["SSR/SSG au besoin", "SEO & perfs (LCP/CLS)", "Auth, formulaires, i18n"],
+        theme: { color: "#38bdf8", tint: "rgba(56,189,248,0.25)", shape: "wave" } // bleu
     },
     {
         k: "03",
@@ -322,6 +324,7 @@ const SERVICES = [
         desc:
             "Outils métier rapides et fiables : MVVM propre, bases solides, imports/exports Excel et vues optimisées pour le travail réel. Focus sur stabilité, ergonomie et vitesse.",
         pillars: ["MVVM testable", "SQL/EF Core, offline-first", "Import/Export Excel, reporting"],
+        theme: { color: "#22c55e", tint: "rgba(34,197,94,0.25)", shape: "hex" } // vert
     },
     {
         k: "04",
@@ -331,8 +334,131 @@ const SERVICES = [
         desc:
             "On automatise ce qui vous prend du temps : connecteurs, scripts, flux approuvés. Moins d’erreurs, plus de traçabilité — des process qui roulent seuls.",
         pillars: ["Connecteurs & APIs", "Nettoyage/ETL léger", "Workflows traçables"],
-    },
+        theme: { color: "#eab308", tint: "rgba(234,179,8,0.25)", shape: "bolt" } // jaune ⚡
+    }
 ];
+
+function DecoShape({
+    shape,
+    color,
+    tint,
+    active,
+    sizePct = 30,   // % largeur de la card
+    intensity = 1,  // 1 = normal, 1.2 = très lumineux
+}: {
+    shape: "bolt" | "wave" | "diamond" | "hex";
+    color: string;
+    tint: string;
+    active: boolean;
+    sizePct?: number;
+    intensity?: number;
+}) {
+    const baseProps = { fill: "none", stroke: color, strokeWidth: 2, vectorEffect: "non-scaling-stroke" as const };
+
+    const content = (() => {
+        switch (shape) {
+            case "bolt":
+                return (
+                    <g>
+                        <path d="M60 10 L35 55 H60 L30 110 L90 50 H60 L90 10 Z" {...baseProps} />
+                        <path d="M60 10 L35 55 H60 L30 110 L90 50 H60 L90 10 Z" fill={tint} />
+                    </g>
+                );
+            case "wave":
+                return (
+                    <g>
+                        <path d="M10 70 C30 40, 70 100, 90 70 S150 40, 170 70" {...baseProps} />
+                        <path d="M10 70 C30 40, 70 100, 90 70 S150 40, 170 70" stroke={color} strokeOpacity="0.25" strokeWidth={16} />
+                    </g>
+                );
+            case "diamond":
+                return (
+                    <g>
+                        <polygon points="100,20 40,80 100,140 160,80" {...baseProps} />
+                        <polygon points="100,20 40,80 100,140 160,80" fill={tint} />
+                    </g>
+                );
+            case "hex":
+            default:
+                return (
+                    <g>
+                        <polygon points="100,20 55,45 55,95 100,120 145,95 145,45" {...baseProps} />
+                        <polygon points="100,20 55,45 55,95 100,120 145,95 145,45" fill={tint} />
+                    </g>
+                );
+        }
+    })();
+
+    // coin bas-droit + taille explicite
+    const widthPx = `min(${sizePct}%, 120px)`;
+    const heightPx = `min(${sizePct}%, 120px)`;
+
+    // courbe super fluide (sans saccades), avec légère sur-intensité qui se stabilise
+    const ease = [0.22, 1, 0.36, 1] as const;
+    const strong = (alpha: number) => Math.min(1, alpha * intensity);
+    const glowA = `${Math.round(80 * intensity)}`;  // 0..80 hex
+    const glowB = `${Math.round(66 * intensity)}`;
+    const glowC = `${Math.round(52 * intensity)}`;
+
+    return (
+        <div
+            className="absolute pointer-events-none z-0"
+            style={{ right: "0.5rem", bottom: "0.5rem", width: widthPx, height: heightPx }}
+        >
+            {/* Bloom radial très doux derrière (ne couvre pas la card entière) */}
+            <motion.div
+                className="absolute inset-0"
+                style={{
+                    background: `radial-gradient(120% 120% at 70% 70%, ${color}${glowC} 0%, transparent 60%)`,
+                    borderRadius: "12px",
+                    filter: `blur(6px)`,
+                }}
+                initial={{ opacity: 0.0, scale: 0.9 }}
+                animate={active ? { opacity: strong(0.55), scale: 1 } : { opacity: 0.0, scale: 0.9 }}
+                transition={{ duration: 1.0, ease }}
+            />
+
+            {/* Le “tube” (SVG) — montée d’intensité + léger settle, sans clignoter */}
+            <motion.svg
+                width="100%"
+                height="100%"
+                viewBox="0 0 200 160"
+                preserveAspectRatio="xMidYMid meet"
+                initial={{
+                    opacity: 0.08,
+                    filter: `drop-shadow(0 0 0 ${color}00)`,
+                    transform: "scale(0.96)",
+                    transformOrigin: "bottom right",
+                }}
+                animate={
+                    active
+                        ? {
+                            // montée → sur-intensité → stabilisation
+                            opacity: [0.08, strong(0.85), strong(0.78)],
+                            filter: [
+                                `drop-shadow(0 0 0 ${color}00)`,
+                                `drop-shadow(0 0 14px ${color}${glowA}) drop-shadow(0 0 26px ${color}${glowB})`,
+                                `drop-shadow(0 0 12px ${color}${glowB}) drop-shadow(0 0 22px ${color}${glowC})`,
+                            ],
+                            transform: ["scale(0.96)", "scale(1.005)", "scale(1.0)"],
+                        }
+                        : {
+                            opacity: 0.08,
+                            filter: `drop-shadow(0 0 0 ${color}00)`,
+                            transform: "scale(0.96)",
+                        }
+                }
+                transition={{
+                    duration: 1.15,
+                    ease,
+                    times: [0, 0.72, 1],
+                }}
+            >
+                {content}
+            </motion.svg>
+        </div>
+    );
+}
 
 const cardVariants = {
     initial: { opacity: 0.6, scale: 0.98, filter: "brightness(0.9)" as any },
@@ -341,56 +467,55 @@ const cardVariants = {
 
 function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
     const ref = React.useRef<HTMLDivElement | null>(null);
-    const inView = useInView(ref, { margin: "-15% 0% -15% 0%", amount: 0.5 });
+    const inView = useInView(ref, { margin: "-20% 0% -20% 0%", amount: 0.5 });
     const reduced = usePrefersReducedMotion();
 
     return (
         <motion.article
             ref={ref}
-            initial="initial"
-            animate={inView ? "active" : "initial"}
-            variants={cardVariants}
-            transition={
-                reduced
-                    ? { duration: 0 }
-                    : { type: "spring", stiffness: 220, damping: 26, mass: 0.9, delay: 0.05 * i }
-            }
-            whileHover={!reduced ? { y: -4, scale: 1.01, filter: "brightness(1.15)" as any } : {}}
-            className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6"
+            initial={{ opacity: 0.75, scale: 0.97, filter: "brightness(0.92)" }}
+            animate={inView ? { opacity: 1, scale: 1, filter: "brightness(1)" } : { opacity: 0.75, scale: 0.97 }}
+            transition={reduced ? { duration: 0 } : { type: "spring", stiffness: 220, damping: 26, delay: 0.05 * i }}
+            whileHover={!reduced ? { y: -4, scale: 1.01 } : {}}
+            className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-7"
         >
-            {/* glow */}
-            <motion.div
+            {/* forme néon — petite, bas/droite, flicker off→on */}
+            <DecoShape shape={s.theme.shape} color={s.theme.color} tint={s.theme.tint} active={inView} sizePct={32} />
+
+            {/* contour discret, pas d’illuminage global */}
+            <div
                 aria-hidden
-                className="pointer-events-none absolute inset-0"
+                className="absolute inset-0 rounded-2xl pointer-events-none"
                 style={{
-                    background:
-                        "radial-gradient(900px 220px at 50% -10%, rgba(130,80,255,0.20), transparent 55%)",
+                    boxShadow: inView
+                        ? `inset 0 0 0 1px rgba(255,255,255,0.08), 0 0 24px 0 ${s.theme.color}22`
+                        : "inset 0 0 0 1px rgba(255,255,255,0.08)",
                 }}
-                animate={{ opacity: inView ? 1 : 0 }}
-                transition={{ duration: reduced ? 0 : 0.6, delay: reduced ? 0 : 0.05 }}
             />
 
-            <div className="mb-1.5 flex items-center justify-between">
-                {/* → numéro sans # */}
-                <div className="text-[10px] sm:text-[11px] uppercase tracking-widest text-zinc-400">
-                    {s.k}
+            {/* contenu */}
+            <div className="relative z-10">
+                <div className="mb-1.5 flex items-center justify-between">
+                    <div className="text-[10px] sm:text-[11px] uppercase tracking-widest text-zinc-400">{s.k}</div>
+                    <span className="inline-flex items-center rounded-full border border-white/10 px-2 py-0.5 text-[11px] text-zinc-200/90">
+                        {s.tag}
+                    </span>
                 </div>
-                <span className="inline-flex items-center rounded-full border border-white/10 px-2 py-0.5 text-[11px] text-zinc-200/90">
-                    {s.tag}
-                </span>
+
+                <div className="text-xs uppercase tracking-wide" style={{ color: s.theme.color + "CC" }}>
+                    {s.kicker}
+                </div>
+                <h3 className="mt-1 text-base sm:text-lg font-medium text-white/90">{s.title}</h3>
+                <p className="mt-2 text-[13px] sm:text-sm leading-relaxed text-zinc-300">{s.desc}</p>
+
+                {s.pillars?.length > 0 && (
+                    <ul className="mt-3 space-y-1.5">
+                        {s.pillars.map((p, idx) => (
+                            <li key={idx} className="text-[13px] sm:text-sm text-zinc-400">• {p}</li>
+                        ))}
+                    </ul>
+                )}
             </div>
-
-            <div className="text-xs uppercase tracking-wide text-violet-300/80">{s.kicker}</div>
-            <h3 className="mt-1 text-base sm:text-lg font-medium text-white/90">{s.title}</h3>
-            <p className="mt-2 text-[13px] sm:text-sm leading-relaxed text-zinc-300">{s.desc}</p>
-
-            {s.pillars?.length > 0 && (
-                <ul className="mt-3 space-y-1.5">
-                    {s.pillars.map((p, idx) => (
-                        <li key={idx} className="text-[13px] sm:text-sm text-zinc-400">• {p}</li>
-                    ))}
-                </ul>
-            )}
         </motion.article>
     );
 }
