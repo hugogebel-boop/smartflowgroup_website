@@ -6,17 +6,6 @@ import { motion, useScroll, useMotionValueEvent, useInView } from "framer-motion
    ========================================================= */
 const isClient = typeof window !== "undefined";
 
-function useIsSmallScreen(breakpoint = 768) {
-    const [small, setSmall] = useState(false);
-    useEffect(() => {
-        if (!isClient) return;
-        const onResize = () => setSmall(window.innerWidth < breakpoint);
-        onResize();
-        window.addEventListener("resize", onResize);
-        return () => window.removeEventListener("resize", onResize);
-    }, [breakpoint]);
-    return small;
-}
 function usePrefersReducedMotion() {
     const [reduced, setReduced] = useState(false);
     useEffect(() => {
@@ -110,30 +99,43 @@ function HeroSection() {
 }
 
 /* =========================================================
-   Mini highlighter
+   Mini highlighter — tokenized (safe)
    ========================================================= */
-function escapeHtml(src: string) {
-    return src.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-function highlightTS(src: string) {
-    let s = escapeHtml(src);
-    // strings
-    s = s.replace(/("[^"]*"|'[^']*'|`[^`]*`)/g, "<span style='color:#34d399;'>$&</span>");
-    // keywords
-    s = s.replace(
-        /\b(export|function|return|const|let|type|interface|new|async|await)\b/g,
-        "<span style='color:#c4b5fd;font-weight:500;'>$&</span>"
-    );
-    // start & commit en rouge
-    s = s.replace(/\b(start|commit)\b/g, "<span style='color:#ef4444;font-weight:700;'>$&</span>");
-    // Commentaire : tout est grisé/estompé SAUF "Notre approche" en violet
-    s = s.replace(
-        /\/\*\s*(Notre approche)(.*?)\*\//,
-        `<span style="color:#71717a;opacity:0.85;">/* <span style='color:#a78bfa;font-weight:700;'>$1</span>$2*/</span>`
-    );
-    // line comments
-    s = s.replace(/(\/\/.*$)/gm, (full) => `<span style='color:#71717a;'>${full}</span>`);
-    return s;
+type Token = { t: "str" | "kw" | "red" | "cm" | "plain"; v: string };
+
+function tokenizeTS(src: string): Token[] {
+    const tokens: Token[] = [];
+    const push = (t: Token["t"], v: string) => v && tokens.push({ t, v });
+
+    // Bloc commentaire complet ? On met en avant "Notre approche"
+    const block = src.match(/^\/\*[\s\S]*\*\/$/);
+    if (block) {
+        const m = block[0].match(/\/\*\s*(Notre approche)([\s\S]*?)\*\//);
+        if (m) {
+            push("cm", "/* ");
+            push("kw", m[1]); // “Notre approche” en violet
+            push("cm", m[2] + "*/");
+            return tokens;
+        }
+    }
+
+    // Tokenisation simple lignes (strings, keywords, start/commit, commentaires //)
+    const re =
+        /("[^"]*"|'[^']*'|`[^`]*`)|\b(export|function|return|const|let|type|interface|new|async|await|start|commit)\b|(\/\/.*$)/gm;
+
+    let i = 0;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(src))) {
+        if (m.index > i) push("plain", src.slice(i, m.index));
+
+        if (m[1]) push("str", m[1]);
+        else if (m[2]) push(m[2] === "start" || m[2] === "commit" ? "red" : "kw", m[2]);
+        else if (m[3]) push("cm", m[3]);
+
+        i = m.index + m[0].length;
+    }
+    if (i < src.length) push("plain", src.slice(i));
+    return tokens;
 }
 
 /* =========================================================
@@ -172,7 +174,7 @@ function sliceByBudget(lines: string[], budget: number) {
    Code line
    ========================================================= */
 function CodeLine({ text, index, active }: { text: string; index: number; active: boolean }) {
-    const html = useMemo(() => highlightTS(text), [text]);
+    const tokens = useMemo(() => tokenizeTS(text), [text]);
     return (
         <motion.div
             className="whitespace-pre leading-6 sm:leading-7 font-mono text-[10.5px] xs:text-[11px] sm:text-[13px] md:text-[15px] text-white"
@@ -180,9 +182,24 @@ function CodeLine({ text, index, active }: { text: string; index: number; active
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.18 }}
         >
-            {/* → plus d’estompage sur le numéro : couleur pleine */}
             <span className="mr-2 sm:mr-3 text-white">{String(index + 1).padStart(2, "0")}</span>
-            <span dangerouslySetInnerHTML={{ __html: html }} />
+            {tokens.map((k, i) => {
+                const cls =
+                    k.t === "str"
+                        ? "text-emerald-400"
+                        : k.t === "kw"
+                            ? "text-violet-300 font-medium"
+                            : k.t === "red"
+                                ? "text-red-500 font-bold"
+                                : k.t === "cm"
+                                    ? "text-zinc-400/90"
+                                    : "";
+                return (
+                    <span key={i} className={cls}>
+                        {k.v}
+                    </span>
+                );
+            })}
             {active && <span className="inline-block w-2 h-4 align-baseline ml-0.5 bg-zinc-200 animate-pulse" />}
         </motion.div>
     );
@@ -198,9 +215,7 @@ function EditorFrame({ children }: { children: React.ReactNode }) {
                 <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-400/90" />
                 <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-400/90" />
                 <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-400/90" />
-                <div className="ml-2 sm:ml-3 text-[10px] sm:text-xs tracking-widest uppercase text-zinc-400">
-                    dev / approche.ts
-                </div>
+                <div className="ml-2 sm:ml-3 text-[10px] sm:text-xs tracking-widest uppercase text-zinc-400">dev / approche.ts</div>
             </div>
 
             {/* code zone */}
@@ -230,20 +245,16 @@ function DevScrollCodeSection() {
     const budget = Math.round(totalChars * Math.max(0, Math.min(1, p)));
     const visible = useMemo(() => sliceByBudget(APPROACH_LINES, budget), [budget]);
 
-    let remain = budget,
-        activeIdx = 0;
-    for (let i = 0; i < APPROACH_LINES.length; i++) {
-        if (remain <= 0) {
-            activeIdx = i;
-            break;
-        }
-        if (remain < APPROACH_LINES[i].length) {
-            activeIdx = i;
-            break;
-        }
-        remain -= APPROACH_LINES[i].length;
-        activeIdx = i;
-    }
+    const lengths = useMemo(() => APPROACH_LINES.map((l) => l.length), []);
+    const cum = useMemo(() => {
+        let s = 0;
+        return lengths.map((len) => (s += len));
+    }, [lengths]);
+
+    const activeIdx = useMemo(() => {
+        const i = cum.findIndex((S) => budget < S);
+        return i === -1 ? APPROACH_LINES.length - 1 : i;
+    }, [cum, budget]);
 
     const reduced = usePrefersReducedMotion();
     if (reduced) {
@@ -336,7 +347,7 @@ const SERVICES = [
         pillars: ["Connecteurs & APIs", "Nettoyage/ETL léger", "Workflows traçables"],
         theme: { color: "#eab308", tint: "rgba(234,179,8,0.25)", shape: "bolt" } // jaune ⚡
     }
-];
+] as const;
 
 function DecoShape({
     shape,
@@ -344,7 +355,7 @@ function DecoShape({
     tint,
     active,
     sizePct = 30,
-    intensity = 1.15,  // boost léger
+    intensity = 1.15, // boost léger
 }: {
     shape: "bolt" | "wave" | "diamond" | "hex";
     color: string;
@@ -358,14 +369,34 @@ function DecoShape({
     const content = (() => {
         switch (shape) {
             case "bolt":
-                return (<g><path d="M60 10 L35 55 H60 L30 110 L90 50 H60 L90 10 Z" {...baseProps} /><path d="M60 10 L35 55 H60 L30 110 L90 50 H60 L90 10 Z" fill={tint} /></g>);
+                return (
+                    <g>
+                        <path d="M60 10 L35 55 H60 L30 110 L90 50 H60 L90 10 Z" {...baseProps} />
+                        <path d="M60 10 L35 55 H60 L30 110 L90 50 H60 L90 10 Z" fill={tint} />
+                    </g>
+                );
             case "wave":
-                return (<g><path d="M10 70 C30 40, 70 100, 90 70 S150 40, 170 70" {...baseProps} /><path d="M10 70 C30 40, 70 100, 90 70 S150 40, 170 70" stroke={color} strokeOpacity="0.25" strokeWidth={16} /></g>);
+                return (
+                    <g>
+                        <path d="M10 70 C30 40, 70 100, 90 70 S150 40, 170 70" {...baseProps} />
+                        <path d="M10 70 C30 40, 70 100, 90 70 S150 40, 170 70" stroke={color} strokeOpacity="0.25" strokeWidth={16} />
+                    </g>
+                );
             case "diamond":
-                return (<g><polygon points="100,20 40,80 100,140 160,80" {...baseProps} /><polygon points="100,20 40,80 100,140 160,80" fill={tint} /></g>);
+                return (
+                    <g>
+                        <polygon points="100,20 40,80 100,140 160,80" {...baseProps} />
+                        <polygon points="100,20 40,80 100,140 160,80" fill={tint} />
+                    </g>
+                );
             case "hex":
             default:
-                return (<g><polygon points="100,20 55,45 55,95 100,120 145,95 145,45" {...baseProps} /><polygon points="100,20 55,45 55,95 100,120 145,95 145,45" fill={tint} /></g>);
+                return (
+                    <g>
+                        <polygon points="100,20 55,45 55,95 100,120 145,95 145,45" {...baseProps} />
+                        <polygon points="100,20 55,45 55,95 100,120 145,95 145,45" fill={tint} />
+                    </g>
+                );
         }
     })();
 
@@ -381,10 +412,7 @@ function DecoShape({
     const strong = (a: number) => Math.min(1, a * intensity);
 
     return (
-        <div
-            className="absolute pointer-events-none z-0"
-            style={{ right: "0.5rem", bottom: "0.5rem", width: widthPx, height: heightPx }}
-        >
+        <div className="absolute pointer-events-none z-0" style={{ right: "0.5rem", bottom: "0.5rem", width: widthPx, height: heightPx }}>
             {/* bloom radial discret (reste soft, monte au ‘hop’) */}
             <motion.div
                 className="absolute inset-0 rounded-xl"
@@ -416,7 +444,7 @@ function DecoShape({
                 }
                 transition={{
                     duration: 0.8,
-                    times: [0, 0.8, 1],          // 90% du temps “faible”, puis hop à la fin
+                    times: [0, 0.8, 1], // long plateau doux puis hop
                     ease: [easeSegments[0], easeSegments[1]],
                 }}
             >
@@ -425,11 +453,6 @@ function DecoShape({
         </div>
     );
 }
-
-const cardVariants = {
-    initial: { opacity: 0.6, scale: 0.98, filter: "brightness(0.9)" as any },
-    active: { opacity: 1, scale: 1.0, filter: "brightness(1.05)" as any },
-};
 
 function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
     const ref = React.useRef<HTMLDivElement | null>(null);
@@ -445,10 +468,10 @@ function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
             whileHover={!reduced ? { y: -4, scale: 1.01 } : {}}
             className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-7"
         >
-            {/* forme néon — petite, bas/droite, flicker off→on */}
+            {/* forme néon — petite, bas/droite */}
             <DecoShape shape={s.theme.shape} color={s.theme.color} tint={s.theme.tint} active={inView} sizePct={32} />
 
-            {/* contour discret, pas d’illuminage global */}
+            {/* contour discret */}
             <div
                 aria-hidden
                 className="absolute inset-0 rounded-2xl pointer-events-none"
@@ -477,7 +500,9 @@ function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
                 {s.pillars?.length > 0 && (
                     <ul className="mt-3 space-y-1.5">
                         {s.pillars.map((p, idx) => (
-                            <li key={idx} className="text-[13px] sm:text-sm text-zinc-400">• {p}</li>
+                            <li key={idx} className="text-[13px] sm:text-sm text-zinc-400">
+                                • {p}
+                            </li>
                         ))}
                     </ul>
                 )}
@@ -575,10 +600,16 @@ function ContactSection() {
                         required
                     />
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                        <button type="submit" className="rounded-xl border border-white/15 bg-white/10 px-5 py-3 text-sm text-white hover:bg-white/15 w-full sm:w-auto">
+                        <button
+                            type="submit"
+                            className="rounded-xl border border-white/15 bg-white/10 px-5 py-3 text-sm text-white hover:bg-white/15 w-full sm:w-auto"
+                        >
                             Envoyer
                         </button>
-                        <a href="mailto:hello@smartflow.dev" className="text-sm text-zinc-300 underline-offset-4 hover:text-white hover:underline text-center">
+                        <a
+                            href="mailto:hello@smartflow.dev"
+                            className="text-sm text-zinc-300 underline-offset-4 hover:text-white hover:underline text-center"
+                        >
                             Ou écrivez-nous directement
                         </a>
                     </div>
