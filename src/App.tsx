@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState, useId } from "react";
-import { motion, useScroll, useMotionValueEvent, useInView } from "framer-motion";
+import { motion, useScroll, useMotionValueEvent, useInView, useTransform } from "framer-motion";
 
 /* =========================================================
    Helpers
@@ -67,6 +67,15 @@ function SiteBackground() {
    HERO
    ========================================================= */
 function HeroSection() {
+    const { scrollY } = useScroll();
+    const [opacity, setOpacity] = useState(1);
+
+    // Fade out la flèche dès qu’on scroll de 0 → 120px
+    useMotionValueEvent(scrollY, "change", (latest) => {
+        const o = Math.max(0, 1 - latest / 120);
+        setOpacity(o);
+    });
+
     return (
         <section
             id="hero"
@@ -78,7 +87,6 @@ function HeroSection() {
                     SmartFlow
                 </p>
 
-                {/* gradient title like vite */}
                 <h1 className="text-[30px] sm:text-5xl md:text-6xl font-semibold leading-[1.07]">
                     <span className="bg-clip-text text-transparent bg-[linear-gradient(120deg,#e0e7ff_0%,#a78bfa_35%,#22d3ee_65%,#e879f9_100%)]">
                         Design ✕ Développement
@@ -94,7 +102,7 @@ function HeroSection() {
                 <div className="mt-6 sm:mt-8 inline-flex w-full flex-col sm:w-auto sm:flex-row gap-3 justify-center">
                     <a
                         href="#dev"
-                        className="rounded-xl border border-white/10 bg-white/10 px-5 py-3 text-sm text-white hover:bg-white/15 transition w-full sm:w-auto shadow-[0_0_0_1px_rgba(255,255,255,0.06)]"
+                        className="rounded-xl border border-white/10 px-5 py-3 text-sm text-zinc-300 hover:text-white hover:border-white/20 transition w-full sm:w-auto"
                     >
                         Notre approche
                     </a>
@@ -102,10 +110,34 @@ function HeroSection() {
                         href="#services"
                         className="rounded-xl border border-white/10 px-5 py-3 text-sm text-zinc-300 hover:text-white hover:border-white/20 transition w-full sm:w-auto"
                     >
-                        Services
+                        Nos services
                     </a>
                 </div>
             </div>
+
+            {/* flèche fine, fondue au scroll */}
+            <motion.div
+                className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center"
+                animate={{ opacity }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+            >
+                <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    className="opacity-80 animate-bounce"
+                    aria-hidden="true"
+                >
+                    <path
+                        d="M6 9l6 6 6-6"
+                        fill="none"
+                        stroke="white"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    />
+                </svg>
+            </motion.div>
         </section>
     );
 }
@@ -268,48 +300,24 @@ function DevScrollCodeSection() {
         return i === -1 ? APPROACH_LINES.length - 1 : i;
     }, [cum, budget]);
 
-    const reduced = usePrefersReducedMotion();
-    if (reduced) {
-        return (
-            <section id="dev" className="relative w-full text-white py-12 sm:py-16 px-4">
-                <div className="mx-auto w-full max-w-3xl">
-                    <span className="inline-block rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] tracking-widest text-zinc-200 uppercase">
-                        Notre approche
-                    </span>
-                    <div className="mt-4 sm:mt-6">
-                        <EditorFrame>
-                            {APPROACH_LINES.map((t, i) => (
-                                <CodeLine key={i} text={t} index={i} active={false} />
-                            ))}
-                        </EditorFrame>
-                        <p className="mt-3 sm:mt-4 text-[11px] sm:text-xs text-zinc-400">Du concept au code, chaque détail compte.</p>
-                    </div>
-                </div>
-            </section>
-        );
-    }
-
-    // Version longue distance
     return (
         <section id="dev" ref={sectionRef} className="relative min-h-[320vh] sm:min-h-[420vh] md:min-h-[500vh] w-full text-white">
             <div
                 className="sticky top-0 z-10 flex min-h-[100svh] w-full flex-col items-center justify-center px-3 sm:px-4"
                 style={{ paddingTop: "env(safe-area-inset-top)" }}
             >
-                <div className="mx-auto mb-3 sm:mb-4 w-full max-w-[min(92vw,48rem)] px-1 sm:px-2">
-                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] tracking-widest text-zinc-200 uppercase">
-                        Notre approche
-                    </span>
+                {/* Même style de titre que Nos services */}
+                <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-1 w-full max-w-[min(92vw,48rem)]">
+                    <h2 className="text-xl sm:text-2xl font-semibold text-white">Notre approche</h2>
                 </div>
+
                 <EditorFrame>
                     {visible.map((t, i) => (
                         <CodeLine key={i} text={t} index={i} active={i === activeIdx && t.length < APPROACH_LINES[i].length} />
                     ))}
                 </EditorFrame>
-                <p className="mt-3 sm:mt-4 text-[11px] text-zinc-400">Du concept au code, chaque détail compte.</p>
             </div>
 
-            {/* spacer pour étendre le scroll total */}
             <div className="h-[200vh] sm:h-[280vh] md:h-[350vh]" />
         </section>
     );
@@ -597,7 +605,7 @@ function ServicesSection() {
             <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6">
                 <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-1">
                     <h2 className="text-xl sm:text-2xl font-semibold text-white">Nos services</h2>
-                    <span className="text-xs text-zinc-500">essentiel et structuré</span>
+                    {/* texte “essentiel et structuré” retiré */}
                 </div>
 
                 {/* → 2 colonnes dès sm et on garde 2 à lg */}
@@ -655,7 +663,10 @@ function ContactSection() {
         <section id="contact" className="relative w-full text-white py-12 sm:py-16">
             <div className="relative z-10 mx-auto max-w-3xl px-4 sm:px-6">
                 <h2 className="text-xl sm:text-2xl font-semibold">Contact</h2>
-                <p className="mt-2 text-sm sm:text-base text-zinc-300">Parlez-nous de votre projet. Réponse rapide et conseils concrets.</p>
+                <p className="mt-2 text-sm sm:text-base text-zinc-300">
+                    Parlez-nous de votre projet. Réponse rapide et conseils concrets.
+                </p>
+
                 <form className="mt-5 sm:mt-6 grid gap-4" action="mailto:hello@smartflow.dev" method="post" encType="text/plain">
                     <div className="grid gap-4 sm:grid-cols-2">
                         <input
@@ -673,32 +684,27 @@ function ContactSection() {
                             required
                         />
                     </div>
+
                     <textarea
                         name="message"
                         placeholder="Décrivez brièvement votre besoin…"
                         className="min-h-[140px] rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-violet-400/40"
                         required
                     />
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+
+                    <div className="flex items-stretch sm:items-center">
                         <button
                             type="submit"
-                            className="rounded-xl border border-white/15 bg-white/10 px-5 py-3 text-sm text-white hover:bg-white/15 w-full sm:w-auto"
+                            className="rounded-xl border border-white/10 px-5 py-3 text-sm text-zinc-300 hover:text-white hover:border-white/20 transition w-full sm:w-auto"
                         >
                             Envoyer
                         </button>
-                        <a
-                            href="mailto:hello@smartflow.dev"
-                            className="text-sm text-zinc-300 underline-offset-4 hover:text-white hover:underline text-center"
-                        >
-                            Ou écrivez-nous directement
-                        </a>
                     </div>
                 </form>
             </div>
         </section>
     );
 }
-
 function Footer() {
     return (
         <footer className="relative w-full text-white py-8 sm:py-10">
