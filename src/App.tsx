@@ -139,7 +139,7 @@ const APPROACH_LINES: string[] = [
     "});",
     "",
     'SmartFlow.commit("livrer, apprendre, améliorer");',
-    'console.log("Chaque projet est creé sur mesure.");',
+    'console.log("Chaque projet est créé sur mesure.");',
 ];
 
 function sliceByBudget(lines: string[], budget: number) {
