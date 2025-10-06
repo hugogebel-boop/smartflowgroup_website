@@ -371,19 +371,25 @@ export function DecoShape({
     sizePct = 30,
     intensity = 1.15,
 }: {
-    shape: ShapeKey;
-    color: string;   // ex: "#22c55e"
-    tint: string;    // ex: "rgba(34,197,94,0.25)"
+    shape: "bolt" | "wave" | "diamond" | "hex";
+    color: string;
+    tint: string;
     active: boolean;
     sizePct?: number;
     intensity?: number;
 }) {
-    const uid = useId(); // évite les conflits d'IDs SVG entre cartes
+    // === helpers déjà présents dans ton fichier ===
+    const isTouch = useIsTouchDevice?.() ?? false;
+    const reduced = usePrefersReducedMotion?.() ?? false;
+
+    // uid stable sans React 18
+    const uidRef = useRef(Math.random().toString(36).slice(2));
+    const uid = uidRef.current;
+
     const widthPx = `min(${sizePct}%, 120px)`;
-    const heightPx = `min(${sizePct}%, 120px)`;
     const strong = (a: number) => Math.min(1, a * intensity);
 
-    // géométrie de la forme (réutilisée pour clip + stroke)
+    // géométrie
     const shapeEl = (() => {
         switch (shape) {
             case "bolt":
@@ -392,17 +398,12 @@ export function DecoShape({
                 return { tag: "path" as const, props: { d: "M10 70 C30 40, 70 100, 90 70 S150 40, 170 70" } };
             case "diamond":
                 return { tag: "polygon" as const, props: { points: "100,20 40,80 100,140 160,80" } };
-            default: // hex
+            default:
                 return { tag: "polygon" as const, props: { points: "100,20 55,45 55,95 100,120 145,95 145,45" } };
         }
     })();
 
-    const baseStroke = {
-        fill: "none",
-        stroke: color,
-        strokeWidth: 2,
-        vectorEffect: "non-scaling-stroke" as const,
-    };
+    const baseStroke = { fill: "none", stroke: color, strokeWidth: 2, vectorEffect: "non-scaling-stroke" as const };
 
     // ids uniques
     const idShape = `sf-shape-${uid}`;
@@ -413,23 +414,27 @@ export function DecoShape({
     return (
         <div
             className="absolute pointer-events-none z-0"
-            style={{ right: "0.5rem", bottom: "0.5rem", width: widthPx, height: heightPx }}
+            style={{ right: "0.5rem", bottom: "0.5rem", width: widthPx, height: widthPx }}
         >
-            {/* HALO EXTERNE — flou CSS sur calque indépendant (pas d'overflow/masque → pas de bug “rectangle”) */}
-            <motion.div
-                className="absolute inset-0"
-                style={{
-                    background: `radial-gradient(120% 120% at 70% 70%, ${color}40 0%, transparent 70%)`,
-                    filter: "blur(20px)",
-                    borderRadius: "9999px",
-                    transform: "translateZ(0)",
-                }}
-                initial={{ opacity: 0.18, scale: 0.96 }}
-                animate={active ? { opacity: [0.18, 0.28, 0.36], scale: [0.96, 0.99, 1] } : { opacity: 0.16, scale: 0.96 }}
-                transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-            />
+            {/* --- HALO EXTERNE : coupé sur mobile (touch) --- */}
+            {!isTouch && (
+                <motion.div
+                    className="absolute inset-0"
+                    style={{
+                        background: `radial-gradient(120% 120% at 70% 70%, ${color}40 0%, transparent 70%)`,
+                        filter: "blur(20px)",
+                        borderRadius: "9999px",
+                        transform: "translateZ(0)",
+                    }}
+                    initial={{ opacity: 0.18, scale: 0.96 }}
+                    animate={
+                        active && !reduced ? { opacity: [0.18, 0.28, 0.36], scale: [0.96, 0.99, 1] } : { opacity: 0.16, scale: 0.96 }
+                    }
+                    transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+                />
+            )}
 
-            {/* SHAPE + INNER GLOW — flou SVG clippé (reste toujours flou et dedans) */}
+            {/* --- SHAPE + INNER GLOW (OK mobile) --- */}
             <motion.svg
                 width="100%"
                 height="100%"
@@ -437,7 +442,7 @@ export function DecoShape({
                 preserveAspectRatio="xMidYMid meet"
                 initial={{ opacity: 0.1, transform: "scale(0.96)", filter: `drop-shadow(0 0 0 ${color}00)` }}
                 animate={
-                    active
+                    active && !reduced
                         ? {
                             opacity: [0.1, 0.25, strong(1)],
                             transform: ["scale(0.96)", "scale(0.99)", "scale(1)"],
@@ -457,39 +462,34 @@ export function DecoShape({
                     ) : (
                         <polygon id={idShape} {...(shapeEl.props as any)} />
                     )}
-
                     <clipPath id={idClip}>
                         <use href={`#${idShape}`} />
                     </clipPath>
 
-                    {/* gradient interne : centre lumineux -> bords transparents */}
                     <radialGradient id={idGrad} cx="50%" cy="50%" r="55%">
                         <stop offset="0%" stopColor={color} stopOpacity="0.58" />
                         <stop offset="42%" stopColor={color} stopOpacity="0.30" />
                         <stop offset="80%" stopColor={color} stopOpacity="0.00" />
                     </radialGradient>
 
-                    {/* flou SVG stable (aucun bug de clipping) */}
                     <filter id={idBlur} x="-40%" y="-40%" width="180%" height="180%" colorInterpolationFilters="sRGB">
                         <feGaussianBlur in="SourceGraphic" stdDeviation="10" />
                     </filter>
                 </defs>
 
-                {/* INNER GLOW : rempli par le radial, clippé par la forme, puis flouté */}
+                {/* inner-glow clippé à l’intérieur (garde l’intérieur éclairé sur mobile) */}
                 <motion.g
                     clipPath={`url(#${idClip})`}
                     filter={`url(#${idBlur})`}
                     initial={{ opacity: 0 }}
-                    animate={active ? { opacity: [0, 0.35, strong(0.55)] } : { opacity: 0 }}
-                    transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+                    animate={active && !reduced ? { opacity: [0, 0.35, strong(0.55)] } : { opacity: 0 }}
+                    transition={{ duration: 1.0, ease: [0.22, 1, 0.36, 1] }}
                 >
-                    {/* “disque” large pour couvrir l’intérieur */}
                     <rect x="-50" y="-40" width="300" height="240" fill={`url(#${idGrad})`} />
-                    {/* teinte douce sous le trait */}
                     <use href={`#${idShape}`} fill={tint} opacity="0.25" />
                 </motion.g>
 
-                {/* trait de la forme au-dessus */}
+                {/* trait */}
                 {shapeEl.tag === "path" ? (
                     <path {...(shapeEl.props as any)} {...baseStroke} />
                 ) : (
@@ -499,7 +499,6 @@ export function DecoShape({
         </div>
     );
 }
-
 function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
     const ref = React.useRef<HTMLDivElement | null>(null);
 
