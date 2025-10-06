@@ -469,42 +469,37 @@ function DecoShape({
 function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
     const ref = React.useRef<HTMLDivElement | null>(null);
 
-    // ZOOM (scroll)
-    const inView = useInView(ref, { margin: "-20% 0% -20% 0%", amount: 0.5 });
+    // In-view plus stable sur mobile
+    const inView = useInView(ref, {
+        margin: "-12% 0% -12% 0%",
+        amount: 0.35,
+    });
 
-    // HOVER (desktop)
     const [hovered, setHovered] = React.useState(false);
-
-    // Device & accessibilité
     const isTouch = useIsTouchDevice();
     const reduced = usePrefersReducedMotion();
 
-    // 👉 mobile = allumé quand inView (zoom) ; desktop = allumé seulement en hover
+    // Sur mobile : néon suit le zoom (inView). Desktop : néon au hover uniquement.
     const neonActive = isTouch ? inView : hovered;
 
+    // On sépare la "carte" (statique) du "calque zoom" (transform seulement)
     return (
-        <motion.article
+        <article
             ref={ref}
-            // événements hover (desktop) + focus clavier
-            onHoverStart={() => !isTouch && setHovered(true)}
-            onHoverEnd={() => !isTouch && setHovered(false)}
+            onMouseEnter={() => !isTouch && setHovered(true)}
+            onMouseLeave={() => !isTouch && setHovered(false)}
             onFocus={() => !isTouch && setHovered(true)}
             onBlur={() => !isTouch && setHovered(false)}
-            // sur mobile on ne force rien au tap (c’est inView qui drive le néon)
-            initial={{ opacity: 0.75, scale: 0.97, filter: "brightness(0.92)" }}
-            animate={
-                inView
-                    ? { opacity: 1, scale: 1.0, filter: "brightness(1)" }
-                    : { opacity: 0.75, scale: 0.97, filter: "brightness(0.92)" }
-            }
-            transition={reduced ? { duration: 0 } : { type: "spring", stiffness: 220, damping: 26, delay: 0.05 * i }}
-            whileHover={!reduced && !isTouch ? { y: -4 } : {}}
-            className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-7"
+            className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-0"
+            style={{
+                // pas de filter ici -> évite un repaint coûteux pendant l’anim
+                contain: "layout style paint", // hint perf
+            }}
         >
-            {/* Néon : activé par hover (desktop) ou par inView (mobile) */}
+            {/* Calque décor néon (indépendant du zoom) */}
             <DecoShape shape={s.theme.shape} color={s.theme.color} tint={s.theme.tint} active={neonActive} sizePct={32} />
 
-            {/* Contour : lueur en même temps que le néon */}
+            {/* Contour : lueur quand neonActive */}
             <div
                 aria-hidden
                 className="absolute inset-0 rounded-2xl pointer-events-none"
@@ -516,8 +511,29 @@ function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
                 }}
             />
 
-            {/* Contenu */}
-            <div className="relative z-10">
+            {/* Calque qui zoom: transform-only, GPU-friendly */}
+            <motion.div
+                className="relative z-10 p-6 sm:p-7 will-change-transform transform-gpu"
+                initial={{ opacity: 0.92, scale: 0.985 }}
+                animate={
+                    inView
+                        ? { opacity: 1, scale: 1.0 }
+                        : { opacity: 0.92, scale: 0.985 }
+                }
+                transition={
+                    reduced
+                        ? { duration: 0 }
+                        : {
+                            // tween plus “smooth” que spring sur mobile
+                            type: "tween",
+                            duration: inView ? 0.35 : 0.45,
+                            ease: [0.22, 1, 0.36, 1], // easeOutExpo-like
+                            delay: 0.03 * i,
+                        }
+                }
+                // Légère translation en hover DESKTOP (pas de re-scale)
+                whileHover={!reduced && !isTouch ? { y: -4 } : {}}
+            >
                 <div className="mb-1.5 flex items-center justify-between">
                     <div className="text-[10px] sm:text-[11px] uppercase tracking-widest text-zinc-400">{s.k}</div>
                     <span className="inline-flex items-center rounded-full border border-white/10 px-2 py-0.5 text-[11px] text-zinc-200/90">
@@ -538,8 +554,8 @@ function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
                         ))}
                     </ul>
                 )}
-            </div>
-        </motion.article>
+            </motion.div>
+        </article>
     );
 }
 function ServicesSection() {
