@@ -95,7 +95,7 @@ function SiteBackground() {
                 style={{ filter: `saturate(${SAT}) brightness(${BRIGHT})` }}
                 aria-hidden
             >
-                {/* Nap 1 — violet/rose */}
+                {/* Nap 1 — violet/rose (1 seule avec will-change prononcé) */}
                 <motion.div
                     className="absolute left-[-15%] top-[-10%] h-[70vh] w-[70vw] rounded-[9999px] pointer-events-none"
                     style={{
@@ -126,7 +126,7 @@ function SiteBackground() {
                     }
                 />
 
-                {/* Nap 2 — cyan */}
+                {/* Nap 2 — cyan (sans will-change pour économiser) */}
                 <motion.div
                     className="absolute right-[-12%] top-[10%] h-[65vh] w-[60vw] rounded-[9999px] pointer-events-none"
                     style={{
@@ -139,12 +139,9 @@ function SiteBackground() {
                             "radial-gradient(70% 70% at 50% 50%, rgba(0,0,0,0.88) 35%, rgba(0,0,0,0.52) 60%, rgba(0,0,0,0) 100%)",
                         WebkitMaskImage:
                             "radial-gradient(70% 70% at 50% 50%, rgba(0,0,0,0.88) 35%, rgba(0,0,0,0.52) 60%, rgba(0,0,0,0) 100%)",
-                        willChange: "transform",
                     }}
                     animate={
-                        animOn
-                            ? { x: [AMP_X * 1.2, -AMP_X * 1.2, AMP_X * 1.2], y: [-AMP_Y, AMP_Y, -AMP_Y] }
-                            : {}
+                        animOn ? { x: [AMP_X * 1.2, -AMP_X * 1.2, AMP_X * 1.2], y: [-AMP_Y, AMP_Y, -AMP_Y] } : {}
                     }
                     transition={
                         animOn
@@ -156,7 +153,7 @@ function SiteBackground() {
                     }
                 />
 
-                {/* Nap 3 — magenta */}
+                {/* Nap 3 — magenta (sans will-change) */}
                 <motion.div
                     className="absolute left-[5%] bottom-[-12%] h-[60vh] w-[55vw] rounded-[9999px] pointer-events-none"
                     style={{
@@ -169,11 +166,8 @@ function SiteBackground() {
                             "radial-gradient(70% 70% at 50% 50%, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.58) 65%, rgba(0,0,0,0) 100%)",
                         WebkitMaskImage:
                             "radial-gradient(70% 70% at 50% 50%, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.58) 65%, rgba(0,0,0,0) 100%)",
-                        willChange: "transform",
                     }}
-                    animate={
-                        animOn ? { x: [-AMP_X * 0.8, AMP_X * 0.8, -AMP_X * 0.8], y: [0, AMP_Y * 0.6, 0] } : {}
-                    }
+                    animate={animOn ? { x: [-AMP_X * 0.8, AMP_X * 0.8, -AMP_X * 0.8], y: [0, AMP_Y * 0.6, 0] } : {}}
                     transition={
                         animOn
                             ? {
@@ -184,7 +178,7 @@ function SiteBackground() {
                     }
                 />
 
-                {/* Nap 4 — streak très faible */}
+                {/* Nap 4 — streak très faible (pas de will-change) */}
                 <motion.div
                     className="absolute inset-0 pointer-events-none"
                     style={{
@@ -193,7 +187,6 @@ function SiteBackground() {
                         )}) 0%, rgba(56,189,248,${a(0.04)}) 30%, rgba(232,121,249,${a(0.035)}) 55%, rgba(0,0,0,0) 70%)`,
                         mixBlendMode: "screen",
                         filter: "blur(90px)",
-                        willChange: "transform",
                         transform: "translateZ(0)",
                     }}
                     animate={animOn ? { x: [-AMP_X * 1.4, AMP_X * 1.4, -AMP_X * 1.4] } : {}}
@@ -213,7 +206,6 @@ function SiteBackground() {
                     opacity: 0.06,
                     backgroundImage: NOISE_BG,
                     backgroundSize: "160px 160px",
-                    willChange: "opacity",
                 }}
                 animate={animOn ? { opacity: [0.05, 0.08, 0.05] } : {}}
                 transition={animOn ? { duration: 14, ease: "easeInOut", repeat: Infinity } : {}}
@@ -228,6 +220,7 @@ function SiteBackground() {
 function HeroSection() {
     const { scrollY } = useScroll();
     const [opacity, setOpacity] = useState(1);
+    const reduced = usePrefersReducedMotion();
 
     // Fade out la flèche 0 → 120px
     useMotionValueEvent(scrollY, "change", (latest) => {
@@ -242,9 +235,7 @@ function HeroSection() {
             style={{ paddingTop: "max(env(safe-area-inset-top),1rem)", paddingBottom: "1rem" }}
         >
             <div className="relative z-10 mx-auto w-full max-w-5xl px-4 sm:px-6 text-center">
-                <p className="mb-2 sm:mb-3 text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-zinc-400">
-                    SmartFlow
-                </p>
+                <p className="mb-2 sm:mb-3 text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-zinc-400">SmartFlow</p>
 
                 <h1 className="text-[30px] sm:text-5xl md:text-6xl font-semibold leading-[1.07]">
                     <span className="bg-clip-text text-transparent bg-[linear-gradient(120deg,#e0e7ff_0%,#a78bfa_35%,#22d3ee_65%,#e879f9_100%)]">
@@ -262,6 +253,7 @@ function HeroSection() {
                     <a
                         href="#dev"
                         aria-label="Découvrir notre approche"
+                        role="button"
                         className="rounded-xl border border-white/10 px-5 py-3 text-sm text-zinc-300 hover:text-white hover:border-white/20 transition w-full sm:w-auto"
                     >
                         Notre approche
@@ -269,6 +261,7 @@ function HeroSection() {
                     <a
                         href="#services"
                         aria-label="Voir nos services"
+                        role="button"
                         className="rounded-xl border border-white/10 px-5 py-3 text-sm text-zinc-300 hover:text-white hover:border-white/20 transition w-full sm:w-auto"
                     >
                         Nos services
@@ -277,20 +270,15 @@ function HeroSection() {
             </div>
 
             {/* flèche fine, fondue au scroll */}
-            <motion.div
-                className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center"
-                animate={{ opacity }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
-            >
-                <svg width="20" height="20" viewBox="0 0 24 24" className="opacity-80 animate-bounce" aria-hidden="true">
-                    <path
-                        d="M6 9l6 6 6-6"
-                        fill="none"
-                        stroke="white"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    />
+            <motion.div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center" animate={{ opacity }} transition={{ duration: 0.4, ease: "easeOut" }}>
+                <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    className={`opacity-80 ${!reduced ? "animate-bounce" : ""}`}
+                    aria-hidden="true"
+                >
+                    <path d="M6 9l6 6 6-6" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
             </motion.div>
         </section>
@@ -298,36 +286,41 @@ function HeroSection() {
 }
 
 /* =========================================================
-   Mini highlighter — tokenized (safe)
+   Mini highlighter — tokenized (safe) + détection "Notre approche"
    ========================================================= */
 type Token = { t: "str" | "kw" | "red" | "cm" | "plain"; v: string };
 
+/** Tokenizer TypeScript minimaliste avec surlignage "Notre approche" au sein des commentaires */
 function tokenizeTS(src: string): Token[] {
     const tokens: Token[] = [];
     const push = (t: Token["t"], v: string) => v && tokens.push({ t, v });
 
-    const block = src.match(/^\/\*[\s\S]*\*\/$/);
-    if (block) {
-        const m = block[0].match(/\/\*\s*(Notre approche)([\s\S]*?)\*\//);
-        if (m) {
-            push("cm", "/* ");
-            push("kw", m[1]);
-            push("cm", m[2] + "*/");
-            return tokens;
-        }
-    }
-
+    // Regexp: strings | keywords | single-line comments | block comments
     const re =
-        /("[^"]*"|'[^']*'|`[^`]*`)|\b(export|function|return|const|let|type|interface|new|async|await|start|commit)\b|(\/\/.*$)/gm;
+        /("[^"]*"|'[^']*'|`[^`]*`)|\b(export|function|return|const|let|type|interface|new|async|await|start|commit)\b|(\/\/.*$|\/\*[\s\S]*?\*\/)/gm;
 
     let i = 0;
     let m: RegExpExecArray | null;
     while ((m = re.exec(src))) {
         if (m.index > i) push("plain", src.slice(i, m.index));
 
-        if (m[1]) push("str", m[1]);
-        else if (m[2]) push(m[2] === "start" || m[2] === "commit" ? "red" : "kw", m[2]);
-        else if (m[3]) push("cm", m[3]);
+        if (m[1]) {
+            // string
+            push("str", m[1]);
+        } else if (m[2]) {
+            // keyword
+            push(m[2] === "start" || m[2] === "commit" ? "red" : "kw", m[2]);
+        } else if (m[3]) {
+            // comment — on surligne "Notre approche"
+            const comment = m[3];
+            if (/Notre approche/.test(comment)) {
+                const marked = comment.replace(/(Notre approche)/g, "\u0000$1\u0000");
+                const segs = marked.split("\u0000");
+                segs.forEach((seg, idx) => push(idx % 2 ? "kw" : "cm", seg));
+            } else {
+                push("cm", comment);
+            }
+        }
 
         i = m.index + m[0].length;
     }
@@ -446,6 +439,13 @@ function DevScrollCodeSection() {
         if (rafRef.current) cancelAnimationFrame(rafRef.current);
         rafRef.current = requestAnimationFrame(() => setP(v));
     });
+
+    // Cleanup rAF à l’unmount
+    useEffect(() => {
+        return () => {
+            if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        };
+    }, []);
 
     const totalChars = useMemo(() => APPROACH_LINES.reduce((a, l) => a + l.length, 0), []);
     const budget = Math.round(totalChars * Math.max(0, Math.min(1, p)));
@@ -579,14 +579,19 @@ export function DecoShape({
         }
     })();
 
-    const baseStroke = { fill: "none", stroke: color, strokeWidth: 2, vectorEffect: "non-scaling-stroke" as const };
+    const baseStroke: React.SVGProps<SVGPathElement> = {
+        fill: "none",
+        stroke: color,
+        strokeWidth: 2,
+        vectorEffect: "non-scaling-stroke",
+    };
 
     const idShape = `sf-shape-${uid}`;
     const idClip = `sf-clip-${uid}`;
     const idGrad = `sf-inner-grad-${uid}`;
     const idBlur = `sf-inner-blur-${uid}`;
 
-    // Région de filtre userSpaceOnUse — grande pour éviter le “rectangle”
+    // Région de filtre — large sur desktop pour éviter le “rectangle”
     const FILTER_BOX = { x: -120, y: -120, w: 480, h: 420 };
 
     return (
@@ -657,18 +662,18 @@ export function DecoShape({
                     </clipPath>
 
                     <radialGradient id={idGrad} cx="50%" cy="50%" r="55%">
-                        <stop offset="0%" stopColor={color} stopOpacity="0.58" />
-                        <stop offset="42%" stopColor={color} stopOpacity="0.3" />
-                        <stop offset="80%" stopColor={color} stopOpacity="0" />
+                        <stop offset="0%" stopColor={color} stopOpacity={0.58} />
+                        <stop offset="42%" stopColor={color} stopOpacity={0.3} />
+                        <stop offset="80%" stopColor={color} stopOpacity={0} />
                     </radialGradient>
 
                     <filter
                         id={idBlur}
-                        x={FILTER_BOX.x}
-                        y={FILTER_BOX.y}
-                        width={FILTER_BOX.w}
-                        height={FILTER_BOX.h}
-                        filterUnits="userSpaceOnUse"
+                        x={iosMode ? undefined : FILTER_BOX.x}
+                        y={iosMode ? undefined : FILTER_BOX.y}
+                        width={iosMode ? undefined : FILTER_BOX.w}
+                        height={iosMode ? undefined : FILTER_BOX.h}
+                        filterUnits={iosMode ? "objectBoundingBox" : "userSpaceOnUse"}
                         colorInterpolationFilters="sRGB"
                     >
                         <feGaussianBlur stdDeviation={BLUR_STD_DEV} edgeMode="duplicate" />
@@ -702,7 +707,7 @@ export function DecoShape({
                 {shapeEl.tag === "path" ? (
                     <path {...(shapeEl.props as any)} {...baseStroke} />
                 ) : (
-                    <polygon {...(shapeEl.props as any)} {...baseStroke} />
+                    <polygon {...(shapeEl.props as any)} {...(baseStroke as any)} />
                 )}
             </motion.svg>
         </div>
@@ -719,6 +724,8 @@ function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
 
     const neonActive = isTouch ? inView : hovered;
 
+    const headingId = `svc-${s.k}-title`;
+
     return (
         <article
             ref={ref}
@@ -728,6 +735,8 @@ function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
             onBlur={() => !isTouch && setHovered(false)}
             className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-0"
             style={{ contain: "layout style paint" }}
+            role="article"
+            aria-labelledby={headingId}
         >
             <DecoShape shape={s.theme.shape as ShapeKey} color={s.theme.color} tint={s.theme.tint} active={neonActive} sizePct={32} />
 
@@ -743,7 +752,7 @@ function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
             />
 
             <motion.div
-                className="relative z-10 p-6 sm:p-7 will-change-transform transform-gpu"
+                className="relative z-10 p-6 sm:p-7 transform-gpu"
                 initial={{ opacity: 0.92, scale: 0.985 }}
                 animate={inView ? { opacity: 1, scale: 1.0 } : { opacity: 0.92, scale: 0.985 }}
                 transition={
@@ -768,7 +777,9 @@ function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
                 <div className="text-xs uppercase tracking-wide" style={{ color: s.theme.color + "CC" }}>
                     {s.kicker}
                 </div>
-                <h3 className="mt-1 text-base sm:text-lg font-medium text-white/90">{s.title}</h3>
+                <h3 id={headingId} className="mt-1 text-base sm:text-lg font-medium text-white/90">
+                    {s.title}
+                </h3>
                 <p className="mt-2 text-[13px] sm:text-sm leading-relaxed text-zinc-300">{s.desc}</p>
 
                 {!!s.pillars?.length && (
@@ -845,10 +856,10 @@ function ProjectCard({
                     style={{
                         borderRadius: "0.9rem",
                         boxShadow: `
-                            0 0 8px 2px ${c}33,
-                            0 0 20px 6px ${c}29,
-                            0 0 36px 12px ${c}20
-                        `,
+              0 0 8px 2px ${c}33,
+              0 0 20px 6px ${c}29,
+              0 0 36px 12px ${c}20
+            `,
                         filter: "blur(4px) saturate(1.4) brightness(1.1)",
                     }}
                     animate={{ opacity: active ? 1 : 0, scale: active ? 1.01 : 0.99 }}
@@ -868,11 +879,8 @@ function ProjectCard({
                     background: "linear-gradient(180deg, rgba(22,24,31,0.45) 0%, rgba(12,14,18,0.42) 100%)",
                     backdropFilter: "blur(8px)",
                     // Bordure: sur mobile elle devient violette quand visible
-                    border: `1px solid ${isTouch
-                            ? (active ? c : "rgba(255,255,255,0.15)")
-                            : "rgba(255,255,255,0.12)"
-                        }`,
-                    transition: "border-color 300ms ease, transform 300ms ease",
+                    border: `1px solid ${isTouch ? (active ? c : "rgba(255,255,255,0.15)") : "rgba(255,255,255,0.12)"}`,
+                    transition: "border-color 300ms ease, transform 300ms ease, outline-color 300ms ease",
                 }}
                 aria-label={`${title} – en savoir plus`}
             >
@@ -927,11 +935,7 @@ function ContactSection() {
                 <p className="mt-2 text-sm sm:text-base text-zinc-300">Parlez-nous de votre projet. Réponse rapide et conseils concrets.</p>
 
                 {/* FormSubmit : remplace l’email par le tien si besoin */}
-                <form
-                    className="mt-5 sm:mt-6 grid gap-4"
-                    action="https://formsubmit.co/hello@smartflow.dev"
-                    method="POST"
-                >
+                <form className="mt-5 sm:mt-6 grid gap-4" action="https://formsubmit.co/hello@smartflow.dev" method="POST">
                     {/* Anti-spam & options */}
                     <input type="hidden" name="_subject" value="Nouveau message SmartFlow" />
                     <input type="hidden" name="_captcha" value="false" />
@@ -947,6 +951,7 @@ function ContactSection() {
                                 name="nom"
                                 placeholder="Votre nom"
                                 autoComplete="name"
+                                autoCapitalize="words"
                                 className="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-violet-400/40 w-full"
                                 required
                             />
@@ -976,6 +981,8 @@ function ContactSection() {
                             id="c-message"
                             name="message"
                             placeholder="Décrivez brièvement votre besoin…"
+                            autoCorrect="on"
+                            autoCapitalize="sentences"
                             className="min-h-[140px] rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-violet-400/40 w-full"
                             required
                         />
