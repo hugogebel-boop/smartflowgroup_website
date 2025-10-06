@@ -105,9 +105,6 @@ function HeroSection() {
                     </a>
                 </div>
             </div>
-
-            {/* subtle spotlight */}
-            <div aria-hidden className="pointer-events-none absolute inset-x-0 -bottom-24 h-48 blur-3xl opacity-40 bg-gradient-to-t from-violet-600/30 via-fuchsia-500/10 to-transparent" />
         </section>
     );
 }
