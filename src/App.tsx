@@ -554,9 +554,14 @@ export function DecoShape({
     const uidRef = useRef(Math.random().toString(36).slice(2));
     const uid = uidRef.current;
 
-    // low-blur pour appareils étroits/low-end
-    const isNarrow = isClient ? window.innerWidth < 400 : false;
-    const BLUR_STD_DEV = isNarrow ? 4 : 10;
+    // Détection légère
+    const ua = isClient ? navigator.userAgent : "";
+    const isIOS = /iP(hone|ad|od)/i.test(ua);
+    const iosMode = isTouch || isIOS; // on force le mode iOS/touch
+
+    // Blur différents selon mode
+    const isNarrow = isClient ? window.innerWidth < 420 : false;
+    const BLUR_STD_DEV = iosMode ? (isNarrow ? 4 : 8) : 12;
 
     const widthPx = `min(${sizePct}%, 120px)`;
     const strong = (a: number) => Math.min(1, a * intensity);
@@ -581,48 +586,72 @@ export function DecoShape({
     const idGrad = `sf-inner-grad-${uid}`;
     const idBlur = `sf-inner-blur-${uid}`;
 
+    // Région de filtre userSpaceOnUse — grande pour éviter le “rectangle”
+    const FILTER_BOX = { x: -120, y: -120, w: 480, h: 420 };
+
     return (
-        <div className="absolute pointer-events-none z-0" style={{ right: "0.5rem", bottom: "0.5rem", width: widthPx, height: widthPx }}>
-            {/* HALO EXTERNE (coupé sur mobile) */}
-            {!isTouch && (
+        <div
+            className="absolute pointer-events-none z-0"
+            style={{ right: "0.5rem", bottom: "0.5rem", width: widthPx, height: widthPx }}
+        >
+            {/* Halo externe — seulement desktop (ne gêne pas iOS) */}
+            {!iosMode && (
                 <motion.div
                     className="absolute inset-0"
                     style={{
                         background: `radial-gradient(120% 120% at 70% 70%, ${color}40 0%, transparent 70%)`,
-                        filter: "blur(20px)",
+                        filter: "blur(22px)",
                         borderRadius: "9999px",
                         transform: "translateZ(0)",
                     }}
                     initial={{ opacity: 0.18, scale: 0.96 }}
-                    animate={active && !reduced ? { opacity: [0.18, 0.28, 0.36], scale: [0.96, 0.99, 1] } : { opacity: 0.16, scale: 0.96 }}
+                    animate={
+                        active && !reduced
+                            ? { opacity: [0.18, 0.3, 0.38], scale: [0.96, 0.995, 1] }
+                            : { opacity: 0.16, scale: 0.96 }
+                    }
                     transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
                 />
             )}
 
-            {/* SHAPE + inner glow */}
             <motion.svg
                 width="100%"
                 height="100%"
                 viewBox="0 0 200 160"
                 preserveAspectRatio="xMidYMid meet"
-                initial={{ opacity: 0.1, transform: "scale(0.96)", filter: `drop-shadow(0 0 0 ${color}00)` }}
+                style={{ overflow: "visible" }} // laisser déborder le glow
+                initial={{
+                    opacity: 0.1,
+                    transform: "scale(0.96)",
+                    // Sur desktop on reprend le drop-shadow “riche”
+                    filter: iosMode ? undefined : `drop-shadow(0 0 0 ${color}00)`,
+                }}
                 animate={
                     active && !reduced
-                        ? {
-                            opacity: [0.1, 0.25, strong(1)],
-                            transform: ["scale(0.96)", "scale(0.99)", "scale(1)"],
-                            filter: [
-                                `drop-shadow(0 0 0 ${color}00)`,
-                                `drop-shadow(0 0 6px ${color}66)`,
-                                `drop-shadow(0 0 16px ${color}AA) drop-shadow(0 0 28px ${color}80)`,
-                            ],
-                        }
-                        : { opacity: 0.1, transform: "scale(0.96)", filter: `drop-shadow(0 0 0 ${color}00)` }
+                        ? iosMode
+                            ? { opacity: [0.1, 0.25, strong(1)], transform: ["scale(0.96)", "scale(0.99)", "scale(1)"] }
+                            : {
+                                opacity: [0.12, 0.3, strong(1)],
+                                transform: ["scale(0.965)", "scale(0.995)", "scale(1)"],
+                                filter: [
+                                    `drop-shadow(0 0 0 ${color}00)`,
+                                    `drop-shadow(0 0 8px ${color}66)`,
+                                    `drop-shadow(0 0 18px ${color}AA) drop-shadow(0 0 30px ${color}80)`,
+                                ],
+                            }
+                        : iosMode
+                            ? { opacity: 0.1, transform: "scale(0.96)" }
+                            : { opacity: 0.1, transform: "scale(0.96)", filter: `drop-shadow(0 0 0 ${color}00)` }
                 }
                 transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
             >
                 <defs>
-                    {shapeEl.tag === "path" ? <path id={idShape} {...(shapeEl.props as any)} /> : <polygon id={idShape} {...(shapeEl.props as any)} />}
+                    {shapeEl.tag === "path" ? (
+                        <path id={idShape} {...(shapeEl.props as any)} />
+                    ) : (
+                        <polygon id={idShape} {...(shapeEl.props as any)} />
+                    )}
+
                     <clipPath id={idClip}>
                         <use href={`#${idShape}`} />
                     </clipPath>
@@ -633,24 +662,43 @@ export function DecoShape({
                         <stop offset="80%" stopColor={color} stopOpacity="0" />
                     </radialGradient>
 
-                    <filter id={idBlur} x="-40%" y="-40%" width="180%" height="180%" colorInterpolationFilters="sRGB">
-                        <feGaussianBlur in="SourceGraphic" stdDeviation={BLUR_STD_DEV} />
+                    <filter
+                        id={idBlur}
+                        x={FILTER_BOX.x}
+                        y={FILTER_BOX.y}
+                        width={FILTER_BOX.w}
+                        height={FILTER_BOX.h}
+                        filterUnits="userSpaceOnUse"
+                        colorInterpolationFilters="sRGB"
+                    >
+                        <feGaussianBlur stdDeviation={BLUR_STD_DEV} edgeMode="duplicate" />
                     </filter>
                 </defs>
 
-                {/* inner-glow clippé */}
-                <motion.g
-                    clipPath={`url(#${idClip})`}
-                    filter={`url(#${idBlur})`}
-                    initial={{ opacity: 0 }}
-                    animate={active && !reduced ? { opacity: [0, 0.35, strong(0.55)] } : { opacity: 0 }}
-                    transition={{ duration: 1.0, ease: [0.22, 1, 0.36, 1] }}
-                >
-                    <rect x="-50" y="-40" width="300" height="240" fill={`url(#${idGrad})`} />
-                    <use href={`#${idShape}`} fill={tint} opacity="0.25" />
-                </motion.g>
+                {/* === Rendu selon mode === */}
+                {iosMode ? (
+                    // ----- iOS / Touch SAFE: clip le groupe, filtre sur les éléments peints
+                    <g clipPath={`url(#${idClip})`}>
+                        <rect
+                            x={-50}
+                            y={-40}
+                            width={300}
+                            height={240}
+                            fill={`url(#${idGrad})`}
+                            filter={`url(#${idBlur})`}
+                            opacity={active && !reduced ? 1 : 0}
+                        />
+                        <use href={`#${idShape}`} fill={tint} opacity="0.25" filter={`url(#${idBlur})`} />
+                    </g>
+                ) : (
+                    // ----- Desktop RICHE: filtre sur le groupe entier (glow plus large)
+                    <g clipPath={`url(#${idClip})`} filter={`url(#${idBlur})`}>
+                        <rect x={-50} y={-40} width={300} height={240} fill={`url(#${idGrad})`} opacity={active && !reduced ? 1 : 0} />
+                        <use href={`#${idShape}`} fill={tint} opacity="0.25" />
+                    </g>
+                )}
 
-                {/* trait */}
+                {/* Trait net au-dessus, non filtré */}
                 {shapeEl.tag === "path" ? (
                     <path {...(shapeEl.props as any)} {...baseStroke} />
                 ) : (
