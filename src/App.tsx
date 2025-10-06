@@ -415,8 +415,8 @@ function DecoShape({
                         : { opacity: 0.08, filter: `drop-shadow(0 0 0 ${color}00)`, transform: "scale(0.96)" }
                 }
                 transition={{
-                    duration: 1.0,
-                    times: [0, 0.75, 1],          // 90% du temps “faible”, puis hop à la fin
+                    duration: 0.8,
+                    times: [0, 0.8, 1],          // 90% du temps “faible”, puis hop à la fin
                     ease: [easeSegments[0], easeSegments[1]],
                 }}
             >
