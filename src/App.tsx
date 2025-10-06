@@ -281,7 +281,7 @@ function tokenizeTS(src: string): Token[] {
    Code content
    ========================================================= */
 const APPROACH_LINES: string[] = [
-    "/* Notre approche — simple et directe. */",
+    "/* Notre approche : simple et directe. */",
     "SmartFlow.start({",
     '  idée: "on comprend le besoin",',
     '  design: "on imagine une expérience fluide",',
