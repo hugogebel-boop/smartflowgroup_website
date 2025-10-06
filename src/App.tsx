@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, useId } from "react";
 import { motion, useScroll, useMotionValueEvent, useInView } from "framer-motion";
 
 /* =========================================================
@@ -361,106 +361,140 @@ const SERVICES = [
     }
 ] as const;
 
-function DecoShape({
+type ShapeKey = "bolt" | "wave" | "diamond" | "hex";
+
+export function DecoShape({
     shape,
     color,
     tint,
     active,
     sizePct = 30,
-    intensity = 1.15, // boost léger
+    intensity = 1.15,
 }: {
-    shape: "bolt" | "wave" | "diamond" | "hex";
-    color: string;
-    tint: string;
+    shape: ShapeKey;
+    color: string;   // ex: "#22c55e"
+    tint: string;    // ex: "rgba(34,197,94,0.25)"
     active: boolean;
     sizePct?: number;
     intensity?: number;
 }) {
-    const baseProps = { fill: "none", stroke: color, strokeWidth: 2, vectorEffect: "non-scaling-stroke" as const };
+    const uid = useId(); // évite les conflits d'IDs SVG entre cartes
+    const widthPx = `min(${sizePct}%, 120px)`;
+    const heightPx = `min(${sizePct}%, 120px)`;
+    const strong = (a: number) => Math.min(1, a * intensity);
 
-    const content = (() => {
+    // géométrie de la forme (réutilisée pour clip + stroke)
+    const shapeEl = (() => {
         switch (shape) {
             case "bolt":
-                return (
-                    <g>
-                        <path d="M60 10 L35 55 H60 L30 110 L90 50 H60 L90 10 Z" {...baseProps} />
-                        <path d="M60 10 L35 55 H60 L30 110 L90 50 H60 L90 10 Z" fill={tint} />
-                    </g>
-                );
+                return { tag: "path" as const, props: { d: "M60 10 L35 55 H60 L30 110 L90 50 H60 L90 10 Z" } };
             case "wave":
-                return (
-                    <g>
-                        <path d="M10 70 C30 40, 70 100, 90 70 S150 40, 170 70" {...baseProps} />
-                        <path d="M10 70 C30 40, 70 100, 90 70 S150 40, 170 70" stroke={color} strokeOpacity="0.25" strokeWidth={16} />
-                    </g>
-                );
+                return { tag: "path" as const, props: { d: "M10 70 C30 40, 70 100, 90 70 S150 40, 170 70" } };
             case "diamond":
-                return (
-                    <g>
-                        <polygon points="100,20 40,80 100,140 160,80" {...baseProps} />
-                        <polygon points="100,20 40,80 100,140 160,80" fill={tint} />
-                    </g>
-                );
-            case "hex":
-            default:
-                return (
-                    <g>
-                        <polygon points="100,20 55,45 55,95 100,120 145,95 145,45" {...baseProps} />
-                        <polygon points="100,20 55,45 55,95 100,120 145,95 145,45" fill={tint} />
-                    </g>
-                );
+                return { tag: "polygon" as const, props: { points: "100,20 40,80 100,140 160,80" } };
+            default: // hex
+                return { tag: "polygon" as const, props: { points: "100,20 55,45 55,95 100,120 145,95 145,45" } };
         }
     })();
 
-    const widthPx = `min(${sizePct}%, 120px)`;
-    const heightPx = `min(${sizePct}%, 120px)`;
+    const baseStroke = {
+        fill: "none",
+        stroke: color,
+        strokeWidth: 2,
+        vectorEffect: "non-scaling-stroke" as const,
+    };
 
-    // segments: long plateau (faible), puis hop -> allumé
-    const easeSegments = [
-        [0.22, 1, 0.36, 1], // segment 0 -> 0.9 (lent, fluide)
-        [0.15, 0.85, 0.2, 1], // snap final 0.9 -> 1
-    ] as const;
-
-    const strong = (a: number) => Math.min(1, a * intensity);
+    // ids uniques
+    const idShape = `sf-shape-${uid}`;
+    const idClip = `sf-clip-${uid}`;
+    const idGrad = `sf-inner-grad-${uid}`;
+    const idBlur = `sf-inner-blur-${uid}`;
 
     return (
-        <div className="absolute pointer-events-none z-0" style={{ right: "0.5rem", bottom: "0.5rem", width: widthPx, height: heightPx }}>
-            {/* bloom radial discret (reste soft, monte au ‘hop’) */}
+        <div
+            className="absolute pointer-events-none z-0"
+            style={{ right: "0.5rem", bottom: "0.5rem", width: widthPx, height: heightPx }}
+        >
+            {/* HALO EXTERNE — flou CSS sur calque indépendant (pas d'overflow/masque → pas de bug “rectangle”) */}
             <motion.div
-                className="absolute inset-0 rounded-xl"
-                style={{ background: `radial-gradient(120% 120% at 70% 70%, ${color}40 0%, transparent 60%)`, filter: "blur(8px)" }}
-                initial={{ opacity: 0.0, scale: 0.95 }}
-                animate={active ? { opacity: [0.0, 0.12, strong(0.45)], scale: [0.95, 0.98, 1.0] } : { opacity: 0.0, scale: 0.95 }}
-                transition={{ duration: 1.6, times: [0, 0.88, 1], ease: [easeSegments[0], easeSegments[1]] }}
+                className="absolute inset-0"
+                style={{
+                    background: `radial-gradient(120% 120% at 70% 70%, ${color}40 0%, transparent 70%)`,
+                    filter: "blur(20px)",
+                    borderRadius: "9999px",
+                    transform: "translateZ(0)",
+                }}
+                initial={{ opacity: 0.18, scale: 0.96 }}
+                animate={active ? { opacity: [0.18, 0.28, 0.36], scale: [0.96, 0.99, 1] } : { opacity: 0.16, scale: 0.96 }}
+                transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
             />
 
-            {/* tube néon : plateau faible → snap lumineux → stabilisation */}
+            {/* SHAPE + INNER GLOW — flou SVG clippé (reste toujours flou et dedans) */}
             <motion.svg
                 width="100%"
                 height="100%"
                 viewBox="0 0 200 160"
                 preserveAspectRatio="xMidYMid meet"
-                initial={{ opacity: 0.08, filter: `drop-shadow(0 0 0 ${color}00)`, transform: "scale(0.96)", transformOrigin: "bottom right" }}
+                initial={{ opacity: 0.1, transform: "scale(0.96)", filter: `drop-shadow(0 0 0 ${color}00)` }}
                 animate={
                     active
                         ? {
-                            opacity: [0.08, 0.14, strong(0.9)],
+                            opacity: [0.1, 0.25, strong(1)],
+                            transform: ["scale(0.96)", "scale(0.99)", "scale(1)"],
                             filter: [
                                 `drop-shadow(0 0 0 ${color}00)`,
-                                `drop-shadow(0 0 6px ${color}33)`,
+                                `drop-shadow(0 0 6px ${color}66)`,
                                 `drop-shadow(0 0 16px ${color}AA) drop-shadow(0 0 28px ${color}80)`,
                             ],
-                            transform: ["scale(0.96)", "scale(0.985)", "scale(1.0)"],
                         }
-                        : { opacity: 0.08, filter: `drop-shadow(0 0 0 ${color}00)`, transform: "scale(0.96)" }
+                        : { opacity: 0.1, transform: "scale(0.96)", filter: `drop-shadow(0 0 0 ${color}00)` }
                 }
-                transition={{
-                    duration: 0.8,
-                    times: [0, 0.8, 1], // long plateau doux puis hop
-                    ease: [easeSegments[0], easeSegments[1]],
-                }}
+                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
             >
-                {content}
+                <defs>
+                    {shapeEl.tag === "path" ? (
+                        <path id={idShape} {...(shapeEl.props as any)} />
+                    ) : (
+                        <polygon id={idShape} {...(shapeEl.props as any)} />
+                    )}
+
+                    <clipPath id={idClip}>
+                        <use href={`#${idShape}`} />
+                    </clipPath>
+
+                    {/* gradient interne : centre lumineux -> bords transparents */}
+                    <radialGradient id={idGrad} cx="50%" cy="50%" r="55%">
+                        <stop offset="0%" stopColor={color} stopOpacity="0.58" />
+                        <stop offset="42%" stopColor={color} stopOpacity="0.30" />
+                        <stop offset="80%" stopColor={color} stopOpacity="0.00" />
+                    </radialGradient>
+
+                    {/* flou SVG stable (aucun bug de clipping) */}
+                    <filter id={idBlur} x="-40%" y="-40%" width="180%" height="180%" colorInterpolationFilters="sRGB">
+                        <feGaussianBlur in="SourceGraphic" stdDeviation="10" />
+                    </filter>
+                </defs>
+
+                {/* INNER GLOW : rempli par le radial, clippé par la forme, puis flouté */}
+                <motion.g
+                    clipPath={`url(#${idClip})`}
+                    filter={`url(#${idBlur})`}
+                    initial={{ opacity: 0 }}
+                    animate={active ? { opacity: [0, 0.35, strong(0.55)] } : { opacity: 0 }}
+                    transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+                >
+                    {/* “disque” large pour couvrir l’intérieur */}
+                    <rect x="-50" y="-40" width="300" height="240" fill={`url(#${idGrad})`} />
+                    {/* teinte douce sous le trait */}
+                    <use href={`#${idShape}`} fill={tint} opacity="0.25" />
+                </motion.g>
+
+                {/* trait de la forme au-dessus */}
+                {shapeEl.tag === "path" ? (
+                    <path {...(shapeEl.props as any)} {...baseStroke} />
+                ) : (
+                    <polygon {...(shapeEl.props as any)} {...baseStroke} />
+                )}
             </motion.svg>
         </div>
     );
