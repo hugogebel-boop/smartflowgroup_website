@@ -70,9 +70,9 @@ function SiteBackground() {
     const SPEED = 45; // plus petit = plus rapide (sec A/R)
     const AMP_X = 360; // px
     const AMP_Y = 240; // px
-    const POWER = 1.28;
-    const SAT = 1.18;
-    const BRIGHT = 1.06;
+    const POWER = 1.08;
+    const SAT = 1.06;
+    const BRIGHT = 1.04;
 
     // Phases aléatoires pour désynchroniser les nappes
     const PHASE_1 = useRef(Math.random()).current;
