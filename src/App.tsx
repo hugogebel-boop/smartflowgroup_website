@@ -83,7 +83,7 @@ function HeroSection() {
                         Design ✕ Développement
                     </span>
                     <br />
-                    d’expériences numériques
+                    Une expériences numériques
                 </h1>
 
                 <p className="mx-auto mt-3 sm:mt-4 max-w-xl text-sm sm:text-base text-zinc-300">
