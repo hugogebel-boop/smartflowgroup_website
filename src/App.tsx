@@ -214,6 +214,121 @@ function SiteBackground() {
     );
 }
 
+function TopNav() {
+    const reduced = usePrefersReducedMotion();
+    const { scrollY } = useScroll();
+    const [solid, setSolid] = useState(false);
+    const [open, setOpen] = useState(false);
+
+    useMotionValueEvent(scrollY, "change", (y) => setSolid(y > 20));
+
+    useEffect(() => {
+        const onResize = () => setOpen(false);
+        window.addEventListener("resize", onResize);
+        return () => window.removeEventListener("resize", onResize);
+    }, []);
+
+    const baseOpacity = 0.75;
+    const scrolledOpacity = 0.9;
+    const hoverOpacity = 1;
+
+    return (
+        <header
+            className="fixed top-0 left-0 right-0 z-50"
+            style={{ paddingTop: "env(safe-area-inset-top)" }}
+            aria-label="Menu principal"
+        >
+            <motion.nav
+                initial={false}
+                animate={{
+                    opacity: solid ? scrolledOpacity : baseOpacity,
+                    backdropFilter: "blur(10px)",
+                }}
+                whileHover={!reduced ? { opacity: hoverOpacity } : {}}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                className="w-full border-b border-white/10 bg-[#0B0B12]/85 px-5 sm:px-8 py-2 sm:py-2.5 flex items-center justify-between"
+            >
+                {/* Logo */}
+                <a
+                    href="#hero"
+                    className="text-[11px] sm:text-[12px] tracking-[0.25em] uppercase text-white/90 hover:text-white transition"
+                >
+                    SmartFlow
+                </a>
+
+                {/* Liens Desktop */}
+                <div className="hidden sm:flex items-center gap-6 text-[14px] font-light">
+                    <a href="#dev" className="text-zinc-200 hover:text-white transition">
+                        Approche
+                    </a>
+                    <a href="#services" className="text-zinc-200 hover:text-white transition">
+                        Services
+                    </a>
+                    <a href="#works" className="text-zinc-200 hover:text-white transition">
+                        Réalisations
+                    </a>
+                    <a
+                        href="#contact"
+                        className="rounded-md border border-white/15 px-3 py-1.5 text-zinc-100 hover:text-white hover:border-white/25 transition"
+                    >
+                        Contact
+                    </a>
+                </div>
+
+                {/* Burger Mobile */}
+                <button
+                    type="button"
+                    aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
+                    aria-expanded={open}
+                    onClick={() => setOpen((v) => !v)}
+                    className="sm:hidden inline-flex items-center justify-center rounded-md border border-white/15 px-2.5 py-1.5 text-zinc-100 hover:text-white hover:border-white/25 transition"
+                >
+                    {!open ? (
+                        <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                        </svg>
+                    ) : (
+                        <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M6 6l12 12M18 6l-12 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                        </svg>
+                    )}
+                </button>
+            </motion.nav>
+
+            {/* Drawer Mobile */}
+            <motion.div
+                initial={false}
+                animate={open ? "open" : "closed"}
+                variants={{
+                    open: { height: "auto", opacity: 1 },
+                    closed: { height: 0, opacity: 0 },
+                }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                className="sm:hidden overflow-hidden bg-[#0B0B12]/95 backdrop-blur-md border-b border-white/10"
+            >
+                <div className="grid gap-1.5 p-4 text-[15px]">
+                    <a onClick={() => setOpen(false)} href="#dev" className="block rounded-md px-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white">
+                        Approche
+                    </a>
+                    <a onClick={() => setOpen(false)} href="#services" className="block rounded-md px-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white">
+                        Services
+                    </a>
+                    <a onClick={() => setOpen(false)} href="#works" className="block rounded-md px-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white">
+                        Réalisations
+                    </a>
+                    <a
+                        onClick={() => setOpen(false)}
+                        href="#contact"
+                        className="block rounded-md border border-white/15 px-2 py-2 text-zinc-200 hover:text-white hover:border-white/25"
+                    >
+                        Contact
+                    </a>
+                </div>
+            </motion.div>
+        </header>
+    );
+}
+
 /* =========================================================
    HERO
    ========================================================= */
@@ -1035,10 +1150,12 @@ function Footer() {
 /* =========================================================
    APP
    ========================================================= */
+
 export default function App() {
     return (
         <main className="relative min-h-screen text-white antialiased [text-size-adjust:100%] selection:bg-white/20">
             <SiteBackground />
+            <TopNav />          {/* ← nouveau menu discret */}
             <HeroSection />
             <DevScrollCodeSection />
             <ServicesSection />
