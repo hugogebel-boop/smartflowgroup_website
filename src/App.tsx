@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState, useId } from "react";
-import { motion, useScroll, useMotionValueEvent, useInView, useTransform } from "framer-motion";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { motion, useScroll, useMotionValueEvent, useInView } from "framer-motion";
 
 /* =========================================================
    Helpers
@@ -386,11 +386,10 @@ export function DecoShape({
     sizePct?: number;
     intensity?: number;
 }) {
-    // === helpers déjà présents dans ton fichier ===
     const isTouch = useIsTouchDevice?.() ?? false;
     const reduced = usePrefersReducedMotion?.() ?? false;
 
-    // uid stable sans React 18
+    // uid "safe" sans dépendre de React.useId (compat)
     const uidRef = useRef(Math.random().toString(36).slice(2));
     const uid = uidRef.current;
 
@@ -507,6 +506,7 @@ export function DecoShape({
         </div>
     );
 }
+
 function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
     const ref = React.useRef<HTMLDivElement | null>(null);
 
@@ -533,12 +533,11 @@ function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
             onBlur={() => !isTouch && setHovered(false)}
             className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-0"
             style={{
-                // pas de filter ici -> évite un repaint coûteux pendant l’anim
-                contain: "layout style paint", // hint perf
+                contain: "layout style paint",
             }}
         >
             {/* Calque décor néon (indépendant du zoom) */}
-            <DecoShape shape={s.theme.shape} color={s.theme.color} tint={s.theme.tint} active={neonActive} sizePct={32} />
+            <DecoShape shape={s.theme.shape as ShapeKey} color={s.theme.color} tint={s.theme.tint} active={neonActive} sizePct={32} />
 
             {/* Contour : lueur quand neonActive */}
             <div
@@ -565,14 +564,12 @@ function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
                     reduced
                         ? { duration: 0 }
                         : {
-                            // tween plus “smooth” que spring sur mobile
                             type: "tween",
                             duration: inView ? 0.35 : 0.45,
-                            ease: [0.22, 1, 0.36, 1], // easeOutExpo-like
+                            ease: [0.22, 1, 0.36, 1],
                             delay: 0.03 * i,
                         }
                 }
-                // Légère translation en hover DESKTOP (pas de re-scale)
                 whileHover={!reduced && !isTouch ? { y: -4 } : {}}
             >
                 <div className="mb-1.5 flex items-center justify-between">
@@ -599,16 +596,15 @@ function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
         </article>
     );
 }
+
 function ServicesSection() {
     return (
         <section id="services" className="relative w-full text-white py-12 sm:py-16">
             <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6">
                 <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-1">
                     <h2 className="text-xl sm:text-2xl font-semibold text-white">Nos services</h2>
-                    {/* texte “essentiel et structuré” retiré */}
                 </div>
 
-                {/* → 2 colonnes dès sm et on garde 2 à lg */}
                 <div className="grid gap-5 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2">
                     {SERVICES.map((s, i) => (
                         <ServiceCard key={s.k} s={s} i={i} />
@@ -620,13 +616,98 @@ function ServicesSection() {
 }
 
 /* =========================================================
+   Projets — cartes avec halo néon (jaune/rouge/vert)
+   ========================================================= */
+type GlowColor = "yellow" | "red" | "green";
+const glowHex: Record<GlowColor, string> = {
+    yellow: "#f59e0b",
+    red: "#f43f5e",
+    green: "#10b981",
+};
+
+function ProjectCard({
+    title,
+    subtitle,
+    href,
+    color,
+}: {
+    title: string;
+    subtitle: string;
+    href: string;
+    color: GlowColor;
+}) {
+    const isTouch = useIsTouchDevice();
+    const [hovered, setHovered] = React.useState(false);
+    const ref = React.useRef<HTMLAnchorElement | null>(null);
+    const inView = useInView(ref, { margin: "-15% 0% -15% 0%", amount: 0.25 });
+
+    const active = isTouch ? inView : hovered;
+    const c = glowHex[color];
+
+    return (
+        <div className="relative isolate">
+            {/* Halo plus doux, même position */}
+            <motion.div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 -z-10"
+                style={{
+                    borderRadius: "0.9rem",
+                    boxShadow: `
+            0 0 8px 2px ${c}33,
+            0 0 20px 6px ${c}29,
+            0 0 36px 12px ${c}20
+          `,
+                    filter: "blur(4px) saturate(1.4) brightness(1.1)",
+                }}
+                animate={{ opacity: active ? 1 : 0, scale: active ? 1.01 : 0.99 }}
+                transition={{
+                    duration: active ? 1.0 : 4.0, // 1s in / 4s out
+                    ease: [0.22, 1, 0.36, 1],
+                }}
+            />
+
+            {/* Carte plus transparente */}
+            <a
+                ref={ref}
+                href={href}
+                onMouseEnter={() => !isTouch && setHovered(true)}
+                onMouseLeave={() => !isTouch && setHovered(false)}
+                onFocus={() => !isTouch && setHovered(true)}
+                onBlur={() => !isTouch && setHovered(false)}
+                className="relative block overflow-hidden rounded-2xl p-4 sm:p-5 transition-transform"
+                style={{
+                    background:
+                        "linear-gradient(180deg, rgba(22,24,31,0.45) 0%, rgba(12,14,18,0.42) 100%)",
+                    backdropFilter: "blur(8px)",
+                }}
+            >
+                <div
+                    className="mb-2 sm:mb-3 h-28 sm:h-32 w-full overflow-hidden rounded-lg"
+                    style={{
+                        background:
+                            "linear-gradient(180deg, rgba(40,43,53,0.25) 0%, rgba(22,24,31,0.25) 100%)",
+                    }}
+                />
+                <div className="flex items-center justify-between">
+                    <h3 className="text-sm sm:text-base font-medium text-white/85 group-hover:text-white">
+                        {title}
+                    </h3>
+                    <span className="text-[10px] text-zinc-400">→</span>
+                </div>
+                <p className="mt-1 text-[13px] text-zinc-300">{subtitle}</p>
+            </a>
+        </div>
+    );
+}
+
+/* =========================================================
    Works / Contact / Footer
    ========================================================= */
 function WorksSection() {
     const works = [
-        { t: "Site vitrine premium", d: "Next.js, Tailwind, Motion", href: "#", year: "2025" },
-        { t: "Portail métier", d: "React, TypeScript, Auth", href: "#", year: "2025" },
-        { t: "App desktop labo", d: ".NET, WPF, EF Core", href: "#", year: "2024" },
+        { t: "Site vitrine premium", d: "Next.js, Tailwind, Motion", href: "#", color: "yellow" as GlowColor },
+        { t: "Portail métier", d: "React, TypeScript, Auth", href: "#", color: "red" as GlowColor },
+        { t: "App desktop labo", d: ".NET, WPF, EF Core", href: "#", color: "green" as GlowColor },
     ];
     return (
         <section id="works" className="relative w-full text-white py-12 sm:py-16">
@@ -637,20 +718,9 @@ function WorksSection() {
                         Discuter d’un projet
                     </a>
                 </div>
-                <div className="grid gap-4 sm:gap-5 grid-cols-1 xs:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-8 sm:gap-10 grid-cols-1 xs:grid-cols-2 lg:grid-cols-3">
                     {works.map((w, i) => (
-                        <a
-                            key={i}
-                            href={w.href}
-                            className="group rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5 hover:border-violet-400/30 transition"
-                        >
-                            <div className="mb-3 sm:mb-4 h-36 sm:h-40 w-full overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-zinc-800/60 to-zinc-900/60" />
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-base sm:text-lg font-medium text-white/90 group-hover:text-white">{w.t}</h3>
-                                <span className="text-[10px] sm:text-[11px] text-zinc-400">{w.year}</span>
-                            </div>
-                            <p className="mt-1 text-sm text-zinc-300">{w.d}</p>
-                        </a>
+                        <ProjectCard key={i} title={w.t} subtitle={w.d} href={w.href} color={w.color} />
                     ))}
                 </div>
             </div>
@@ -705,6 +775,7 @@ function ContactSection() {
         </section>
     );
 }
+
 function Footer() {
     return (
         <footer className="relative w-full text-white py-8 sm:py-10">
