@@ -89,10 +89,10 @@ function HeroSection() {
 
                 <h1 className="text-[30px] sm:text-5xl md:text-6xl font-semibold leading-[1.07]">
                     <span className="bg-clip-text text-transparent bg-[linear-gradient(120deg,#e0e7ff_0%,#a78bfa_35%,#22d3ee_65%,#e879f9_100%)]">
-                        Design ✕ Développement
+                        Design ✕ Développement,
                     </span>
                     <br />
-                    Une expériences numériques
+                    une expérience numérique.
                 </h1>
 
                 <p className="mx-auto mt-3 sm:mt-4 max-w-xl text-sm sm:text-base text-zinc-300">
