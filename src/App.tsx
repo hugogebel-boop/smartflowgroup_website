@@ -1125,7 +1125,7 @@ function Footer() {
                 <div className="flex flex-col items-start justify-between gap-6 sm:flex-row">
                     <div>
                         <div className="text-[11px] sm:text-sm uppercase tracking-[0.25em] text-zinc-400">SmartFlow</div>
-                        <p className="mt-2 text-zinc-400 text-xs sm:text-sm">Design & Développement d’expériences numériques.</p>
+                        <p className="mt-2 text-zinc-400 text-xs sm:text-sm">Design & Développement, une expérience numérique.</p>
                     </div>
                     <div className="flex gap-5 sm:gap-6 text-sm">
                         <a href="#services" className="text-zinc-300 hover:text-white" aria-label="Voir nos services">
