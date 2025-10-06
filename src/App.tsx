@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { motion, useScroll, useMotionValueEvent } from "framer-motion";
+import { motion, useScroll, useMotionValueEvent, useInView } from "framer-motion";
 
 /* =========================================================
    Helpers
@@ -83,7 +83,7 @@ function HeroSection() {
                         Design ✕ Développement
                     </span>
                     <br />
-                    Une expériences numériques
+                    d’expériences numériques
                 </h1>
 
                 <p className="mx-auto mt-3 sm:mt-4 max-w-xl text-sm sm:text-base text-zinc-300">
@@ -117,10 +117,21 @@ function escapeHtml(src: string) {
 }
 function highlightTS(src: string) {
     let s = escapeHtml(src);
+    // strings
     s = s.replace(/("[^"]*"|'[^']*'|`[^`]*`)/g, "<span style='color:#34d399;'>$&</span>");
-    s = s.replace(/\b(export|function|return|const|let|type|interface|new|async|await)\b/g, "<span style='color:#c4b5fd;font-weight:500;'>$&</span>");
+    // keywords
+    s = s.replace(
+        /\b(export|function|return|const|let|type|interface|new|async|await)\b/g,
+        "<span style='color:#c4b5fd;font-weight:500;'>$&</span>"
+    );
+    // start & commit en rouge
     s = s.replace(/\b(start|commit)\b/g, "<span style='color:#ef4444;font-weight:700;'>$&</span>");
-    s = s.replace(/\/\*\s*(Notre approche)(.*?)\*\//, `<span style="color:#71717a;opacity:0.85;">/* <span style='color:#a78bfa;font-weight:600;'>$1</span>$2*/</span>`);
+    // Commentaire : tout est grisé/estompé SAUF "Notre approche" en violet
+    s = s.replace(
+        /\/\*\s*(Notre approche)(.*?)\*\//,
+        `<span style="color:#71717a;opacity:0.85;">/* <span style='color:#a78bfa;font-weight:700;'>$1</span>$2*/</span>`
+    );
+    // line comments
     s = s.replace(/(\/\/.*$)/gm, (full) => `<span style='color:#71717a;'>${full}</span>`);
     return s;
 }
@@ -169,7 +180,8 @@ function CodeLine({ text, index, active }: { text: string; index: number; active
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.18 }}
         >
-            <span className="mr-2 sm:mr-3 text-white/90">{String(index + 1).padStart(2, "0")}</span>
+            {/* → plus d’estompage sur le numéro : couleur pleine */}
+            <span className="mr-2 sm:mr-3 text-white">{String(index + 1).padStart(2, "0")}</span>
             <span dangerouslySetInnerHTML={{ __html: html }} />
             {active && <span className="inline-block w-2 h-4 align-baseline ml-0.5 bg-zinc-200 animate-pulse" />}
         </motion.div>
@@ -197,13 +209,16 @@ function EditorFrame({ children }: { children: React.ReactNode }) {
             </div>
 
             {/* subtle outer glow */}
-            <div aria-hidden className="pointer-events-none absolute -inset-1 rounded-2xl bg-[conic-gradient(from_120deg_at_50%_50%,rgba(56,189,248,0.06),rgba(168,85,247,0.10),rgba(232,121,249,0.06),rgba(56,189,248,0.06))] blur-xl" />
+            <div
+                aria-hidden
+                className="pointer-events-none absolute -inset-1 rounded-2xl bg-[conic-gradient(from_120deg_at_50%_50%,rgba(56,189,248,0.06),rgba(168,85,247,0.10),rgba(232,121,249,0.06),rgba(56,189,248,0.06))] blur-xl"
+            />
         </div>
     );
 }
 
 /* =========================================================
-   DEV SECTION — sticky reveal
+   DEV SECTION — sticky reveal (distance de scroll ↑)
    ========================================================= */
 function DevScrollCodeSection() {
     const sectionRef = useRef<HTMLElement | null>(null);
@@ -215,11 +230,19 @@ function DevScrollCodeSection() {
     const budget = Math.round(totalChars * Math.max(0, Math.min(1, p)));
     const visible = useMemo(() => sliceByBudget(APPROACH_LINES, budget), [budget]);
 
-    let remain = budget, activeIdx = 0;
+    let remain = budget,
+        activeIdx = 0;
     for (let i = 0; i < APPROACH_LINES.length; i++) {
-        if (remain <= 0) { activeIdx = i; break; }
-        if (remain < APPROACH_LINES[i].length) { activeIdx = i; break; }
-        remain -= APPROACH_LINES[i].length; activeIdx = i;
+        if (remain <= 0) {
+            activeIdx = i;
+            break;
+        }
+        if (remain < APPROACH_LINES[i].length) {
+            activeIdx = i;
+            break;
+        }
+        remain -= APPROACH_LINES[i].length;
+        activeIdx = i;
     }
 
     const reduced = usePrefersReducedMotion();
@@ -232,7 +255,9 @@ function DevScrollCodeSection() {
                     </span>
                     <div className="mt-4 sm:mt-6">
                         <EditorFrame>
-                            {APPROACH_LINES.map((t, i) => <CodeLine key={i} text={t} index={i} active={false} />)}
+                            {APPROACH_LINES.map((t, i) => (
+                                <CodeLine key={i} text={t} index={i} active={false} />
+                            ))}
                         </EditorFrame>
                         <p className="mt-3 sm:mt-4 text-[11px] sm:text-xs text-zinc-400">Du concept au code, chaque détail compte.</p>
                     </div>
@@ -241,13 +266,9 @@ function DevScrollCodeSection() {
         );
     }
 
-    // === version même effet, distance de scroll augmentée ===
+    // Version longue distance
     return (
-        <section
-            id="dev"
-            ref={sectionRef}
-            className="relative min-h-[320vh] sm:min-h-[420vh] md:min-h-[500vh] w-full text-white"
-        >
+        <section id="dev" ref={sectionRef} className="relative min-h-[320vh] sm:min-h-[420vh] md:min-h-[500vh] w-full text-white">
             <div
                 className="sticky top-0 z-10 flex min-h-[100svh] w-full flex-col items-center justify-center px-3 sm:px-4"
                 style={{ paddingTop: "env(safe-area-inset-top)" }}
@@ -259,12 +280,7 @@ function DevScrollCodeSection() {
                 </div>
                 <EditorFrame>
                     {visible.map((t, i) => (
-                        <CodeLine
-                            key={i}
-                            text={t}
-                            index={i}
-                            active={i === activeIdx && t.length < APPROACH_LINES[i].length}
-                        />
+                        <CodeLine key={i} text={t} index={i} active={i === activeIdx && t.length < APPROACH_LINES[i].length} />
                     ))}
                 </EditorFrame>
                 <p className="mt-3 sm:mt-4 text-[11px] text-zinc-400">Du concept au code, chaque détail compte.</p>
@@ -277,15 +293,109 @@ function DevScrollCodeSection() {
 }
 
 /* =========================================================
-   Services / Works / Contact / Footer (identiques sauf micro-polish)
+   Services — contenu enrichi + “s’allume” à l’arrivée
    ========================================================= */
+const SERVICES = [
+    {
+        k: "01",
+        title: "Design & conception",
+        tag: "Interfaces claires",
+        kicker: "UI/UX, identité, prototypes",
+        desc:
+            "On part de votre usage réel : parcours simples, hiérarchie limpide et micro-interactions utiles. Identité sobre, design system épuré et prototypes cliquables pour valider vite et bien.",
+        pillars: ["Wireframes → prototypes", "Design system minimal", "Accessibilité & motion discret"],
+    },
+    {
+        k: "02",
+        title: "Développement web",
+        tag: "Code rapide et durable",
+        kicker: "React/Next, Tailwind, TypeScript",
+        desc:
+            "Sites et portails performants, maintenables et élégants. Structure typée, SEO technique propre, formulaires robustes, i18n, et intégrations back-office sans friction.",
+        pillars: ["SSR/SSG au besoin", "SEO & perfs (LCP/CLS)", "Auth, formulaires, i18n"],
+    },
+    {
+        k: "03",
+        title: "Applications desktop",
+        tag: "Efficience au quotidien",
+        kicker: ".NET, WPF, EF Core",
+        desc:
+            "Outils métier rapides et fiables : MVVM propre, bases solides, imports/exports Excel et vues optimisées pour le travail réel. Focus sur stabilité, ergonomie et vitesse.",
+        pillars: ["MVVM testable", "SQL/EF Core, offline-first", "Import/Export Excel, reporting"],
+    },
+    {
+        k: "04",
+        title: "Automatisation",
+        tag: "Gain de temps, contrôle total",
+        kicker: "Excel, Power Automate, Python",
+        desc:
+            "On automatise ce qui vous prend du temps : connecteurs, scripts, flux approuvés. Moins d’erreurs, plus de traçabilité — des process qui roulent seuls.",
+        pillars: ["Connecteurs & APIs", "Nettoyage/ETL léger", "Workflows traçables"],
+    },
+];
+
+const cardVariants = {
+    initial: { opacity: 0.6, scale: 0.98, filter: "brightness(0.9)" as any },
+    active: { opacity: 1, scale: 1.0, filter: "brightness(1.05)" as any },
+};
+
+function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
+    const ref = React.useRef<HTMLDivElement | null>(null);
+    const inView = useInView(ref, { margin: "-15% 0% -15% 0%", amount: 0.5 });
+    const reduced = usePrefersReducedMotion();
+
+    return (
+        <motion.article
+            ref={ref}
+            initial="initial"
+            animate={inView ? "active" : "initial"}
+            variants={cardVariants}
+            transition={
+                reduced
+                    ? { duration: 0 }
+                    : { type: "spring", stiffness: 220, damping: 26, mass: 0.9, delay: 0.05 * i }
+            }
+            whileHover={!reduced ? { y: -4, scale: 1.01, filter: "brightness(1.15)" as any } : {}}
+            className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6"
+        >
+            {/* glow */}
+            <motion.div
+                aria-hidden
+                className="pointer-events-none absolute inset-0"
+                style={{
+                    background:
+                        "radial-gradient(900px 220px at 50% -10%, rgba(130,80,255,0.20), transparent 55%)",
+                }}
+                animate={{ opacity: inView ? 1 : 0 }}
+                transition={{ duration: reduced ? 0 : 0.6, delay: reduced ? 0 : 0.05 }}
+            />
+
+            <div className="mb-1.5 flex items-center justify-between">
+                {/* → numéro sans # */}
+                <div className="text-[10px] sm:text-[11px] uppercase tracking-widest text-zinc-400">
+                    {s.k}
+                </div>
+                <span className="inline-flex items-center rounded-full border border-white/10 px-2 py-0.5 text-[11px] text-zinc-200/90">
+                    {s.tag}
+                </span>
+            </div>
+
+            <div className="text-xs uppercase tracking-wide text-violet-300/80">{s.kicker}</div>
+            <h3 className="mt-1 text-base sm:text-lg font-medium text-white/90">{s.title}</h3>
+            <p className="mt-2 text-[13px] sm:text-sm leading-relaxed text-zinc-300">{s.desc}</p>
+
+            {s.pillars?.length > 0 && (
+                <ul className="mt-3 space-y-1.5">
+                    {s.pillars.map((p, idx) => (
+                        <li key={idx} className="text-[13px] sm:text-sm text-zinc-400">• {p}</li>
+                    ))}
+                </ul>
+            )}
+        </motion.article>
+    );
+}
+
 function ServicesSection() {
-    const cards = [
-        { k: "01", title: "Design & conception", bullets: ["UI/UX, identité, protos", "Design system épuré"], tag: "Interfaces claires" },
-        { k: "02", title: "Développement web", bullets: ["React/Next, Tailwind, TS", "Sites vitrines & portails"], tag: "Code rapide et durable" },
-        { k: "03", title: "Applications desktop", bullets: [".NET, WPF, EF Core", "Outils métier fluides"], tag: "Efficience au quotidien" },
-        { k: "04", title: "Automatisation", bullets: ["Excel, Power Automate, Python", "Intégrations sur mesure"], tag: "Gain de temps, contrôle total" },
-    ];
     return (
         <section id="services" className="relative w-full text-white py-12 sm:py-16">
             <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6">
@@ -293,16 +403,11 @@ function ServicesSection() {
                     <h2 className="text-xl sm:text-2xl font-semibold text-white">Nos services</h2>
                     <span className="text-xs text-zinc-500">essentiel et structuré</span>
                 </div>
-                <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-                    {cards.map((c) => (
-                        <div key={c.k} className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5 hover:border-violet-400/30 transition">
-                            <div className="mb-1.5 text-[10px] sm:text-[11px] uppercase tracking-widest text-zinc-400">{c.k}</div>
-                            <h3 className="text-base sm:text-lg font-medium text-white/90">{c.title}</h3>
-                            <ul className="mt-2 sm:mt-3 space-y-1.5 text-[13px] sm:text-sm text-zinc-300">
-                                {c.bullets.map((b, i) => (<li key={i} className="list-disc pl-4">{b}</li>))}
-                            </ul>
-                            <p className="mt-3 text-xs text-violet-300">{c.tag}</p>
-                        </div>
+
+                {/* → 2 colonnes dès sm et on garde 2 à lg */}
+                <div className="grid gap-5 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2">
+                    {SERVICES.map((s, i) => (
+                        <ServiceCard key={s.k} s={s} i={i} />
                     ))}
                 </div>
             </div>
@@ -310,6 +415,9 @@ function ServicesSection() {
     );
 }
 
+/* =========================================================
+   Works / Contact / Footer
+   ========================================================= */
 function WorksSection() {
     const works = [
         { t: "Site vitrine premium", d: "Next.js, Tailwind, Motion", href: "#", year: "2025" },
@@ -327,7 +435,11 @@ function WorksSection() {
                 </div>
                 <div className="grid gap-4 sm:gap-5 grid-cols-1 xs:grid-cols-2 lg:grid-cols-3">
                     {works.map((w, i) => (
-                        <a key={i} href={w.href} className="group rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5 hover:border-violet-400/30 transition">
+                        <a
+                            key={i}
+                            href={w.href}
+                            className="group rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5 hover:border-violet-400/30 transition"
+                        >
                             <div className="mb-3 sm:mb-4 h-36 sm:h-40 w-full overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-zinc-800/60 to-zinc-900/60" />
                             <div className="flex items-center justify-between">
                                 <h3 className="text-base sm:text-lg font-medium text-white/90 group-hover:text-white">{w.t}</h3>
@@ -350,10 +462,27 @@ function ContactSection() {
                 <p className="mt-2 text-sm sm:text-base text-zinc-300">Parlez-nous de votre projet. Réponse rapide et conseils concrets.</p>
                 <form className="mt-5 sm:mt-6 grid gap-4" action="mailto:hello@smartflow.dev" method="post" encType="text/plain">
                     <div className="grid gap-4 sm:grid-cols-2">
-                        <input name="nom" placeholder="Votre nom" className="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-violet-400/40" required />
-                        <input name="email" type="email" inputMode="email" placeholder="Votre email" className="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-violet-400/40" required />
+                        <input
+                            name="nom"
+                            placeholder="Votre nom"
+                            className="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-violet-400/40"
+                            required
+                        />
+                        <input
+                            name="email"
+                            type="email"
+                            inputMode="email"
+                            placeholder="Votre email"
+                            className="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-violet-400/40"
+                            required
+                        />
                     </div>
-                    <textarea name="message" placeholder="Décrivez brièvement votre besoin…" className="min-h-[140px] rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-violet-400/40" required />
+                    <textarea
+                        name="message"
+                        placeholder="Décrivez brièvement votre besoin…"
+                        className="min-h-[140px] rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-violet-400/40"
+                        required
+                    />
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                         <button type="submit" className="rounded-xl border border-white/15 bg-white/10 px-5 py-3 text-sm text-white hover:bg-white/15 w-full sm:w-auto">
                             Envoyer
@@ -378,9 +507,15 @@ function Footer() {
                         <p className="mt-2 text-zinc-400 text-xs sm:text-sm">Design & Développement d’expériences numériques.</p>
                     </div>
                     <div className="flex gap-5 sm:gap-6 text-sm">
-                        <a href="#services" className="text-zinc-300 hover:text-white">Services</a>
-                        <a href="#works" className="text-zinc-300 hover:text-white">Réalisations</a>
-                        <a href="#contact" className="text-zinc-300 hover:text-white">Contact</a>
+                        <a href="#services" className="text-zinc-300 hover:text-white">
+                            Services
+                        </a>
+                        <a href="#works" className="text-zinc-300 hover:text-white">
+                            Réalisations
+                        </a>
+                        <a href="#contact" className="text-zinc-300 hover:text-white">
+                            Contact
+                        </a>
                     </div>
                 </div>
                 <div className="mt-6 sm:mt-8 border-t border-white/10 pt-5 sm:pt-6 text-[11px] sm:text-xs text-zinc-500">
