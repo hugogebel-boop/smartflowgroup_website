@@ -343,8 +343,8 @@ function DecoShape({
     color,
     tint,
     active,
-    sizePct = 30,   // % largeur de la card
-    intensity = 1,  // 1 = normal, 1.2 = très lumineux
+    sizePct = 30,
+    intensity = 1.15,  // boost léger
 }: {
     shape: "bolt" | "wave" | "diamond" | "hex";
     color: string;
@@ -358,100 +358,66 @@ function DecoShape({
     const content = (() => {
         switch (shape) {
             case "bolt":
-                return (
-                    <g>
-                        <path d="M60 10 L35 55 H60 L30 110 L90 50 H60 L90 10 Z" {...baseProps} />
-                        <path d="M60 10 L35 55 H60 L30 110 L90 50 H60 L90 10 Z" fill={tint} />
-                    </g>
-                );
+                return (<g><path d="M60 10 L35 55 H60 L30 110 L90 50 H60 L90 10 Z" {...baseProps} /><path d="M60 10 L35 55 H60 L30 110 L90 50 H60 L90 10 Z" fill={tint} /></g>);
             case "wave":
-                return (
-                    <g>
-                        <path d="M10 70 C30 40, 70 100, 90 70 S150 40, 170 70" {...baseProps} />
-                        <path d="M10 70 C30 40, 70 100, 90 70 S150 40, 170 70" stroke={color} strokeOpacity="0.25" strokeWidth={16} />
-                    </g>
-                );
+                return (<g><path d="M10 70 C30 40, 70 100, 90 70 S150 40, 170 70" {...baseProps} /><path d="M10 70 C30 40, 70 100, 90 70 S150 40, 170 70" stroke={color} strokeOpacity="0.25" strokeWidth={16} /></g>);
             case "diamond":
-                return (
-                    <g>
-                        <polygon points="100,20 40,80 100,140 160,80" {...baseProps} />
-                        <polygon points="100,20 40,80 100,140 160,80" fill={tint} />
-                    </g>
-                );
+                return (<g><polygon points="100,20 40,80 100,140 160,80" {...baseProps} /><polygon points="100,20 40,80 100,140 160,80" fill={tint} /></g>);
             case "hex":
             default:
-                return (
-                    <g>
-                        <polygon points="100,20 55,45 55,95 100,120 145,95 145,45" {...baseProps} />
-                        <polygon points="100,20 55,45 55,95 100,120 145,95 145,45" fill={tint} />
-                    </g>
-                );
+                return (<g><polygon points="100,20 55,45 55,95 100,120 145,95 145,45" {...baseProps} /><polygon points="100,20 55,45 55,95 100,120 145,95 145,45" fill={tint} /></g>);
         }
     })();
 
-    // coin bas-droit + taille explicite
     const widthPx = `min(${sizePct}%, 120px)`;
     const heightPx = `min(${sizePct}%, 120px)`;
 
-    // courbe super fluide (sans saccades), avec légère sur-intensité qui se stabilise
-    const ease = [0.22, 1, 0.36, 1] as const;
-    const strong = (alpha: number) => Math.min(1, alpha * intensity);
-    const glowA = `${Math.round(80 * intensity)}`;  // 0..80 hex
-    const glowB = `${Math.round(66 * intensity)}`;
-    const glowC = `${Math.round(52 * intensity)}`;
+    // segments: long plateau (faible), puis hop -> allumé
+    const easeSegments = [
+        [0.22, 1, 0.36, 1], // segment 0 -> 0.9 (lent, fluide)
+        [0.15, 0.85, 0.2, 1], // snap final 0.9 -> 1
+    ] as const;
+
+    const strong = (a: number) => Math.min(1, a * intensity);
 
     return (
         <div
             className="absolute pointer-events-none z-0"
             style={{ right: "0.5rem", bottom: "0.5rem", width: widthPx, height: heightPx }}
         >
-            {/* Bloom radial très doux derrière (ne couvre pas la card entière) */}
+            {/* bloom radial discret (reste soft, monte au ‘hop’) */}
             <motion.div
-                className="absolute inset-0"
-                style={{
-                    background: `radial-gradient(120% 120% at 70% 70%, ${color}${glowC} 0%, transparent 60%)`,
-                    borderRadius: "12px",
-                    filter: `blur(6px)`,
-                }}
-                initial={{ opacity: 0.0, scale: 0.9 }}
-                animate={active ? { opacity: strong(0.55), scale: 1 } : { opacity: 0.0, scale: 0.9 }}
-                transition={{ duration: 1.0, ease }}
+                className="absolute inset-0 rounded-xl"
+                style={{ background: `radial-gradient(120% 120% at 70% 70%, ${color}40 0%, transparent 60%)`, filter: "blur(8px)" }}
+                initial={{ opacity: 0.0, scale: 0.95 }}
+                animate={active ? { opacity: [0.0, 0.12, strong(0.45)], scale: [0.95, 0.98, 1.0] } : { opacity: 0.0, scale: 0.95 }}
+                transition={{ duration: 1.6, times: [0, 0.88, 1], ease: [easeSegments[0], easeSegments[1]] }}
             />
 
-            {/* Le “tube” (SVG) — montée d’intensité + léger settle, sans clignoter */}
+            {/* tube néon : plateau faible → snap lumineux → stabilisation */}
             <motion.svg
                 width="100%"
                 height="100%"
                 viewBox="0 0 200 160"
                 preserveAspectRatio="xMidYMid meet"
-                initial={{
-                    opacity: 0.08,
-                    filter: `drop-shadow(0 0 0 ${color}00)`,
-                    transform: "scale(0.96)",
-                    transformOrigin: "bottom right",
-                }}
+                initial={{ opacity: 0.08, filter: `drop-shadow(0 0 0 ${color}00)`, transform: "scale(0.96)", transformOrigin: "bottom right" }}
                 animate={
                     active
                         ? {
-                            // montée → sur-intensité → stabilisation
-                            opacity: [0.08, strong(0.85), strong(0.78)],
+                            opacity: [0.08, 0.14, strong(0.9)],
                             filter: [
                                 `drop-shadow(0 0 0 ${color}00)`,
-                                `drop-shadow(0 0 14px ${color}${glowA}) drop-shadow(0 0 26px ${color}${glowB})`,
-                                `drop-shadow(0 0 12px ${color}${glowB}) drop-shadow(0 0 22px ${color}${glowC})`,
+                                `drop-shadow(0 0 6px ${color}33)`,
+                                `drop-shadow(0 0 16px ${color}AA) drop-shadow(0 0 28px ${color}80)`,
                             ],
-                            transform: ["scale(0.96)", "scale(1.005)", "scale(1.0)"],
+                            transform: ["scale(0.96)", "scale(0.985)", "scale(1.0)"],
                         }
-                        : {
-                            opacity: 0.08,
-                            filter: `drop-shadow(0 0 0 ${color}00)`,
-                            transform: "scale(0.96)",
-                        }
+                        : { opacity: 0.08, filter: `drop-shadow(0 0 0 ${color}00)`, transform: "scale(0.96)" }
                 }
                 transition={{
-                    duration: 1.15,
-                    ease,
-                    times: [0, 0.72, 1],
+                    duration: 1.0,
+                    times: [0, 0.75, 1],          // 90% du temps “faible”, puis hop à la fin
+                    ease: [easeSegments[0], easeSegments[1]],
                 }}
             >
                 {content}
