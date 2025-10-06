@@ -32,32 +32,127 @@ function useIsTouchDevice() {
 }
 
 /* =========================================================
-   Background — “Aurora + Grain” (style vite.dev)
+   Background — Color Mist (subtle, fast drift)
    ========================================================= */
 function SiteBackground() {
+    const reduced = usePrefersReducedMotion();
+
+    // Knobs
+    const SPEED = 45;           // plus petit = plus rapide (sec A/R)
+    const AMP_X = 360;          // px
+    const AMP_Y = 240;          // px
+    const POWER = 1.28;         // 1.00–1.40 → boost d’intensité
+    const SAT = 1.18;           // saturation globale
+    const BRIGHT = 1.06;        // brightness globale
+
+    // petit helper alpha
+    const a = (x: number) => Math.min(1, x * POWER);
+
     return (
         <>
-            {/* base gradient */}
-            <div className="fixed inset-0 -z-20 bg-gradient-to-b from-[#0B0B12] via-[#0B0B12] to-black" />
+            {/* base */}
+            <div className="fixed inset-0 -z-30 bg-[#0B0B12]" />
+            <div className="fixed inset-0 -z-20 opacity-[0.05] bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.6)_1px,transparent_1px)] [background-size:22px_22px]" />
 
-            {/* dot grid */}
-            <div className="fixed inset-0 -z-20 opacity-[0.08] bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.7)_1px,transparent_1px)] [background-size:22px_22px]" />
+            {/* WRAPPER FX : boost global (saturation/brightness) */}
+            <div
+                className="fixed inset-0 -z-10 overflow-hidden"
+                style={{ filter: `saturate(${SAT}) brightness(${BRIGHT})` }}
+                aria-hidden
+            >
+                {/* Nap 1 — violet/rose (un peu plus dense au centre) */}
+                <motion.div
+                    className="absolute left-[-15%] top-[-10%] h-[70vh] w-[70vw] rounded-[9999px] pointer-events-none"
+                    style={{
+                        background:
+                            `radial-gradient(60% 60% at 50% 50%, rgba(168,85,247,${a(0.22)}) 0%, rgba(168,85,247,${a(0.10)}) 35%, rgba(168,85,247,0) 70%)`,
+                        filter: "blur(56px)",              // blur légerement ↓ → plus “présent”
+                        mixBlendMode: "screen",
+                        maskImage:
+                            "radial-gradient(70% 70% at 50% 50%, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.62) 65%, rgba(0,0,0,0) 100%)",
+                        WebkitMaskImage:
+                            "radial-gradient(70% 70% at 50% 50%, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.62) 65%, rgba(0,0,0,0) 100%)",
+                        willChange: "transform",
+                    }}
+                    animate={reduced ? {} : { x: [-AMP_X, AMP_X, -AMP_X], y: [AMP_Y, -AMP_Y, AMP_Y], scale: [0.985, 1.02, 0.985] }}
+                    transition={reduced ? {} : {
+                        x: { duration: SPEED, ease: "easeInOut", repeat: Infinity },
+                        y: { duration: SPEED * 0.9, ease: "easeInOut", repeat: Infinity },
+                        scale: { duration: SPEED * 1.4, ease: "easeInOut", repeat: Infinity },
+                    }}
+                />
 
-            {/* aurora blobs */}
-            <div aria-hidden className="fixed -z-10 inset-0 overflow-hidden">
-                <div className="absolute -top-32 -left-24 h-[46rem] w-[46rem] rounded-full blur-[120px] opacity-30 bg-[conic-gradient(from_140deg_at_50%_50%,#7c3aed_0%,#22d3ee_30%,#e879f9_60%,#7c3aed_100%)]" />
-                <div className="absolute -bottom-40 -right-24 h-[40rem] w-[40rem] rounded-full blur-[120px] opacity-25 bg-[radial-gradient(45%_45%_at_50%_50%,#22d3ee_0%,transparent_70%)]" />
+                {/* Nap 2 — cyan (renforcée un chouïa) */}
+                <motion.div
+                    className="absolute right-[-12%] top-[10%] h-[65vh] w-[60vw] rounded-[9999px] pointer-events-none"
+                    style={{
+                        background:
+                            `radial-gradient(60% 60% at 50% 50%, rgba(34,211,238,${a(0.18)}) 0%, rgba(34,211,238,${a(0.085)}) 35%, rgba(34,211,238,0) 70%)`,
+                        filter: "blur(54px)",
+                        mixBlendMode: "screen",
+                        maskImage:
+                            "radial-gradient(70% 70% at 50% 50%, rgba(0,0,0,0.88) 35%, rgba(0,0,0,0.52) 60%, rgba(0,0,0,0) 100%)",
+                        WebkitMaskImage:
+                            "radial-gradient(70% 70% at 50% 50%, rgba(0,0,0,0.88) 35%, rgba(0,0,0,0.52) 60%, rgba(0,0,0,0) 100%)",
+                        willChange: "transform",
+                    }}
+                    animate={reduced ? {} : { x: [AMP_X * 1.2, -AMP_X * 1.2, AMP_X * 1.2], y: [-AMP_Y, AMP_Y, -AMP_Y] }}
+                    transition={reduced ? {} : {
+                        x: { duration: SPEED * 1.1, ease: "easeInOut", repeat: Infinity },
+                        y: { duration: SPEED * 0.95, ease: "easeInOut", repeat: Infinity },
+                    }}
+                />
+
+                {/* Nap 3 — magenta (profondeur) */}
+                <motion.div
+                    className="absolute left-[5%] bottom-[-12%] h-[60vh] w-[55vw] rounded-[9999px] pointer-events-none"
+                    style={{
+                        background:
+                            `radial-gradient(60% 60% at 50% 50%, rgba(232,121,249,${a(0.14)}) 0%, rgba(232,121,249,${a(0.06)}) 35%, rgba(232,121,249,0) 70%)`,
+                        filter: "blur(66px)",
+                        mixBlendMode: "screen",
+                        maskImage:
+                            "radial-gradient(70% 70% at 50% 50%, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.58) 65%, rgba(0,0,0,0) 100%)",
+                        WebkitMaskImage:
+                            "radial-gradient(70% 70% at 50% 50%, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.58) 65%, rgba(0,0,0,0) 100%)",
+                        willChange: "transform",
+                    }}
+                    animate={reduced ? {} : { x: [-AMP_X * 0.8, AMP_X * 0.8, -AMP_X * 0.8], y: [0, AMP_Y * 0.6, 0] }}
+                    transition={reduced ? {} : {
+                        x: { duration: SPEED * 0.9, ease: "easeInOut", repeat: Infinity },
+                        y: { duration: SPEED * 1.2, ease: "easeInOut", repeat: Infinity },
+                    }}
+                />
+
+                {/* Nap 4 — STREAK large et très faible (donne de la “puissance” perçue) */}
+                <motion.div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                        background:
+                            `radial-gradient(80% 100% at 20% 50%, rgba(168,85,247,${a(0.05)}) 0%, rgba(56,189,248,${a(0.04)}) 30%, rgba(232,121,249,${a(0.035)}) 55%, rgba(0,0,0,0) 70%)`,
+                        mixBlendMode: "screen",
+                        filter: "blur(90px)",
+                        willChange: "transform",
+                        transform: "translateZ(0)",
+                    }}
+                    animate={reduced ? {} : { x: [-AMP_X * 1.4, AMP_X * 1.4, -AMP_X * 1.4] }}
+                    transition={reduced ? {} : { duration: Math.max(12, SPEED * 0.6), ease: "easeInOut", repeat: Infinity }}
+                />
             </div>
 
-            {/* grain (CSS-only) */}
-            <div
+            {/* grain */}
+            <motion.div
                 aria-hidden
-                className="fixed inset-0 -z-10 opacity-[0.07] mix-blend-overlay pointer-events-none"
+                className="fixed inset-0 -z-5 mix-blend-overlay pointer-events-none"
                 style={{
+                    opacity: 0.06,
                     backgroundImage:
                         "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.5'/></svg>\")",
                     backgroundSize: "160px 160px",
+                    willChange: "opacity",
                 }}
+                animate={reduced ? {} : { opacity: [0.05, 0.08, 0.05] }}
+                transition={reduced ? {} : { duration: 14, ease: "easeInOut", repeat: Infinity }}
             />
         </>
     );
@@ -351,7 +446,7 @@ const SERVICES = [
         k: "03",
         title: "Applications desktop",
         tag: "Efficience au quotidien",
-        kicker: ".NET, WPF, EF Core",
+        kicker: "WPF, .NET, EF Core",
         desc:
             "Outils métier rapides et fiables : MVVM propre, bases solides, imports/exports Excel et vues optimisées pour le travail réel. Focus sur stabilité, ergonomie et vitesse.",
         pillars: ["MVVM testable", "SQL/EF Core, offline-first", "Import/Export Excel, reporting"],
@@ -619,10 +714,11 @@ function ServicesSection() {
    Projets — cartes avec halo néon (jaune/rouge/vert)
    ========================================================= */
 type GlowColor = "yellow" | "red" | "green";
+// par ceci (violet discret partout) :
 const glowHex: Record<GlowColor, string> = {
-    yellow: "#f59e0b",
-    red: "#f43f5e",
-    green: "#10b981",
+    yellow: "#9b6bff",
+    red: "#9b6bff",
+    green: "#9b6bff",
 };
 
 function ProjectCard({
