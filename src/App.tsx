@@ -215,7 +215,6 @@ function DevScrollCodeSection() {
     const budget = Math.round(totalChars * Math.max(0, Math.min(1, p)));
     const visible = useMemo(() => sliceByBudget(APPROACH_LINES, budget), [budget]);
 
-    // active caret line
     let remain = budget, activeIdx = 0;
     for (let i = 0; i < APPROACH_LINES.length; i++) {
         if (remain <= 0) { activeIdx = i; break; }
@@ -242,10 +241,17 @@ function DevScrollCodeSection() {
         );
     }
 
-    // sticky (hauteurs optimisées mobile)
+    // === version même effet, distance de scroll augmentée ===
     return (
-        <section id="dev" ref={sectionRef} className="relative min-h-[200vh] sm:min-h-[240vh] md:min-h-[280vh] w-full text-white">
-            <div className="sticky top-0 z-10 flex min-h-[100svh] w-full flex-col items-center justify-center px-3 sm:px-4" style={{ paddingTop: "env(safe-area-inset-top)" }}>
+        <section
+            id="dev"
+            ref={sectionRef}
+            className="relative min-h-[320vh] sm:min-h-[420vh] md:min-h-[500vh] w-full text-white"
+        >
+            <div
+                className="sticky top-0 z-10 flex min-h-[100svh] w-full flex-col items-center justify-center px-3 sm:px-4"
+                style={{ paddingTop: "env(safe-area-inset-top)" }}
+            >
                 <div className="mx-auto mb-3 sm:mb-4 w-full max-w-[min(92vw,48rem)] px-1 sm:px-2">
                     <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] tracking-widest text-zinc-200 uppercase">
                         Notre approche
@@ -263,8 +269,9 @@ function DevScrollCodeSection() {
                 </EditorFrame>
                 <p className="mt-3 sm:mt-4 text-[11px] text-zinc-400">Du concept au code, chaque détail compte.</p>
             </div>
-            {/* spacer for scroll progression */}
-            <div className="h-[120vh] sm:h-[170vh] md:h-[210vh]" />
+
+            {/* spacer pour étendre le scroll total */}
+            <div className="h-[200vh] sm:h-[280vh] md:h-[350vh]" />
         </section>
     );
 }
