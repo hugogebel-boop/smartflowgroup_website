@@ -18,6 +18,18 @@ function usePrefersReducedMotion() {
     }, []);
     return reduced;
 }
+function useIsTouchDevice() {
+    const [touch, setTouch] = useState(false);
+    useEffect(() => {
+        if (!isClient) return;
+        const mq = window.matchMedia("(hover: none), (pointer: coarse)");
+        const update = () => setTouch(mq.matches);
+        update();
+        mq.addEventListener?.("change", update);
+        return () => mq.removeEventListener?.("change", update);
+    }, []);
+    return touch;
+}
 
 /* =========================================================
    Background — “Aurora + Grain” (style vite.dev)
@@ -457,61 +469,47 @@ function DecoShape({
 function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
     const ref = React.useRef<HTMLDivElement | null>(null);
 
-    // → déclenche le ZOOM quand la carte entre dans le viewport (scroll)
+    // ZOOM (scroll)
     const inView = useInView(ref, { margin: "-20% 0% -20% 0%", amount: 0.5 });
 
-    // → déclenche le NÉON seulement au survol (hover/focus/tap)
+    // HOVER (desktop)
     const [hovered, setHovered] = React.useState(false);
 
+    // Device & accessibilité
+    const isTouch = useIsTouchDevice();
     const reduced = usePrefersReducedMotion();
+
+    // 👉 mobile = allumé quand inView (zoom) ; desktop = allumé seulement en hover
+    const neonActive = isTouch ? inView : hovered;
 
     return (
         <motion.article
             ref={ref}
-            // NÉON: événements de survol
-            onHoverStart={() => setHovered(true)}
-            onHoverEnd={() => setHovered(false)}
-            // accessibilité clavier
-            onFocus={() => setHovered(true)}
-            onBlur={() => setHovered(false)}
-            // mobile (tap = allume, relâche = éteint)
-            onTapStart={() => setHovered(true)}
-            onTapCancel={() => setHovered(false)}
-            onTap={() => setHovered(false)}
-
-            // ZOOM: uniquement via le scroll (inView)
+            // événements hover (desktop) + focus clavier
+            onHoverStart={() => !isTouch && setHovered(true)}
+            onHoverEnd={() => !isTouch && setHovered(false)}
+            onFocus={() => !isTouch && setHovered(true)}
+            onBlur={() => !isTouch && setHovered(false)}
+            // sur mobile on ne force rien au tap (c’est inView qui drive le néon)
             initial={{ opacity: 0.75, scale: 0.97, filter: "brightness(0.92)" }}
             animate={
                 inView
                     ? { opacity: 1, scale: 1.0, filter: "brightness(1)" }
                     : { opacity: 0.75, scale: 0.97, filter: "brightness(0.92)" }
             }
-            transition={
-                reduced
-                    ? { duration: 0 }
-                    : { type: "spring", stiffness: 220, damping: 26, delay: 0.05 * i }
-            }
-
-            // On peut garder un léger lift en hover, sans rescale (zoom déjà géré par inView)
-            whileHover={!reduced ? { y: -4 } : {}}
-
+            transition={reduced ? { duration: 0 } : { type: "spring", stiffness: 220, damping: 26, delay: 0.05 * i }}
+            whileHover={!reduced && !isTouch ? { y: -4 } : {}}
             className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-7"
         >
-            {/* NÉON — actif UNIQUEMENT quand hovered === true */}
-            <DecoShape
-                shape={s.theme.shape}
-                color={s.theme.color}
-                tint={s.theme.tint}
-                active={hovered}
-                sizePct={32}
-            />
+            {/* Néon : activé par hover (desktop) ou par inView (mobile) */}
+            <DecoShape shape={s.theme.shape} color={s.theme.color} tint={s.theme.tint} active={neonActive} sizePct={32} />
 
-            {/* Contour : lueur seulement au hover */}
+            {/* Contour : lueur en même temps que le néon */}
             <div
                 aria-hidden
                 className="absolute inset-0 rounded-2xl pointer-events-none"
                 style={{
-                    boxShadow: hovered
+                    boxShadow: neonActive
                         ? `inset 0 0 0 1px rgba(255,255,255,0.10), 0 0 24px 0 ${s.theme.color}22`
                         : "inset 0 0 0 1px rgba(255,255,255,0.08)",
                     transition: "box-shadow 260ms ease",
