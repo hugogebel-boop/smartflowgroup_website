@@ -635,7 +635,7 @@ const SERVICES = [
         k: "03",
         title: "Applications métier",
         tag: "Performance & fiabilité",
-        kicker: ".NET, WPF, EF Core",
+        kicker: "WPF, .NET, EF Core",
         desc:
             "Des outils internes conçus sur mesure pour améliorer vos processus quotidiens. Architecture stable, interfaces claires et fiabilité sur le long terme.",
         pillars: [

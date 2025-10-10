@@ -6,3 +6,35 @@
 html, body, #root {
     height: 100%;
 }
+/* ===== Scroll fluide global ===== */
+:root {
+    /* Ajuste si ton header est plus haut */
+    --header-offset: 64px;
+    scroll-behavior: smooth;
+}
+
+/* Respecte l’accessibilité */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        scroll-behavior: auto;
+    }
+}
+
+/* ===== Marge d’ancrage pour éviter que le titre passe sous le header ===== */
+/* S’applique à toutes les ancres (sections identifiées par id) */
+[id] {
+    scroll-margin-top: var(--header-offset);
+}
+
+/* (Optionnel) offset différent selon viewport */
+@media (min-width: 640px) {
+    :root {
+        --header-offset: 72px;
+    }
+}
+
+@media (min-width: 1024px) {
+    :root {
+        --header-offset: 80px;
+    }
+}
