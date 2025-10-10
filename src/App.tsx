@@ -600,48 +600,64 @@ function DevScrollCodeSection() {
 }
 
 /* =========================================================
-   Services — déco néon optimisée (low-blur sur écrans étroits)
+   Services — version finale SmartFlow
    ========================================================= */
 const SERVICES = [
     {
         k: "01",
-        title: "Design & conception",
-        tag: "Interfaces claires",
-        kicker: "UI/UX, identité, prototypes",
+        title: "Design & identité digitale",
+        tag: "Clarté visuelle",
+        kicker: "UI/UX, branding, direction visuelle",
         desc:
-            "On part de votre usage réel : parcours simples, hiérarchie limpide et micro-interactions utiles. Identité sobre, design system épuré et prototypes cliquables pour valider vite et bien.",
-        pillars: ["Wireframes → prototypes", "Design system minimal", "Accessibilité & motion discret"],
-        theme: { color: "#a855f7", tint: "rgba(168,85,247,0.25)", shape: "diamond" }, // violet
+            "Nous concevons des interfaces et des identités sobres, lisibles et durables. Chaque élément visuel est pensé pour renforcer votre image et guider vos utilisateurs avec clarté.",
+        pillars: [
+            "Identité visuelle et direction artistique",
+            "Interfaces nettes et lisibles",
+            "Maquettes et prototypes interactifs",
+        ],
+        theme: { color: "#a855f7", tint: "rgba(168,85,247,0.25)", shape: "diamond" },
     },
     {
         k: "02",
-        title: "Développement web",
-        tag: "Code rapide et durable",
-        kicker: "React/Next, Tailwind, TypeScript",
+        title: "Sites web",
+        tag: "Expérience soignée",
+        kicker: "React, Next.js, Tailwind",
         desc:
-            "Sites et portails performants, maintenables et élégants. Structure typée, SEO technique propre, formulaires robustes, i18n, et intégrations back-office sans friction.",
-        pillars: ["SSR/SSG au besoin", "SEO & perfs (LCP/CLS)", "Auth, formulaires, i18n"],
-        theme: { color: "#38bdf8", tint: "rgba(56,189,248,0.25)", shape: "wave" }, // bleu
+            "Des sites élégants et réactifs, construits pour durer. Du code propre, des transitions fluides et une attention particulière portée à l’expérience utilisateur et au contenu.",
+        pillars: [
+            "Développement web moderne et léger",
+            "Expérience utilisateur et interface responsive",
+            "Optimisation du contenu et du référencement",
+        ],
+        theme: { color: "#38bdf8", tint: "rgba(56,189,248,0.25)", shape: "wave" },
     },
     {
         k: "03",
-        title: "Applications desktop",
-        tag: "Efficience au quotidien",
-        kicker: "WPF, .NET, EF Core",
+        title: "Applications métier",
+        tag: "Performance & fiabilité",
+        kicker: ".NET, WPF, EF Core",
         desc:
-            "Outils métier rapides et fiables : MVVM propre, bases solides, imports/exports Excel et vues optimisées pour le travail réel. Focus sur stabilité, ergonomie et vitesse.",
-        pillars: ["MVVM testable", "SQL/EF Core, offline-first", "Import/Export Excel, reporting"],
-        theme: { color: "#22c55e", tint: "rgba(34,197,94,0.25)", shape: "hex" }, // vert
+            "Des outils internes conçus sur mesure pour améliorer vos processus quotidiens. Architecture stable, interfaces claires et fiabilité sur le long terme.",
+        pillars: [
+            "Outils internes adaptés à vos besoins",
+            "Navigation claire et productivité accrue",
+            "Suivi et exploitation simplifiés",
+        ],
+        theme: { color: "#22c55e", tint: "rgba(34,197,94,0.25)", shape: "hex" },
     },
     {
         k: "04",
-        title: "Automatisation",
-        tag: "Gain de temps, contrôle total",
-        kicker: "Excel, Power Automate, Python",
+        title: "Outils d’automatisation",
+        tag: "Processus autonomes",
+        kicker: "Excel, Python, PowerShell",
         desc:
-            "On automatise ce qui vous prend du temps : connecteurs, scripts, flux approuvés. Moins d’erreurs, plus de traçabilité et des process qui roulent seuls.",
-        pillars: ["Connecteurs & APIs", "Nettoyage/ETL léger", "Workflows traçables"],
-        theme: { color: "#eab308", tint: "rgba(234,179,8,0.25)", shape: "bolt" }, // jaune ⚡
+            "Nous mettons en place des scripts et automatisations fiables pour connecter vos outils et structurer vos données. Des processus stables, qui tournent seuls et restent sous contrôle.",
+        pillars: [
+            "Scripts sur mesure pour vos besoins",
+            "Processus efficaces et traçables",
+            "Intégrations fluides entre vos outils",
+        ],
+        theme: { color: "#eab308", tint: "rgba(234,179,8,0.25)", shape: "bolt" },
     },
 ] as const;
 
