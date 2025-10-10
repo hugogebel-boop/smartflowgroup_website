@@ -97,9 +97,23 @@ export default function ProjectsWeb() {
                                         href={p.url}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
+                                        className="group inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
                                     >
-                                        Voir le site 
+                                        Voir le site
+                                        <svg
+                                            aria-hidden="true"
+                                            viewBox="0 0 24 24"
+                                            className="h-[14px] w-[14px] -mr-0.5 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                                        >
+                                            <path
+                                                d="M7 17L17 7M9 7h8v8"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="1.25"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            />
+                                        </svg>
                                     </a>
                                 </div>
                             </div>
