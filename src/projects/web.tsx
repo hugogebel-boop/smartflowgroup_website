@@ -44,7 +44,7 @@ export default function ProjectsWeb() {
             client: "Agence de voyages sur mesure",
             excerpt:
                 "Identité raffinée, direction artistique complète et site vitrine fluide. Navigation claire, typographie élégante, design immersif.",
-            image: "/public/assets/ame-du-monde.png",
+            image: "/assets/ame-du-monde.png",
             url: "https://amedumonde.ch",
         },
         {
@@ -53,7 +53,7 @@ export default function ProjectsWeb() {
             client: "Association EPFL",
             excerpt:
                 "Site événementiel pour le voyage d’étude du Génie Civil 2025. Étapes, partenaires et équipe dans une interface épurée et mobile-first.",
-            image: "/public/assets/travel-gc.png",
+            image: "/assets/travel-gc.png",
             url: "https://travelgc.ch",
         },
     ] as const;
