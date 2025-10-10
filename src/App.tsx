@@ -1,5 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useScroll, useMotionValueEvent, useInView } from "framer-motion";
+import ProjectsWeb from "./projects/web";
+import ProjectsApps from "./projects/apps";
+import ProjectsAutomation from "./projects/automation";
+
 
 /* =========================================================
    Constantes (hors composants pour éviter les recréations)
@@ -12,6 +16,26 @@ const NOISE_BG =
 /* =========================================================
    Hooks utilitaires
    ========================================================= */
+// Navigation fluide entre les sections, même depuis une autre page
+function goToHomeAndScroll(targetId: string) {
+    const current = window.location.hash;
+
+    // Fonction de scroll doux
+    const scrollToTarget = () => {
+        const el = document.getElementById(targetId);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+
+    if (current === "#/" || current === "" || current === "#") {
+        // Déjà sur la home → on scroll directement
+        scrollToTarget();
+    } else {
+        // Autre page → retour à la home puis scroll après un court délai
+        window.location.hash = "#/";
+        setTimeout(scrollToTarget, 300);
+    }
+}
+
 function usePrefersReducedMotion() {
     const [reduced, setReduced] = useState(false);
     useEffect(() => {
@@ -232,6 +256,44 @@ function TopNav() {
     const scrolledOpacity = 0.9;
     const hoverOpacity = 1;
 
+    // --- Helper: aller à une section, depuis home ou autre page
+    const goToHomeAndScroll = (targetId: string) => {
+        const current = window.location.hash;
+        const scrollToTarget = () => {
+            const el = document.getElementById(targetId);
+            if (!el) return;
+            el.scrollIntoView({
+                behavior: reduced ? "auto" : "smooth",
+                block: "start",
+            });
+        };
+
+        if (current === "#/" || current === "" || current === "#") {
+            // Déjà sur la home → scroll direct
+            scrollToTarget();
+        } else {
+            // Autre page → revenir à la home puis scroll
+            window.location.hash = "#/";
+            setTimeout(scrollToTarget, 300);
+        }
+    };
+
+    // (optionnel) logo → remonte au hero proprement
+    const goHero = (e: React.MouseEvent) => {
+        e.preventDefault();
+        const current = window.location.hash;
+        const doScroll = () => {
+            const el = document.getElementById("hero");
+            if (el) el.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+        };
+        if (current === "#/" || current === "" || current === "#") {
+            doScroll();
+        } else {
+            window.location.hash = "#/";
+            setTimeout(doScroll, 300);
+        }
+    };
+
     return (
         <header
             className="fixed top-0 left-0 right-0 z-50"
@@ -250,7 +312,8 @@ function TopNav() {
             >
                 {/* Logo */}
                 <a
-                    href="#hero"
+                    href="#/"
+                    onClick={goHero}
                     className="text-[11px] sm:text-[12px] tracking-[0.25em] uppercase text-white/90 hover:text-white transition"
                 >
                     SmartFlow
@@ -258,17 +321,30 @@ function TopNav() {
 
                 {/* Liens Desktop */}
                 <div className="hidden sm:flex items-center gap-6 text-[14px] font-light">
-                    <a href="#dev" className="text-zinc-200 hover:text-white transition">
+                    <a
+                        href="#dev"
+                        onClick={(e) => { e.preventDefault(); goToHomeAndScroll("dev"); }}
+                        className="text-zinc-200 hover:text-white transition"
+                    >
                         Approche
                     </a>
-                    <a href="#services" className="text-zinc-200 hover:text-white transition">
+                    <a
+                        href="#services"
+                        onClick={(e) => { e.preventDefault(); goToHomeAndScroll("services"); }}
+                        className="text-zinc-200 hover:text-white transition"
+                    >
                         Services
                     </a>
-                    <a href="#works" className="text-zinc-200 hover:text-white transition">
+                    <a
+                        href="#works"
+                        onClick={(e) => { e.preventDefault(); goToHomeAndScroll("works"); }}
+                        className="text-zinc-200 hover:text-white transition"
+                    >
                         Réalisations
                     </a>
                     <a
                         href="#contact"
+                        onClick={(e) => { e.preventDefault(); goToHomeAndScroll("contact"); }}
                         className="rounded-md border border-white/15 px-3 py-1.5 text-zinc-100 hover:text-white hover:border-white/25 transition"
                     >
                         Contact
@@ -307,18 +383,46 @@ function TopNav() {
                 className="sm:hidden overflow-hidden bg-[#0B0B12]/95 backdrop-blur-md border-b border-white/10"
             >
                 <div className="grid gap-1.5 p-4 text-[15px]">
-                    <a onClick={() => setOpen(false)} href="#dev" className="block rounded-md px-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white">
+                    <a
+                        href="#dev"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            setOpen(false);
+                            setTimeout(() => goToHomeAndScroll("dev"), 120);
+                        }}
+                        className="block rounded-md px-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white"
+                    >
                         Approche
                     </a>
-                    <a onClick={() => setOpen(false)} href="#services" className="block rounded-md px-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white">
+                    <a
+                        href="#services"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            setOpen(false);
+                            setTimeout(() => goToHomeAndScroll("services"), 120);
+                        }}
+                        className="block rounded-md px-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white"
+                    >
                         Services
                     </a>
-                    <a onClick={() => setOpen(false)} href="#works" className="block rounded-md px-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white">
+                    <a
+                        href="#works"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            setOpen(false);
+                            setTimeout(() => goToHomeAndScroll("works"), 120);
+                        }}
+                        className="block rounded-md px-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white"
+                    >
                         Réalisations
                     </a>
                     <a
-                        onClick={() => setOpen(false)}
                         href="#contact"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            setOpen(false);
+                            setTimeout(() => goToHomeAndScroll("contact"), 120);
+                        }}
                         className="block rounded-md border border-white/15 px-2 py-2 text-zinc-200 hover:text-white hover:border-white/25"
                     >
                         Contact
@@ -328,6 +432,7 @@ function TopNav() {
         </header>
     );
 }
+
 
 /* =========================================================
    HERO
@@ -971,15 +1076,11 @@ function ProjectCard({
     const ref = React.useRef<HTMLAnchorElement | null>(null);
     const inView = useInView(ref, { margin: "-15% 0% -15% 0%", amount: 0.25 });
 
-    // Sur mobile (touch): actif = quand la carte est visible
-    // Sur desktop: actif = hover (comme avant)
     const active = isTouch ? inView : hovered;
-
     const c = glowHex[color];
 
     return (
         <div className="relative isolate">
-            {/* Halo néon — UNIQUEMENT desktop (pas sur mobile/touch) */}
             {!isTouch && (
                 <motion.div
                     aria-hidden
@@ -1009,7 +1110,6 @@ function ProjectCard({
                 style={{
                     background: "linear-gradient(180deg, rgba(22,24,31,0.45) 0%, rgba(12,14,18,0.42) 100%)",
                     backdropFilter: "blur(8px)",
-                    // Bordure: sur mobile elle devient violette quand visible
                     border: `1px solid ${isTouch ? (active ? c : "rgba(255,255,255,0.15)") : "rgba(255,255,255,0.12)"}`,
                     transition: "border-color 300ms ease, transform 300ms ease, outline-color 300ms ease",
                 }}
@@ -1030,18 +1130,39 @@ function ProjectCard({
         </div>
     );
 }
+
 function WorksSection() {
     const works = [
-        { t: "Site agence de voyage", d: "Next.js, Tailwind, Motion", href: "#", color: "yellow" as GlowColor },
-        { t: "Automation workflow", d: "React, TypeScript, Auth", href: "#", color: "red" as GlowColor },
-        { t: "App desktop labo", d: ".NET, WPF, EF Core", href: "#", color: "green" as GlowColor },
+        {
+            t: "Nos sites web",
+            d: "Découvrez une sélection de sites modernes, pensés pour raconter et sublimer chaque univers.",
+            href: "#/projects/web",
+            color: "yellow" as GlowColor,
+        },
+        {
+            t: "Nos apps métier",
+            d: "Des outils internes clairs et efficaces, conçus pour simplifier le quotidien de chaque équipe.",
+            href: "#/projects/apps",
+            color: "red" as GlowColor,
+        },
+        {
+            t: "Nos programmes automatisés",
+            d: "Des processus intelligents qui connectent vos outils et gagnent du temps sans compromis.",
+            href: "#/projects/automation",
+            color: "green" as GlowColor,
+        },
     ];
+
     return (
         <section id="works" className="relative w-full text-white py-12 sm:py-16">
             <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
                 <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-1">
-                    <h2 className="text-xl sm:text-2xl font-semibold">Nos réalisations</h2>
-                    <a href="#contact" className="text-sm text-zinc-300 underline-offset-4 hover:text-white hover:underline" aria-label="Nous contacter">
+                    <h2 className="text-xl sm:text-2xl font-semibold">Nos projets</h2>
+                    <a
+                        href="#contact"
+                        className="text-sm text-zinc-300 underline-offset-4 hover:text-white hover:underline"
+                        aria-label="Nous contacter"
+                    >
                         Discuter d’un projet
                     </a>
                 </div>
@@ -1166,8 +1287,24 @@ function Footer() {
 /* =========================================================
    APP
    ========================================================= */
+// Rends ces composants importables depuis src/projects/*
+export { SiteBackground, TopNav, Footer };
 
 export default function App() {
+    const [hash, setHash] = React.useState(
+        typeof window !== "undefined" ? window.location.hash.replace(/^#/, "") : ""
+    );
+    React.useEffect(() => {
+        const onHash = () => setHash(window.location.hash.replace(/^#/, ""));
+        window.addEventListener("hashchange", onHash);
+        return () => window.removeEventListener("hashchange", onHash);
+    }, []);
+
+    // Routes "projects"
+    if (hash === "/projects/web") return <ProjectsWeb />;
+    if (hash === "/projects/apps") return <ProjectsApps />;
+    if (hash === "/projects/automation") return <ProjectsAutomation />;
+
     return (
         <main className="relative min-h-screen text-white antialiased [text-size-adjust:100%] selection:bg-white/20">
             <SiteBackground />
