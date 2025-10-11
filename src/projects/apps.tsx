@@ -14,7 +14,7 @@ type AppMeta = {
     resume: string;
     points: string[];
     tags: string[];
-    gallery: string[]; // autant d'images que tu veux
+    gallery: string[];
 };
 
 /* ====== Contenu (identique) ====== */
@@ -56,7 +56,7 @@ const APPS: AppMeta[] = [
     },
 ];
 
-/* ====== Petites briques UI (accordées) ====== */
+/* ====== Petites briques UI ====== */
 function Tag({ children }: { children: React.ReactNode }) {
     return (
         <span className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-1 text-[11.5px] leading-none text-zinc-200">
@@ -74,10 +74,11 @@ function Bullet({ children }: { children: React.ReactNode }) {
     );
 }
 
-/* ====== Carousel 16:9 (léger crop pour remplir) ====== */
+/* ====== Carousel 16:9 (crop léger) — amélioré a11y ====== */
 function ImageCarousel({ images, title }: { images: string[]; title: string }) {
     const [idx, setIdx] = useState(0);
     const total = images.length;
+
     const wrap = useCallback(
         (n: number) => {
             if (total === 0) return 0;
@@ -88,28 +89,37 @@ function ImageCarousel({ images, title }: { images: string[]; title: string }) {
 
     const goPrev = () => setIdx((i) => wrap(i - 1));
     const goNext = () => setIdx((i) => wrap(i + 1));
+    const goTo = (i: number) => setIdx(wrap(i));
 
-    // Navigation clavier (← →)
+    // Navigation clavier
     const containerRef = useRef<HTMLDivElement | null>(null);
     useEffect(() => {
         const el = containerRef.current;
         if (!el) return;
         const onKey = (e: KeyboardEvent) => {
-            if (e.key === "ArrowLeft") goPrev();
-            if (e.key === "ArrowRight") goNext();
+            if (e.key === "ArrowLeft") { e.preventDefault(); goPrev(); }
+            if (e.key === "ArrowRight") { e.preventDefault(); goNext(); }
+            if (e.key === "Home") { e.preventDefault(); goTo(0); }
+            if (e.key === "End") { e.preventDefault(); goTo(total - 1); }
         };
         el.addEventListener("keydown", onKey);
         return () => el.removeEventListener("keydown", onKey);
-    }, []);
+    }, [total]);
+
+    // Annonce discrète pour lecteurs d'écran
+    const liveRef = useRef<HTMLSpanElement | null>(null);
+    useEffect(() => {
+        if (liveRef.current) liveRef.current.textContent = `Image ${idx + 1} sur ${total}`;
+    }, [idx, total]);
 
     return (
         <div
             ref={containerRef}
             tabIndex={0}
-            className="group relative w-full outline-none"
+            className="group relative w-full outline-none focus-visible:ring-2 focus-visible:ring-white/30 rounded-xl"
+            aria-roledescription="carousel"
             aria-label={`Galerie ${title}`}
         >
-            {/* Cadre 16/9 : padding-top:56.25% */}
             <figure
                 className="relative w-full overflow-hidden rounded-xl border border-white/10 bg-zinc-950"
                 style={{ paddingTop: "56.25%" }}
@@ -132,7 +142,7 @@ function ImageCarousel({ images, title }: { images: string[]; title: string }) {
                         type="button"
                         onClick={goPrev}
                         aria-label="Image précédente"
-                        className="absolute left-3 top-1/2 -translate-y-1/2 hidden items-center justify-center rounded-full bg-zinc-900/70 border border-white/10 backdrop-blur p-2 text-zinc-200 hover:bg-zinc-800/80 group-hover:flex focus:flex focus:outline-none focus:ring-2 focus:ring-white/30"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 hidden items-center justify-center rounded-full bg-zinc-900/70 border border-white/10 backdrop-blur p-3 text-zinc-200 hover:bg-zinc-800/80 group-hover:flex focus:flex focus:outline-none focus:ring-2 focus:ring-white/30"
                     >
                         <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
                             <path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
@@ -146,7 +156,7 @@ function ImageCarousel({ images, title }: { images: string[]; title: string }) {
                         type="button"
                         onClick={goNext}
                         aria-label="Image suivante"
-                        className="absolute right-3 top-1/2 -translate-y-1/2 hidden items-center justify-center rounded-full bg-zinc-900/70 border border-white/10 backdrop-blur p-2 text-zinc-200 hover:bg-zinc-800/80 group-hover:flex focus:flex focus:outline-none focus:ring-2 focus:ring-white/30"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 hidden items-center justify-center rounded-full bg-zinc-900/70 border border-white/10 backdrop-blur p-3 text-zinc-200 hover:bg-zinc-800/80 group-hover:flex focus:flex focus:outline-none focus:ring-2 focus:ring-white/30"
                     >
                         <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
                             <path d="m10 6-1.41 1.41L13.17 12l-4.58 4.59L10 18l6-6z" />
@@ -155,13 +165,13 @@ function ImageCarousel({ images, title }: { images: string[]; title: string }) {
                 )}
             </figure>
 
-            {/* Indicateurs (clic pour naviguer) */}
+            {/* Indicateurs (clic) */}
             {total > 1 && (
                 <div className="mt-3 flex items-center justify-center gap-2">
                     {images.map((_, i) => (
                         <button
                             key={i}
-                            onClick={() => setIdx(i)}
+                            onClick={() => goTo(i)}
                             aria-label={`Aller à l’image ${i + 1}`}
                             className={`h-2.5 w-2.5 rounded-full ${i === idx ? "bg-zinc-200" : "bg-zinc-600/60 hover:bg-zinc-500/80"
                                 }`}
@@ -169,6 +179,9 @@ function ImageCarousel({ images, title }: { images: string[]; title: string }) {
                     ))}
                 </div>
             )}
+
+            {/* Live region SR-only */}
+            <span ref={liveRef} aria-live="polite" className="sr-only" />
         </div>
     );
 }
@@ -253,7 +266,7 @@ function AppCard({ meta, defaultOpen = false }: AppCardProps) {
                                     </ul>
                                 </div>
 
-                                {/* Colonne galerie — carousel 16/9 (crop léger) */}
+                                {/* Colonne galerie */}
                                 <div className="min-w-0">
                                     <ImageCarousel images={meta.gallery} title={meta.title} />
                                 </div>
@@ -268,7 +281,7 @@ function AppCard({ meta, defaultOpen = false }: AppCardProps) {
 
 export default function ProjectsApps() {
     useEffect(() => {
-        document.title = "SmartFlow — Apps métier";
+        document.title = "Apps métier — SmartFlow";
         window.scrollTo({ top: 0 });
     }, []);
 
@@ -286,7 +299,7 @@ export default function ProjectsApps() {
             <TopNav />
 
             {/* En-tête de page */}
-            <section className="mx-auto max-w-5xl px-4 sm:px-6 py-16 sm:py-20">
+            <section className="mx-auto max-w-5xl px-4 sm:px-6 py-[var(--section-y)]">
                 <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-zinc-400">
                     Projets
                 </p>
@@ -295,7 +308,7 @@ export default function ProjectsApps() {
             </section>
 
             {/* Liste des apps */}
-            <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-20 sm:pb-28">
+            <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-[calc(var(--section-y)_+_24px)]">
                 <div className="grid gap-6 sm:gap-8">
                     {APPS.map((meta, i) => (
                         <AppCard key={meta.key} meta={meta} defaultOpen={i === 0} />

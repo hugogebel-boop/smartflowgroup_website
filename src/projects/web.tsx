@@ -60,7 +60,7 @@ export default function ProjectsWeb() {
             <TopNav />
 
             {/* Intro */}
-            <section className="mx-auto max-w-5xl px-4 sm:px-6 py-16 sm:py-20">
+            <section className="mx-auto max-w-5xl px-4 sm:px-6 py-[var(--section-y)]">
                 <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-zinc-400">
                     Projets
                 </p>
@@ -71,18 +71,20 @@ export default function ProjectsWeb() {
             </section>
 
             {/* Projets */}
-            <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-12 sm:pb-20">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-10">
+            <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-[calc(var(--section-y)_-_0.5rem)]">
+                {/* items-stretch + h-full sur <article> → cartes de même hauteur */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-10 items-stretch">
                     {PROJECTS.map((p) => (
                         <article
                             key={p.id}
-                            className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm transition hover:bg-white/[0.07]"
+                            className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm transition hover:bg-white/[0.07] h-full"
                         >
                             <a
                                 href={p.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="relative block aspect-[16/10] overflow-hidden"
+                                className="relative block aspect-[16/10] overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                                aria-label={`${p.title} — ouvrir le site dans un nouvel onglet`}
                             >
                                 {/* Image + harmonisation (légère) */}
                                 <img
@@ -112,7 +114,7 @@ export default function ProjectsWeb() {
                                         href={p.url}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="group inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
+                                        className="group inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                                     >
                                         Voir le site
                                         <svg
@@ -138,7 +140,7 @@ export default function ProjectsWeb() {
             </section>
 
             {/* CTA */}
-            <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-20">
+            <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-[var(--section-y)]">
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8 text-center">
                     <h3 className="text-xl sm:text-2xl font-semibold">Un projet qui mérite de prendre forme ?</h3>
                     <p className="mt-2 text-sm sm:text-base text-zinc-300">
@@ -146,7 +148,7 @@ export default function ProjectsWeb() {
                     </p>
                     <button
                         onClick={() => goHomeThenScrollTo("contact")}
-                        className="mt-5 inline-flex items-center justify-center rounded-full bg-white/10 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-white/20"
+                        className="mt-5 inline-flex items-center justify-center rounded-full bg-white/10 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                     >
                         Discuter de votre site
                     </button>

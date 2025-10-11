@@ -2,39 +2,103 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Optionnel : lissage police */
+
+/* ===== Root sizing & safe areas ===== */
 html, body, #root {
     height: 100%;
 }
-/* ===== Scroll fluide global ===== */
+
 :root {
-    /* Ajuste si ton header est plus haut */
-    --header-offset: 64px;
+    /* Header offset will be measured at runtime for accurate anchor scroll */
+    --header-offset: 72px;
+    --section-y: clamp(48px, 7vw, 96px);
+    --radius-xl: 1rem;
     scroll-behavior: smooth;
 }
 
-/* Respecte l’accessibilité */
 @media (prefers-reduced-motion: reduce) {
     :root {
         scroll-behavior: auto;
     }
 }
 
-/* ===== Marge d’ancrage pour éviter que le titre passe sous le header ===== */
-/* S’applique à toutes les ancres (sections identifiées par id) */
+
+/* Robust anchor offset so titles don't hide under the header */
 [id] {
     scroll-margin-top: var(--header-offset);
 }
 
-/* (Optionnel) offset différent selon viewport */
-@media (min-width: 640px) {
-    :root {
-        --header-offset: 72px;
-    }
+
+/* ===== Fluid typography (keeps your current spirit, makes it consistent) ===== */
+html {
+    font-size: 16px;
 }
 
-@media (min-width: 1024px) {
-    :root {
-        --header-offset: 80px;
-    }
+body {
+    font-feature-settings: "liga" 1, "calt" 1;
+    text-rendering: optimizeLegibility;
+}
+
+
+h1 {
+    font-size: clamp(28px, 5.4vw, 56px);
+    line-height: 1.08;
+}
+
+h2 {
+    font-size: clamp(22px, 3.8vw, 32px);
+    line-height: 1.12;
+}
+
+h3 {
+    font-size: clamp(18px, 3.2vw, 24px);
+    line-height: 1.15;
+}
+
+
+p, li {
+    font-size: clamp(14px, 2.3vw, 16px);
+    line-height: 1.7;
+}
+
+small, .text-xs {
+    font-size: clamp(11px, 1.9vw, 12.5px);
+}
+
+
+/* Buttons: comfortable tap targets by default */
+button, .btn {
+    min-height: 44px;
+}
+
+
+/* Subtle focus style for accessibility */
+:focus-visible {
+    outline: 2px solid rgba(255,255,255,0.35);
+    outline-offset: 2px;
+}
+
+
+/* Cards equal height helpers */
+.sf-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.sf-card__grow {
+    margin-top: auto;
+}
+
+
+/* Use modern viewport units for mobile toolbars */
+.min-h-svh {
+    min-height: 100svh;
+}
+
+
+/* Grain bg helper if needed elsewhere */
+.sf-grain {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.5'/></svg>");
+    background-size: 160px 160px;
 }

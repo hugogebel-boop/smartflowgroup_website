@@ -28,10 +28,8 @@ const PROGRAMS: Program[] = [
         tagline: "Assemble, vérifie, envoie.",
         description:
             "À partir d’un tableau (entreprise, e-mail, accroche, contenu), le programme construit l’objet et le corps du message, injecte les bonnes variables et adresse le bon destinataire. Un mode essai permet de contrôler la mise en page avant l’envoi réel. Chaque action est journalisée avec le statut, la date et l’éventuel message d’erreur pour un suivi limpide.",
-        input:
-            "CSV/XLSX → company_name, email, hook, body",
-        output:
-            "Journal d’envoi + fichier enrichi (status, timestamp, error_message)",
+        input: "CSV/XLSX → company_name, email, hook, body",
+        output: "Journal d’envoi + fichier enrichi (status, timestamp, error_message)",
         stack: "Python · SMTP ou API e-mail · gestion d’erreurs et reprise simple",
     },
 ];
@@ -41,13 +39,13 @@ function goToContact() {
     window.location.hash = "/"; // revient à la page d’accueil
     setTimeout(() => {
         const contact = document.getElementById("contact");
-        if (contact) contact.scrollIntoView({ behavior: "smooth" });
+        if (contact) contact.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 500);
 }
 
 export default function ProjectsAutomation() {
     useEffect(() => {
-        document.title = "SmartFlow";
+        document.title = "Programmes automatisés — SmartFlow";
         window.scrollTo({ top: 0 });
     }, []);
 
@@ -57,7 +55,7 @@ export default function ProjectsAutomation() {
             <TopNav />
 
             {/* En-tête */}
-            <section className="mx-auto max-w-5xl px-4 sm:px-6 py-16 sm:py-20">
+            <section className="mx-auto max-w-5xl px-4 sm:px-6 py-[var(--section-y)]">
                 <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-zinc-400">
                     Projets
                 </p>
@@ -70,12 +68,13 @@ export default function ProjectsAutomation() {
             </section>
 
             {/* Grille des programmes */}
-            <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-20">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:gap-8">
+            <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-[var(--section-y)]">
+                {/* items-stretch + articles en flex pour égaliser les hauteurs */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:gap-8 items-stretch">
                     {PROGRAMS.map((p) => (
                         <article
                             key={p.id}
-                            className="group relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 sm:p-6 transition hover:border-white/20"
+                            className="group relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 sm:p-6 transition hover:border-white/20 focus-within:border-white/25 h-full flex flex-col"
                         >
                             <header>
                                 <h3 className="text-xl sm:text-[22px] font-semibold tracking-tight">
@@ -112,13 +111,15 @@ export default function ProjectsAutomation() {
                                 </p>
                             </div>
 
+                            {/* Footer de carte collé en bas */}
                             <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
                                 <span className="text-[12px] text-zinc-400">
                                     S’adapte à vos colonnes et à vos contraintes
                                 </span>
                                 <button
                                     onClick={goToContact}
-                                    className="text-[12px] sm:text-sm font-medium underline underline-offset-4 decoration-zinc-400 hover:decoration-white"
+                                    className="text-[12px] sm:text-sm font-medium underline underline-offset-4 decoration-zinc-400 hover:decoration-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                                    aria-label={`Demander une démo — ${p.title}`}
                                 >
                                     Demander une démo
                                 </button>
