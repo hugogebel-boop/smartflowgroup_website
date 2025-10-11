@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { motion, useScroll, useMotionValueEvent } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionValue, useSpring, useMotionValueEvent } from "framer-motion";
 
 /* -------- Helper global -------- */
 export function goToHomeAndScroll(targetId: string) {
@@ -33,24 +33,257 @@ export function goToHomeAndScroll(targetId: string) {
 /* -------- Hooks util -------- */
 export function usePrefersReducedMotion() {
     const [reduced, setReduced] = useState(false);
+
     useEffect(() => {
-        const media = window.matchMedia?.("(prefers-reduced-motion: reduce)");
-        const on = () => setReduced(!!media?.matches);
-        on();
-        media?.addEventListener?.("change", on);
-        media?.addListener?.(on);
+        if (!window.matchMedia) return;
+
+        const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+        const onChange = (ev: MediaQueryListEvent | MediaQueryList) => {
+            // ev.matches pour l’event, mql.matches en fallback (Safari anciens)
+            setReduced("matches" in ev ? ev.matches : mql.matches);
+        };
+
+        // Valeur initiale
+        setReduced(mql.matches);
+
+        // ✅ API moderne
+        if (typeof mql.addEventListener === "function") {
+            mql.addEventListener("change", onChange as EventListener);
+        } else {
+            // 🔁 Fallback sans addListener (évite l’avertissement TS)
+            (mql as any).onchange = onChange;
+        }
+
         return () => {
-            media?.removeEventListener?.("change", on);
-            media?.removeListener?.(on);
+            if (typeof mql.removeEventListener === "function") {
+                mql.removeEventListener("change", onChange as EventListener);
+            } else {
+                (mql as any).onchange = null;
+            }
         };
     }, []);
+
     return reduced;
 }
 
 /* -------- Background (minimal pour l’exemple) -------- */
 export function SiteBackground() {
-    return <div className="fixed inset-0 -z-30 bg-[#0B0B12]" />;
+    const reduced = usePrefersReducedMotion();
+
+    /* ======================== Knobs (tes paramètres) ======================== */
+    const SPEED = 36;   // plus petit = plus rapide (sec A/R)
+    const AMP_X = 260;  // px
+    const AMP_Y = 140;  // px
+    const POWER = 1.08; // 1.00–1.40 → boost d’intensité
+    const SAT = 1.06; // saturation globale
+    const BRIGHT = 1.04; // brightness globale
+
+    const a = (x: number) => Math.min(1, x * POWER);
+
+    /* ====================== Parallaxe scroll (3 vitesses) =================== */
+    const { scrollY } = useScroll();
+    const ySlow = useTransform(scrollY, [0, 800], [0, 40]);
+    const yMid = useTransform(scrollY, [0, 800], [0, 80]);
+    const yFast = useTransform(scrollY, [0, 800], [0, 140]);
+
+    /* ============== Suivi souris subtil (print screen-friendly) ============= */
+    const mx = useMotionValue(0);
+    const my = useMotionValue(0);
+    const px = useSpring(mx, { stiffness: 30, damping: 15 }); // lissés
+    const py = useSpring(my, { stiffness: 30, damping: 15 });
+
+    useEffect(() => {
+        if (reduced) return;
+        const onMove = (e: PointerEvent) => {
+            const w = window.innerWidth || 1;
+            const h = window.innerHeight || 1;
+            mx.set((e.clientX / w) * 2 - 1); // [-1,1]
+            my.set((e.clientY / h) * 2 - 1);
+        };
+        window.addEventListener("pointermove", onMove, { passive: true });
+        return () => window.removeEventListener("pointermove", onMove);
+    }, [reduced, mx, my]);
+
+    // Helper: génère x/y pour une couche selon scroll + souris
+    const layerShift = (baseY: any, fx: number, fy: number) => ({
+        x: reduced ? 0 : (px.get() * fx),
+        y: reduced ? 0 : (typeof baseY === "number" ? baseY : (baseY as any)) + (py.get() * fy),
+    });
+
+    return (
+        <>
+            {/* Base + Quadrillage léger */}
+            <div className="fixed inset-0 -z-30 bg-[#0B0B12]" />
+            <div className="fixed inset-0 -z-20 opacity-[0.05] bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.6)_1px,transparent_1px)] [background-size:22px_22px]" />
+
+            {/* Wrapper FX global : saturation/brightness */}
+            <div
+                className="fixed inset-0 -z-10 overflow-hidden pointer-events-none"
+                style={{ filter: `saturate(${SAT}) brightness(${BRIGHT})` }}
+                aria-hidden
+            >
+                {/* ==================== Nap 1 — violet/rose ==================== */}
+                <motion.div style={layerShift(ySlow, 12, 8)}>
+                    <motion.div
+                        className="absolute left-[-15%] top-[-10%] h-[70vh] w-[70vw] rounded-[9999px]"
+                        style={{
+                            background: `radial-gradient(60% 60% at 50% 50%, rgba(168,85,247,${a(0.22)}) 0%, rgba(168,85,247,${a(0.10)}) 35%, rgba(168,85,247,0) 70%)`,
+                            filter: "blur(56px)",
+                            mixBlendMode: "screen",
+                            maskImage:
+                                "radial-gradient(70% 70% at 50% 50%, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.62) 65%, rgba(0,0,0,0) 100%)",
+                            WebkitMaskImage:
+                                "radial-gradient(70% 70% at 50% 50%, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.62) 65%, rgba(0,0,0,0) 100%)",
+                            willChange: "transform",
+                        }}
+                        animate={
+                            reduced
+                                ? {}
+                                : {
+                                    x: [-AMP_X, AMP_X, -AMP_X],
+                                    y: [AMP_Y, -AMP_Y, AMP_Y],
+                                    scale: [0.985, 1.02, 0.985],
+                                }
+                        }
+                        transition={
+                            reduced
+                                ? {}
+                                : {
+                                    x: { duration: SPEED, ease: "easeInOut", repeat: Infinity },
+                                    y: { duration: SPEED * 0.9, ease: "easeInOut", repeat: Infinity },
+                                    scale: { duration: SPEED * 1.4, ease: "easeInOut", repeat: Infinity },
+                                }
+                        }
+                    />
+                </motion.div>
+
+                {/* ==================== Nap 2 — cyan ==================== */}
+                <motion.div style={layerShift(yMid, -16, 10)}>
+                    <motion.div
+                        className="absolute right-[-12%] top-[10%] h-[65vh] w-[60vw] rounded-[9999px]"
+                        style={{
+                            background: `radial-gradient(60% 60% at 50% 50%, rgba(34,211,238,${a(0.18)}) 0%, rgba(34,211,238,${a(0.085)}) 35%, rgba(34,211,238,0) 70%)`,
+                            filter: "blur(54px)",
+                            mixBlendMode: "screen",
+                            maskImage:
+                                "radial-gradient(70% 70% at 50% 50%, rgba(0,0,0,0.88) 35%, rgba(0,0,0,0.52) 60%, rgba(0,0,0,0) 100%)",
+                            WebkitMaskImage:
+                                "radial-gradient(70% 70% at 50% 50%, rgba(0,0,0,0.88) 35%, rgba(0,0,0,0.52) 60%, rgba(0,0,0,0) 100%)",
+                            willChange: "transform",
+                        }}
+                        animate={
+                            reduced
+                                ? {}
+                                : {
+                                    x: [AMP_X * 1.2, -AMP_X * 1.2, AMP_X * 1.2],
+                                    y: [-AMP_Y, AMP_Y, -AMP_Y],
+                                }
+                        }
+                        transition={
+                            reduced
+                                ? {}
+                                : {
+                                    x: { duration: SPEED * 1.1, ease: "easeInOut", repeat: Infinity },
+                                    y: { duration: SPEED * 0.95, ease: "easeInOut", repeat: Infinity },
+                                }
+                        }
+                    />
+                </motion.div>
+
+                {/* ==================== Nap 3 — magenta (profondeur) ==================== */}
+                <motion.div style={layerShift(yFast, 8, -6)}>
+                    <motion.div
+                        className="absolute left-[5%] bottom-[-12%] h-[60vh] w-[55vw] rounded-[9999px]"
+                        style={{
+                            background: `radial-gradient(60% 60% at 50% 50%, rgba(232,121,249,${a(0.14)}) 0%, rgba(232,121,249,${a(0.06)}) 35%, rgba(232,121,249,0) 70%)`,
+                            filter: "blur(66px)",
+                            mixBlendMode: "screen",
+                            maskImage:
+                                "radial-gradient(70% 70% at 50% 50%, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.58) 65%, rgba(0,0,0,0) 100%)",
+                            WebkitMaskImage:
+                                "radial-gradient(70% 70% at 50% 50%, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.58) 65%, rgba(0,0,0,0) 100%)",
+                            willChange: "transform",
+                        }}
+                        animate={
+                            reduced
+                                ? {}
+                                : {
+                                    x: [-AMP_X * 0.8, AMP_X * 0.8, -AMP_X * 0.8],
+                                    y: [0, AMP_Y * 0.6, 0],
+                                }
+                        }
+                        transition={
+                            reduced
+                                ? {}
+                                : {
+                                    x: { duration: SPEED * 0.9, ease: "easeInOut", repeat: Infinity },
+                                    y: { duration: SPEED * 1.2, ease: "easeInOut", repeat: Infinity },
+                                }
+                        }
+                    />
+                </motion.div>
+
+                {/* ==================== Nap 4 — streak large (puissance) ==================== */}
+                <motion.div style={layerShift(yMid, 18, 0)}>
+                    <motion.div
+                        className="absolute inset-0"
+                        style={{
+                            background: `radial-gradient(80% 100% at 20% 50%, rgba(168,85,247,${a(0.05)}) 0%, rgba(56,189,248,${a(0.04)}) 30%, rgba(232,121,249,${a(0.035)}) 55%, rgba(0,0,0,0) 70%)`,
+                            mixBlendMode: "screen",
+                            filter: "blur(90px)",
+                            willChange: "transform",
+                            transform: "translateZ(0)",
+                        }}
+                        animate={reduced ? {} : { x: [-AMP_X * 1.4, AMP_X * 1.4, -AMP_X * 1.4] }}
+                        transition={reduced ? {} : { duration: Math.max(12, SPEED * 0.6), ease: "easeInOut", repeat: Infinity }}
+                    />
+                </motion.div>
+
+                {/* ==================== Aurora rotatif doux (conic) ==================== */}
+                <motion.div
+                    className="absolute -inset-1"
+                    style={{
+                        opacity: 0.32,
+                        background:
+                            "conic-gradient(from 200deg at 50% 50%, rgba(150,90,255,0.10), rgba(60,220,255,0.10), rgba(255,150,90,0.10), rgba(150,90,255,0.10))",
+                        filter: "blur(18px)",
+                        transform: "scale(1.4)",
+                        animation: reduced ? undefined : "sf-rotate 28s linear infinite",
+                    }}
+                />
+            </div>
+
+            {/* Grain animé + Vignette */}
+            <motion.div
+                aria-hidden
+                className="fixed inset-0 -z-5 mix-blend-overlay pointer-events-none"
+                style={{
+                    opacity: 0.06,
+                    backgroundImage:
+                        "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.5'/></svg>\")",
+                    backgroundSize: "160px 160px",
+                    willChange: "opacity",
+                }}
+                animate={reduced ? {} : { opacity: [0.05, 0.08, 0.05] }}
+                transition={reduced ? {} : { duration: 14, ease: "easeInOut", repeat: Infinity }}
+            />
+            <div className="fixed inset-0 pointer-events-none" style={{ boxShadow: "inset 0 0 220px 80px rgba(0,0,0,0.55)" }} />
+
+            {/* Keyframes internes pour l’aurora & grain */}
+            <style>{`
+        @keyframes sf-rotate {
+          0%   { transform: rotate(0deg) scale(1.4); }
+          100% { transform: rotate(360deg) scale(1.4); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .sf-rotate { animation: none !important; }
+        }
+      `}</style>
+        </>
+    );
 }
+
 
 /* -------- TopNav avec sous-menu Réalisations -------- */
 export function TopNav() {
