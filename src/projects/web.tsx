@@ -9,7 +9,10 @@ export default function ProjectsWeb() {
     }, []);
 
     const goHomeThenScrollTo = (targetId: string) => {
-        const isHome = window.location.hash === "#/" || window.location.hash === "" || window.location.hash === "#";
+        const isHome =
+            window.location.hash === "#/" ||
+            window.location.hash === "" ||
+            window.location.hash === "#";
         const doScroll = () => {
             const el = document.getElementById(targetId);
             if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -58,7 +61,9 @@ export default function ProjectsWeb() {
 
             {/* Intro */}
             <section className="mx-auto max-w-5xl px-4 sm:px-6 py-16 sm:py-20">
-                <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-zinc-400">Projets</p>
+                <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-zinc-400">
+                    Projets
+                </p>
                 <h1 className="mt-2 text-3xl sm:text-4xl font-semibold">Nos sites web</h1>
                 <p className="mt-3 text-sm sm:text-base text-zinc-300 max-w-2xl">
                     Des sites élégants et soignés, conçus pour une expérience web naturelle et agréable.
@@ -77,20 +82,29 @@ export default function ProjectsWeb() {
                                 href={p.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="block aspect-[16/10] overflow-hidden"
+                                className="relative block aspect-[16/10] overflow-hidden"
                             >
+                                {/* Image + harmonisation (légère) */}
                                 <img
                                     src={p.image}
                                     alt={`${p.title} – aperçu du site`}
-                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"
+                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05] brightness-[.97] contrast-[1.02]"
                                     loading="lazy"
                                     decoding="async"
                                 />
+                                {/* Scrim discret pour que la photo n’écrase pas la typographie */}
+                                <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/10 via-black/0 to-black/25 opacity-100 transition-opacity duration-300 group-hover:from-black/15 group-hover:to-black/35" />
                             </a>
 
                             <div className="p-5 sm:p-6">
-                                <h2 className="text-lg sm:text-xl font-semibold tracking-tight">{p.title}</h2>
-                                <p className="mt-1 text-[12px] uppercase tracking-[0.2em] text-zinc-400">{p.client}</p>
+                                <h2 className="text-lg sm:text-xl font-semibold tracking-tight">
+                                    <span className="bg-gradient-to-r from-emerald-300 via-cyan-200 to-sky-300 bg-clip-text text-transparent">
+                                        {p.title}
+                                    </span>
+                                </h2>
+                                <p className="mt-1 text-[12px] uppercase tracking-[0.2em] text-zinc-400/90">
+                                    {p.client}
+                                </p>
                                 <p className="mt-3 text-sm text-zinc-300">{p.excerpt}</p>
 
                                 <div className="mt-5">
