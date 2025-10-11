@@ -322,20 +322,35 @@ const SERVICES = [
 
 type ShapeKey = "bolt" | "wave" | "diamond" | "hex";
 
-/* ===== DecoShape & ServiceCard (inchangés fonctionnellement) ===== */
-export function DecoShape({ shape, color, tint, active, sizePct = 30, intensity = 1.15 }: {
-    shape: ShapeKey; color: string; tint: string; active: boolean; sizePct?: number; intensity?: number;
+/* =========================================================
+   DecoShape — diffusion blur safe (iOS/desktop) + peps SVG
+   Props: { shape, color, tint, active, sizePct?, intensity? }
+   ========================================================= */
+export function DecoShape({
+    shape,
+    color,
+    tint,
+    active,
+    sizePct = 30,
+    intensity = 1.15,
+}: {
+    shape: ShapeKey;
+    color: string;
+    tint: string;
+    active: boolean;
+    sizePct?: number;
+    intensity?: number;
 }) {
     const isTouch = useIsTouchDevice();
     const reduced = usePrefersReducedMotion();
-    const uidRef = useRef(Math.random().toString(36).slice(2));
+    const uidRef = React.useRef(Math.random().toString(36).slice(2));
     const uid = uidRef.current;
 
-    const ua = isClient ? navigator.userAgent : "";
+    const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
     const isIOS = /iP(hone|ad|od)/i.test(ua);
     const iosMode = isTouch || isIOS;
 
-    const isNarrow = isClient ? window.innerWidth < 420 : false;
+    const isNarrow = typeof window !== "undefined" ? window.innerWidth < 420 : false;
     const BLUR_STD_DEV = iosMode ? (isNarrow ? 4 : 8) : 12;
 
     const widthPx = `min(${sizePct}%, 120px)`;
@@ -343,58 +358,115 @@ export function DecoShape({ shape, color, tint, active, sizePct = 30, intensity 
 
     const shapeEl = (() => {
         switch (shape) {
-            case "bolt": return { tag: "path" as const, props: { d: "M60 10 L35 55 H60 L30 110 L90 50 H60 L90 10 Z" } };
-            case "wave": return { tag: "path" as const, props: { d: "M10 70 C30 40, 70 100, 90 70 S150 40, 170 70" } };
-            case "diamond": return { tag: "polygon" as const, props: { points: "100,20 40,80 100,140 160,80" } };
-            default: return { tag: "polygon" as const, props: { points: "100,20 55,45 55,95 100,120 145,95 145,45" } };
+            case "bolt":
+                return { tag: "path" as const, props: { d: "M60 10 L35 55 H60 L30 110 L90 50 H60 L90 10 Z" } };
+            case "wave":
+                return { tag: "path" as const, props: { d: "M10 70 C30 40, 70 100, 90 70 S150 40, 170 70" } };
+            case "diamond":
+                return { tag: "polygon" as const, props: { points: "100,20 40,80 100,140 160,80" } };
+            default:
+                return { tag: "polygon" as const, props: { points: "100,20 55,45 55,95 100,120 145,95 145,45" } };
         }
     })();
 
-    const baseStroke: React.SVGProps<SVGPathElement> = { fill: "none", stroke: color, strokeWidth: 2, vectorEffect: "non-scaling-stroke" };
-    const idShape = `sf-shape-${uid}`, idClip = `sf-clip-${uid}`, idGrad = `sf-inner-grad-${uid}`, idBlur = `sf-inner-blur-${uid}`;
+    const baseStroke: React.SVGProps<SVGPathElement> = {
+        fill: "none",
+        stroke: color,
+        strokeWidth: 2,
+        vectorEffect: "non-scaling-stroke",
+    };
+
+    const idShape = `sf-shape-${uid}`;
+    const idClip = `sf-clip-${uid}`;
+    const idGrad = `sf-inner-grad-${uid}`;
+    const idBlur = `sf-inner-blur-${uid}`;
+
+    // boîte de filtre large (desktop) pour éviter le clipping du flou
     const FILTER_BOX = { x: -120, y: -120, w: 480, h: 420 };
 
     return (
-        <div className="absolute pointer-events-none z-0" style={{ right: "0.5rem", bottom: "0.5rem", width: widthPx, height: widthPx }}>
-            {!iosMode && (
-                <motion.div
-                    className="absolute inset-0"
-                    style={{ background: `radial-gradient(120% 120% at 70% 70%, ${color}40 0%, transparent 70%)`, filter: "blur(22px)", borderRadius: "9999px", transform: "translateZ(0)" }}
-                    initial={{ opacity: 0.18, scale: 0.96 }}
-                    animate={active && !reduced ? { opacity: [0.18, 0.3, 0.38], scale: [0.96, 0.995, 1] } : { opacity: 0.16, scale: 0.96 }}
-                    transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-                />
-            )}
+        <div
+            className="absolute pointer-events-none z-0"
+            style={{ right: "0.5rem", bottom: "0.5rem", width: widthPx, height: widthPx }}
+        >
+            {/* Couche de diffusion radiale (toujours active, iOS compris) */}
+            <motion.div
+                aria-hidden
+                className="absolute inset-0"
+                style={{
+                    background: `radial-gradient(120% 120% at 70% 70%, ${color}40 0%, transparent 70%)`,
+                    // blur plus léger sur iOS / écrans étroits
+                    filter: `blur(${iosMode ? (isNarrow ? 8 : 12) : 22}px)`,
+                    borderRadius: "9999px",
+                    transform: "translateZ(0)",
+                    willChange: "opacity, transform, filter",
+                }}
+                initial={{ opacity: 0.14, scale: 0.96 }}
+                animate={
+                    active && !reduced
+                        ? { opacity: [0.16, 0.26, 0.32], scale: [0.96, 0.995, 1] }
+                        : { opacity: 0.14, scale: 0.96 }
+                }
+                transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+            />
 
-            <motion.svg width="100%" height="100%" viewBox="0 0 200 160" preserveAspectRatio="xMidYMid meet"
+            <motion.svg
+                width="100%"
+                height="100%"
+                viewBox="0 0 200 160"
+                preserveAspectRatio="xMidYMid meet"
                 style={{ overflow: "visible" }}
                 initial={{ opacity: 0.1, transform: "scale(0.96)", filter: iosMode ? undefined : `drop-shadow(0 0 0 ${color}00)` }}
-                animate={active && !reduced
-                    ? iosMode
-                        ? { opacity: [0.1, 0.25, strong(1)], transform: ["scale(0.96)", "scale(0.99)", "scale(1)"] }
-                        : {
-                            opacity: [0.12, 0.3, strong(1)], transform: ["scale(0.965)", "scale(0.995)", "scale(1)"], filter: [
-                                `drop-shadow(0 0 0 ${color}00)`,
-                                `drop-shadow(0 0 8px ${color}66)`,
-                                `drop-shadow(0 0 18px ${color}AA) drop-shadow(0 0 30px ${color}80)`,
-                            ]
-                        }
-                    : iosMode ? { opacity: 0.1, transform: "scale(0.96)" } : { opacity: 0.1, transform: "scale(0.96)", filter: `drop-shadow(0 0 0 ${color}00)` }}
+                animate={
+                    active && !reduced
+                        ? iosMode
+                            ? {
+                                opacity: [0.12, 0.22, strong(0.9)],
+                                transform: ["scale(0.96)", "scale(0.99)", "scale(1)"],
+                            }
+                            : {
+                                opacity: [0.12, 0.3, strong(1)],
+                                transform: ["scale(0.965)", "scale(0.995)", "scale(1)"],
+                                filter: [
+                                    `drop-shadow(0 0 0 ${color}00)`,
+                                    `drop-shadow(0 0 8px ${color}66)`,
+                                    `drop-shadow(0 0 18px ${color}AA) drop-shadow(0 0 30px ${color}80)`,
+                                ] as any,
+                            }
+                        : iosMode
+                            ? { opacity: 0.1, transform: "scale(0.96)" }
+                            : { opacity: 0.1, transform: "scale(0.96)", filter: `drop-shadow(0 0 0 ${color}00)` }
+                }
                 transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
             >
                 <defs>
-                    {shapeEl.tag === "path" ? <path id={idShape} {...(shapeEl.props as any)} /> : <polygon id={idShape} {...(shapeEl.props as any)} />}
-                    <clipPath id={idClip}><use href={`#${idShape}`} /></clipPath>
+                    {shapeEl.tag === "path" ? (
+                        <path id={idShape} {...(shapeEl.props as any)} />
+                    ) : (
+                        <polygon id={idShape} {...(shapeEl.props as any)} />
+                    )}
+                    <clipPath id={idClip}>
+                        <use href={`#${idShape}`} />
+                    </clipPath>
                     <radialGradient id={idGrad} cx="50%" cy="50%" r="55%">
                         <stop offset="0%" stopColor={color} stopOpacity={0.58} />
                         <stop offset="42%" stopColor={color} stopOpacity={0.3} />
                         <stop offset="80%" stopColor={color} stopOpacity={0} />
                     </radialGradient>
-                    <filter id={idBlur} x={iosMode ? undefined : FILTER_BOX.x} y={iosMode ? undefined : FILTER_BOX.y} width={iosMode ? undefined : FILTER_BOX.w} height={iosMode ? undefined : FILTER_BOX.h} filterUnits={iosMode ? "objectBoundingBox" : "userSpaceOnUse"} colorInterpolationFilters="sRGB">
+                    <filter
+                        id={idBlur}
+                        x={iosMode ? undefined : (FILTER_BOX.x as any)}
+                        y={iosMode ? undefined : (FILTER_BOX.y as any)}
+                        width={iosMode ? undefined : (FILTER_BOX.w as any)}
+                        height={iosMode ? undefined : (FILTER_BOX.h as any)}
+                        filterUnits={iosMode ? "objectBoundingBox" : "userSpaceOnUse"}
+                        colorInterpolationFilters="sRGB"
+                    >
                         <feGaussianBlur stdDeviation={BLUR_STD_DEV} edgeMode="duplicate" />
                     </filter>
                 </defs>
 
+                {/* Remplissage doux + teinte interne, avec blur contrôlé */}
                 {iosMode ? (
                     <g clipPath={`url(#${idClip})`}>
                         <rect x={-50} y={-40} width={300} height={240} fill={`url(#${idGrad})`} filter={`url(#${idBlur})`} opacity={active && !reduced ? 1 : 0} />
@@ -407,10 +479,43 @@ export function DecoShape({ shape, color, tint, active, sizePct = 30, intensity 
                     </g>
                 )}
 
-                {shapeEl.tag === "path" ? <path {...(shapeEl.props as any)} {...baseStroke} /> : <polygon {...(shapeEl.props as any)} {...(baseStroke as any)} />}
+                {/* Trait du symbole */}
+                {shapeEl.tag === "path" ? (
+                    <path {...(shapeEl.props as any)} {...baseStroke} />
+                ) : (
+                    <polygon {...(shapeEl.props as any)} {...(baseStroke as any)} />
+                )}
             </motion.svg>
         </div>
     );
+}
+
+/* =========================================================
+   ServiceCard — allumage retardé 300ms sur mobile + glow synchro
+   Props: { s, i }  avec s = SERVICES[i]
+   ========================================================= */
+
+// Petit hook utilitaire: retarde "active" sur mobile
+function useMobileDelay(active: boolean, delayMs: number, enabled: boolean) {
+    const [delayed, setDelayed] = React.useState(active && !enabled ? active : false);
+
+    React.useEffect(() => {
+        if (!enabled) {
+            setDelayed(active);
+            return;
+        }
+        let t: number | null = null;
+        if (active) {
+            t = window.setTimeout(() => setDelayed(true), delayMs);
+        } else {
+            setDelayed(false);
+        }
+        return () => {
+            if (t) window.clearTimeout(t);
+        };
+    }, [active, delayMs, enabled]);
+
+    return enabled ? delayed : active;
 }
 
 function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
@@ -421,7 +526,11 @@ function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
     const isTouch = useIsTouchDevice();
     const reduced = usePrefersReducedMotion();
 
-    const neonActive = isTouch ? inView : hovered;
+    // état brut: scroll (mobile) ou hover (desktop)
+    const neonActiveRaw = isTouch ? inView : hovered;
+    // retard 300ms sur mobile pour l'allumage
+    const neonActive = useMobileDelay(neonActiveRaw, 300, isTouch);
+
     const headingId = `svc-${s.k}-title`;
 
     return (
@@ -436,27 +545,66 @@ function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
             role="article"
             aria-labelledby={headingId}
         >
-            <DecoShape shape={s.theme.shape as ShapeKey} color={s.theme.color} tint={s.theme.tint} active={neonActive} sizePct={32} />
-            <div aria-hidden className="absolute inset-0 rounded-2xl pointer-events-none"
-                style={{ boxShadow: neonActive ? `inset 0 0 0 1px rgba(255,255,255,0.10), 0 0 24px 0 ${s.theme.color}22` : "inset 0 0 0 1px rgba(255,255,255,0.08)", transition: "box-shadow 260ms ease" }} />
+            {/* Forme décorative lumineuse */}
+            <DecoShape
+                shape={s.theme.shape as ShapeKey}
+                color={s.theme.color}
+                tint={s.theme.tint}
+                active={neonActive}
+                sizePct={32}
+            />
+
+            {/* Liseré/ombre externe synchronisé sur l'allumage différé */}
+            <div
+                aria-hidden
+                className="absolute inset-0 rounded-2xl pointer-events-none"
+                style={{
+                    boxShadow: neonActive
+                        ? `inset 0 0 0 1px rgba(255,255,255,0.10), 0 0 24px 0 ${s.theme.color}22`
+                        : "inset 0 0 0 1px rgba(255,255,255,0.08)",
+                    transition: "box-shadow 260ms ease",
+                }}
+            />
+
             <motion.div
                 className="relative z-10 p-6 sm:p-7 transform-gpu"
                 initial={{ opacity: 0.92, scale: 0.985 }}
                 animate={inView ? { opacity: 1, scale: 1.0 } : { opacity: 0.92, scale: 0.985 }}
-                transition={reduced ? { duration: 0 } : { type: "tween", duration: inView ? 0.35 : 0.45, ease: [0.22, 1, 0.36, 1], delay: 0.03 * i }}
+                transition={
+                    reduced
+                        ? { duration: 0 }
+                        : {
+                            type: "tween",
+                            duration: inView ? 0.35 : 0.45,
+                            ease: [0.22, 1, 0.36, 1],
+                            // +300ms sur mobile pour s’aligner avec la diffusion lumineuse
+                            delay: (isTouch ? 0.3 : 0) + 0.03 * i,
+                        }
+                }
                 whileHover={!reduced && !isTouch ? { y: -4 } : {}}
             >
                 <div className="mb-1.5 flex items-center justify-between">
                     <div className="text-[10px] sm:text-[11px] uppercase tracking-widest text-zinc-400">{s.k}</div>
-                    <span className="inline-flex items-center rounded-full border border-white/10 px-2 py-0.5 text-[11px] text-zinc-200/90">{s.tag}</span>
+                    <span className="inline-flex items-center rounded-full border border-white/10 px-2 py-0.5 text-[11px] text-zinc-200/90">
+                        {s.tag}
+                    </span>
                 </div>
 
-                <div className="text-xs uppercase tracking-wide" style={{ color: s.theme.color + "CC" }}>{s.kicker}</div>
-                <h3 id={headingId} className="mt-1 text-base sm:text-lg font-medium text-white/90">{s.title}</h3>
+                <div className="text-xs uppercase tracking-wide" style={{ color: s.theme.color + "CC" }}>
+                    {s.kicker}
+                </div>
+                <h3 id={headingId} className="mt-1 text-base sm:text-lg font-medium text-white/90">
+                    {s.title}
+                </h3>
                 <p className="mt-2 text-[13px] sm:text-sm leading-relaxed text-zinc-300">{s.desc}</p>
+
                 {!!s.pillars?.length && (
                     <ul className="mt-3 space-y-1.5">
-                        {s.pillars.map((p, idx) => <li key={idx} className="text-[13px] sm:text-sm text-zinc-400">• {p}</li>)}
+                        {s.pillars.map((p, idx) => (
+                            <li key={idx} className="text-[13px] sm:text-sm text-zinc-400">
+                                • {p}
+                            </li>
+                        ))}
                     </ul>
                 )}
             </motion.div>
