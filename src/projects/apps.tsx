@@ -311,21 +311,6 @@ export default function ProjectsApps() {
                 <h1 className="mt-2 text-3xl sm:text-4xl font-semibold">{header.k}</h1>
                 <p className="mt-3 text-sm sm:text-base text-zinc-300">{header.sub}</p>
             </section>
-
-            {/* Liste des apps */}
-            <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-20 sm:pb-28">
-                <div className="grid gap-6 sm:gap-8">
-                    {APPS.map((meta, i) => (
-                        <AppCard key={meta.key} meta={meta} defaultOpen={i === 0} />
-                    ))}
-                </div>
-
-                <p className="mt-8 text-center text-xs text-zinc-500">
-                    Place autant d’images que tu veux par app dans{" "}
-                    <code className="text-zinc-400">/assets/apps/&lt;app&gt;/</code>. Elles seront affichées en 16/9, avec un léger crop pour remplir le cadre.
-                </p>
-            </section>
-
             <Footer />
         </main>
     );
