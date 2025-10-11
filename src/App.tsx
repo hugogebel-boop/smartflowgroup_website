@@ -303,7 +303,7 @@ const SERVICES = [
     {
         k: "02", title: "Sites web", tag: "Expérience soignée", kicker: "React, Next.js, Tailwind",
         desc: "Des sites élégants et réactifs, construits pour durer. Du code propre, des transitions fluides et une attention particulière portée à l’expérience utilisateur ainsi qu'au contenu.",
-        pillars: ["Développement web moderne et léger", "Expérience utilisateur et interface responsive", "Optimisation du contenu et du référencement"],
+        pillars: ["Développement web moderne et léger", "Expérience utilisateur", "Optimisation du contenu et du référencement"],
         theme: { color: "#38bdf8", tint: "rgba(56,189,248,0.25)", shape: "wave" }
     },
     {
