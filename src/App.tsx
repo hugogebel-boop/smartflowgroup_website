@@ -483,7 +483,21 @@ function ServicesSection() {
 type GlowColor = "yellow" | "red" | "green";
 const glowHex: Record<GlowColor, string> = { yellow: "#9b6bff", red: "#9b6bff", green: "#9b6bff" };
 
-function ProjectCard({ title, subtitle, href, color }: { title: string; subtitle: string; href: string; color: GlowColor; }) {
+type OverlayWords = { primary: string; secondary?: string[] };
+
+function ProjectCard({
+    title,
+    subtitle,
+    href,
+    color,
+    overlay,
+}: {
+    title: string;
+    subtitle: string;
+    href: string;
+    color: GlowColor;
+    overlay?: OverlayWords; // ← nouveau
+}) {
     const isTouch = useIsTouchDevice();
     const [hovered, setHovered] = React.useState(false);
     const ref = React.useRef<HTMLAnchorElement | null>(null);
@@ -522,21 +536,65 @@ function ProjectCard({ title, subtitle, href, color }: { title: string; subtitle
                 aria-label={`${title} – en savoir plus`}
                 style={{ transition: "border-color 300ms ease, transform 300ms ease, outline-color 300ms ease" }}
             >
-                <div className="mb-2 sm:mb-3 h-28 sm:h-32 w-full overflow-hidden rounded-lg"
-                    style={{ background: "linear-gradient(180deg, rgba(40,43,53,0.25) 0%, rgba(22,24,31,0.25) 100%)" }} />
+                {/* Zone image + overlay typographique */}
+                <div
+                    className="relative mb-2 sm:mb-3 h-28 sm:h-32 w-full overflow-hidden rounded-lg"
+                    style={{ background: "linear-gradient(180deg, rgba(40,43,53,0.25) 0%, rgba(22,24,31,0.25) 100%)" }}
+                >
+                    {overlay && (
+                        <div className="pointer-events-none absolute inset-0">
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <motion.span
+                                    className="font-semibold uppercase select-none bg-clip-text text-transparent
+                     bg-[linear-gradient(120deg,#e0e7ff_0%,#a78bfa_35%,#22d3ee_65%,#e879f9_100%)] tracking-[0.22em]"
+                                    style={{
+                                        fontSize: "clamp(28px, 9vw, 48px)",
+                                        letterSpacing: "0.2em",
+                                        opacity: 0.45,            // ← moins opaque
+                                        filter: "saturate(1.1)",  // léger boost pour le gradient
+                                    }}
+                                    animate={{ opacity: [0.38, 0.5, 0.45] }} // subtil vivant
+                                    transition={{ duration: 2.2, repeat: Infinity, ease: [0.45, 0, 0.55, 1] }}
+                                >
+                                    {overlay.primary}
+                                </motion.span>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
                 <h3 className="text-sm sm:text-base font-medium text-white/85">{title}</h3>
                 <p className="mt-1 text-[13px] text-zinc-300">{subtitle}</p>
-                <div className="mt-auto pt-3 flex items-center justify-end"><span className="text-[10px] text-zinc-400">→</span></div>
+                <div className="mt-auto pt-3 flex items-center justify-end">
+                    <span className="text-[10px] text-zinc-400">→</span>
+                </div>
             </a>
         </div>
     );
 }
-
 function WorksSection() {
     const works = [
-        { t: "Nos sites web", d: "Découvrez une sélection de sites modernes, pensés pour raconter et sublimer chaque univers.", href: "#/projects/web", color: "yellow" as GlowColor },
-        { t: "Nos apps métier", d: "Des outils internes clairs et efficaces, conçus pour simplifier le quotidien de chaque équipe. Peu importe le domaine", href: "#/projects/apps", color: "red" as GlowColor },
-        { t: "Nos programmes automatisés", d: "Des processus intelligents et robustes qui connectent vos outils et gagnent du temps sans compromis.", href: "#/projects/automation", color: "green" as GlowColor },
+        {
+            t: "Nos sites web",
+            d: "Découvrez une sélection de sites modernes, pensés pour raconter et sublimer chaque univers.",
+            href: "#/projects/web",
+            color: "yellow" as GlowColor,
+            overlay: { primary: "WEB", secondary: ["APP", "DEV"] }, // ← ici
+        },
+        {
+            t: "Nos apps métier",
+            d: "Des outils internes clairs et efficaces, conçus pour simplifier le quotidien de chaque équipe. Peu importe le domaine",
+            href: "#/projects/apps",
+            color: "red" as GlowColor,
+            overlay: { primary: "APP", secondary: ["WEB", "DEV"] }, // ← ici
+        },
+        {
+            t: "Nos programmes automatisés",
+            d: "Des processus intelligents et robustes qui connectent vos outils et gagnent du temps sans compromis.",
+            href: "#/projects/automation",
+            color: "green" as GlowColor,
+            overlay: { primary: "DEV", secondary: ["WEB", "APP"] }, // ← ici
+        },
     ];
 
     return (
@@ -553,8 +611,18 @@ function WorksSection() {
                         Discuter d’un projet
                     </a>
                 </div>
+
                 <div className="grid gap-8 sm:gap-10 grid-cols-1 xs:grid-cols-2 lg:grid-cols-3">
-                    {works.map((w, i) => <ProjectCard key={i} title={w.t} subtitle={w.d} href={w.href} color={w.color} />)}
+                    {works.map((w, i) => (
+                        <ProjectCard
+                            key={i}
+                            title={w.t}
+                            subtitle={w.d}
+                            href={w.href}
+                            color={w.color}
+                            overlay={w.overlay} // ← passer l’overlay
+                        />
+                    ))}
                 </div>
             </div>
         </section>
