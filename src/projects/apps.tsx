@@ -75,8 +75,10 @@ function Bullet({ children }: { children: React.ReactNode }) {
 }
 
 /* ====== Carousel 16:9 (crop léger) — amélioré a11y ====== */
+/* ====== Carousel 16:9 (crop léger) — swipe mobile + a11y ====== */
 function ImageCarousel({ images, title }: { images: string[]; title: string }) {
     const [idx, setIdx] = useState(0);
+    const [dx, setDx] = useState(0); // déplacement visuel pendant le swipe
     const total = images.length;
 
     const wrap = useCallback(
@@ -106,11 +108,53 @@ function ImageCarousel({ images, title }: { images: string[]; title: string }) {
         return () => el.removeEventListener("keydown", onKey);
     }, [total]);
 
-    // Annonce discrète pour lecteurs d'écran
+    // Live region pour lecteurs d'écran
     const liveRef = useRef<HTMLSpanElement | null>(null);
     useEffect(() => {
         if (liveRef.current) liveRef.current.textContent = `Image ${idx + 1} sur ${total}`;
     }, [idx, total]);
+
+    // ====== Swipe (pointer events) ======
+    const startX = useRef(0);
+    const tracking = useRef(false);
+    const pointerId = useRef<number | null>(null);
+
+    const THRESH = 48; // px pour déclencher le changement d'image
+    const MAX_DRAG = 120; // limite visuelle pendant le drag
+
+    const onPointerDown: React.PointerEventHandler<HTMLDivElement> = (e) => {
+        // uniquement touche/contact (pas la souris) pour éviter conflits sur desktop
+        if (e.pointerType === "mouse") return;
+        const el = e.currentTarget;
+        pointerId.current = e.pointerId;
+        el.setPointerCapture(e.pointerId);
+        tracking.current = true;
+        startX.current = e.clientX;
+        setDx(0);
+    };
+
+    const onPointerMove: React.PointerEventHandler<HTMLDivElement> = (e) => {
+        if (!tracking.current || pointerId.current !== e.pointerId) return;
+        const delta = e.clientX - startX.current;
+        // limite l'effet visuel
+        const clamped = Math.max(-MAX_DRAG, Math.min(MAX_DRAG, delta));
+        setDx(clamped);
+    };
+
+    const onPointerUp: React.PointerEventHandler<HTMLDivElement> = (e) => {
+        if (!tracking.current || pointerId.current !== e.pointerId) return;
+        const delta = e.clientX - startX.current;
+        tracking.current = false;
+        pointerId.current = null;
+
+        if (Math.abs(delta) > THRESH) {
+            // swipe à gauche => image suivante ; à droite => précédente
+            if (delta < 0) goNext();
+            else goPrev();
+        }
+        // reset l’offset visuel
+        setDx(0);
+    };
 
     return (
         <div
@@ -121,51 +165,56 @@ function ImageCarousel({ images, title }: { images: string[]; title: string }) {
             aria-label={`Galerie ${title}`}
         >
             <figure
-                className="relative w-full overflow-hidden rounded-xl border border-white/10 bg-zinc-950"
+                className="relative w-full overflow-hidden rounded-xl border border-white/10 bg-zinc-950 [touch-action:pan-y] select-none"
                 style={{ paddingTop: "56.25%" }}
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerUp}
+                onPointerCancel={onPointerUp}
             >
                 {images.map((src, i) => (
                     <img
                         key={src + i}
                         src={src}
                         alt={`${title} — image ${i + 1}/${total}`}
-                        className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-300 ${i === idx ? "opacity-100" : "opacity-0"
-                            }`}
+                        className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-300 ${i === idx ? "opacity-100" : "opacity-0"}`}
+                        // léger suivi du doigt pour l’image active
+                        style={i === idx ? { transform: `translateX(${dx}px)` } : undefined}
                         loading={i === 0 ? "eager" : "lazy"}
                         decoding="async"
+                        draggable={false}
                     />
                 ))}
 
-                {/* Flèche gauche */}
+                {/* Flèches — visibles uniquement ≥ md (desktop/tablette en paysage) */}
                 {total > 1 && (
-                    <button
-                        type="button"
-                        onClick={goPrev}
-                        aria-label="Image précédente"
-                        className="absolute left-3 top-1/2 -translate-y-1/2 hidden items-center justify-center rounded-full bg-zinc-900/70 border border-white/10 backdrop-blur p-3 text-zinc-200 hover:bg-zinc-800/80 group-hover:flex focus:flex focus:outline-none focus:ring-2 focus:ring-white/30"
-                    >
-                        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-                            <path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-                        </svg>
-                    </button>
-                )}
+                    <>
+                        <button
+                            type="button"
+                            onClick={goPrev}
+                            aria-label="Image précédente"
+                            className="absolute left-3 top-1/2 -translate-y-1/2 hidden md:flex items-center justify-center rounded-full bg-zinc-900/70 border border-white/10 backdrop-blur p-3 text-zinc-200 hover:bg-zinc-800/80 focus:outline-none focus:ring-2 focus:ring-white/30 md:group-hover:flex"
+                        >
+                            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+                                <path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                            </svg>
+                        </button>
 
-                {/* Flèche droite */}
-                {total > 1 && (
-                    <button
-                        type="button"
-                        onClick={goNext}
-                        aria-label="Image suivante"
-                        className="absolute right-3 top-1/2 -translate-y-1/2 hidden items-center justify-center rounded-full bg-zinc-900/70 border border-white/10 backdrop-blur p-3 text-zinc-200 hover:bg-zinc-800/80 group-hover:flex focus:flex focus:outline-none focus:ring-2 focus:ring-white/30"
-                    >
-                        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-                            <path d="m10 6-1.41 1.41L13.17 12l-4.58 4.59L10 18l6-6z" />
-                        </svg>
-                    </button>
+                        <button
+                            type="button"
+                            onClick={goNext}
+                            aria-label="Image suivante"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 hidden md:flex items-center justify-center rounded-full bg-zinc-900/70 border border-white/10 backdrop-blur p-3 text-zinc-200 hover:bg-zinc-800/80 focus:outline-none focus:ring-2 focus:ring-white/30 md:group-hover:flex"
+                        >
+                            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+                                <path d="m10 6-1.41 1.41L13.17 12l-4.58 4.59L10 18l6-6z" />
+                            </svg>
+                        </button>
+                    </>
                 )}
             </figure>
 
-            {/* Indicateurs (clic pour naviguer) */}
+            {/* Indicateurs (tap/clic) */}
             {total > 1 && (
                 <div className="mt-3 flex items-center justify-center gap-2">
                     {images.map((_, i) => (
@@ -174,17 +223,14 @@ function ImageCarousel({ images, title }: { images: string[]; title: string }) {
                             onClick={() => setIdx(i)}
                             aria-label={`Aller à l’image ${i + 1}`}
                             className={`flex items-center justify-center p-0 border-0 outline-none cursor-pointer
-          before:block before:h-[10px] before:w-[10px] before:rounded-full before:content-['']
-          before:transition-colors before:duration-300 ${i === idx
-                                    ? "before:bg-zinc-200"
-                                    : "before:bg-zinc-600/60 hover:before:bg-zinc-500/80"
+                before:block before:h-[10px] before:w-[10px] before:rounded-full before:content-['']
+                before:transition-colors before:duration-300 ${i === idx ? "before:bg-zinc-200" : "before:bg-zinc-600/60 hover:before:bg-zinc-500/80"
                                 }`}
                         />
                     ))}
                 </div>
             )}
 
-            {/* Live region SR-only */}
             <span ref={liveRef} aria-live="polite" className="sr-only" />
         </div>
     );
