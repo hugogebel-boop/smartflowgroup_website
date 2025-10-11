@@ -481,22 +481,46 @@ export function TopNav() {
 
                     {/* ===== Accordéon Réalisations (mobile) ===== */}
                     <div className="rounded-md" ref={mobileSubRef}>
-                        <button
-                            type="button"
+                        {/* Ligne entière = toggle ; le lien "Réalisations" = navigation */}
+                        <div
+                            role="button"
+                            tabIndex={0}
                             aria-expanded={mobileSubOpen}
+                            aria-controls="mobile-sub-works"
                             onClick={() => setMobileSubOpen(v => !v)}
-                            className="w-full flex items-center justify-between gap-2 rounded-md px-2 py-2 text-left text-zinc-300 hover:bg-white/5 hover:text-white"
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                    e.preventDefault();
+                                    setMobileSubOpen(v => !v);
+                                }
+                            }}
+                            className="w-full flex items-center justify-between gap-2 rounded-md px-2 py-2 text-left text-zinc-300 hover:bg-white/5 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/20"
                         >
-                            <span>Réalisations</span>
+                            {/* Cliquer sur le texte = NAVIGUER (et ne pas toggler) */}
+                            <a
+                                href="#works"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation(); // ← empêche le toggle
+                                    setOpen(false);
+                                    setTimeout(() => goToHomeAndScroll("works"), 120);
+                                }}
+                                className="flex-1 min-w-0"
+                            >
+                                Réalisations
+                            </a>
+
+                            {/* Chevron (clique = toggle) */}
                             <svg
-                                className={`transition-transform ${mobileSubOpen ? "rotate-180" : ""}`}
+                                className={`shrink-0 transition-transform ${mobileSubOpen ? "rotate-180" : ""}`}
                                 width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"
                             >
                                 <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
                             </svg>
-                        </button>
+                        </div>
 
                         <motion.div
+                            id="mobile-sub-works"
                             initial={false}
                             animate={mobileSubOpen ? "open" : "closed"}
                             variants={{ open: { height: "auto", opacity: 1 }, closed: { height: 0, opacity: 0 } }}
