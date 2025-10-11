@@ -67,30 +67,27 @@ export function usePrefersReducedMotion() {
     return reduced;
 }
 
-/* -------- Background (minimal pour l’exemple) -------- */
+/* -------- Background (identique) -------- */
 export function SiteBackground() {
     const reduced = usePrefersReducedMotion();
 
-    /* ======================== Knobs (tes paramètres) ======================== */
-    const SPEED = 45;   // plus petit = plus rapide (sec A/R)
-    const AMP_X = 260;  // px
-    const AMP_Y = 140;  // px
-    const POWER = 1.08; // 1.00–1.40 → boost d’intensité
-    const SAT = 1.06; // saturation globale
-    const BRIGHT = 1.04; // brightness globale
+    const SPEED = 45;
+    const AMP_X = 260;
+    const AMP_Y = 140;
+    const POWER = 1.08;
+    const SAT = 1.06;
+    const BRIGHT = 1.04;
 
     const a = (x: number) => Math.min(1, x * POWER);
 
-    /* ====================== Parallaxe scroll (3 vitesses) =================== */
     const { scrollY } = useScroll();
     const ySlow = useTransform(scrollY, [0, 800], [0, 40]);
     const yMid = useTransform(scrollY, [0, 800], [0, 80]);
     const yFast = useTransform(scrollY, [0, 800], [0, 140]);
 
-    /* ============== Suivi souris subtil (print screen-friendly) ============= */
     const mx = useMotionValue(0);
     const my = useMotionValue(0);
-    const px = useSpring(mx, { stiffness: 30, damping: 15 }); // lissés
+    const px = useSpring(mx, { stiffness: 30, damping: 15 });
     const py = useSpring(my, { stiffness: 30, damping: 15 });
 
     useEffect(() => {
@@ -98,14 +95,13 @@ export function SiteBackground() {
         const onMove = (e: PointerEvent) => {
             const w = window.innerWidth || 1;
             const h = window.innerHeight || 1;
-            mx.set((e.clientX / w) * 2 - 1); // [-1,1]
+            mx.set((e.clientX / w) * 2 - 1);
             my.set((e.clientY / h) * 2 - 1);
         };
         window.addEventListener("pointermove", onMove, { passive: true });
         return () => window.removeEventListener("pointermove", onMove);
     }, [reduced, mx, my]);
 
-    // Helper: génère x/y pour une couche selon scroll + souris
     const layerShift = (baseY: any, fx: number, fy: number) => ({
         x: reduced ? 0 : (px.get() * fx),
         y: reduced ? 0 : (typeof baseY === "number" ? baseY : (baseY as any)) + (py.get() * fy),
@@ -113,17 +109,15 @@ export function SiteBackground() {
 
     return (
         <>
-            {/* Base + Quadrillage léger */}
             <div className="fixed inset-0 -z-30 bg-[#0B0B12]" />
             <div className="fixed inset-0 -z-20 opacity-[0.05] bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.6)_1px,transparent_1px)] [background-size:22px_22px]" />
 
-            {/* Wrapper FX global : saturation/brightness */}
             <div
                 className="fixed inset-0 -z-10 overflow-hidden pointer-events-none"
                 style={{ filter: `saturate(${SAT}) brightness(${BRIGHT})` }}
                 aria-hidden
             >
-                {/* ==================== Nap 1 — violet/rose ==================== */}
+                {/* Nap 1 */}
                 <motion.div style={layerShift(ySlow, 12, 8)}>
                     <motion.div
                         className="absolute left-[-15%] top-[-10%] h-[70vh] w-[70vw] rounded-[9999px]"
@@ -158,7 +152,7 @@ export function SiteBackground() {
                     />
                 </motion.div>
 
-                {/* ==================== Nap 2 — cyan ==================== */}
+                {/* Nap 2 */}
                 <motion.div style={layerShift(yMid, -16, 10)}>
                     <motion.div
                         className="absolute right-[-12%] top-[10%] h-[65vh] w-[60vw] rounded-[9999px]"
@@ -191,7 +185,7 @@ export function SiteBackground() {
                     />
                 </motion.div>
 
-                {/* ==================== Nap 3 — magenta (profondeur) ==================== */}
+                {/* Nap 3 */}
                 <motion.div style={layerShift(yFast, 8, -6)}>
                     <motion.div
                         className="absolute left-[5%] bottom-[-12%] h-[60vh] w-[55vw] rounded-[9999px]"
@@ -224,7 +218,7 @@ export function SiteBackground() {
                     />
                 </motion.div>
 
-                {/* ==================== Nap 4 — streak large (puissance) ==================== */}
+                {/* Nap 4 */}
                 <motion.div style={layerShift(yMid, 18, 0)}>
                     <motion.div
                         className="absolute inset-0"
@@ -240,7 +234,7 @@ export function SiteBackground() {
                     />
                 </motion.div>
 
-                {/* ==================== Aurora rotatif doux (conic) ==================== */}
+                {/* Aurora conic */}
                 <motion.div
                     className="absolute -inset-1"
                     style={{
@@ -254,7 +248,7 @@ export function SiteBackground() {
                 />
             </div>
 
-            {/* Grain animé + Vignette */}
+            {/* Grain + Vignette */}
             <motion.div
                 aria-hidden
                 className="fixed inset-0 -z-5 mix-blend-overlay pointer-events-none"
@@ -270,7 +264,6 @@ export function SiteBackground() {
             />
             <div className="fixed inset-0 pointer-events-none" style={{ boxShadow: "inset 0 0 220px 80px rgba(0,0,0,0.55)" }} />
 
-            {/* Keyframes internes pour l’aurora & grain */}
             <style>{`
         @keyframes sf-rotate {
           0%   { transform: rotate(0deg) scale(1.4); }
@@ -284,7 +277,6 @@ export function SiteBackground() {
     );
 }
 
-
 /* -------- TopNav avec sous-menu Réalisations -------- */
 export function TopNav() {
     const reduced = usePrefersReducedMotion();
@@ -292,6 +284,18 @@ export function TopNav() {
     const [solid, setSolid] = useState(false);
     const [open, setOpen] = useState(false);
     const [submenuOpen, setSubmenuOpen] = useState(false);
+
+    // 🆕 Mesure du header pour offset d’ancre précis
+    const headerRef = useRef<HTMLElement | null>(null);
+    useEffect(() => {
+        const setOffset = () => {
+            const h = headerRef.current?.offsetHeight ?? 72;
+            document.documentElement.style.setProperty("--header-offset", `${h + 8}px`);
+        };
+        setOffset();
+        window.addEventListener("resize", setOffset);
+        return () => window.removeEventListener("resize", setOffset);
+    }, []);
 
     // ⏳ Timer pour fermer le sous-menu avec délai
     const closeTimerRef = useRef<number | null>(null);
@@ -316,7 +320,12 @@ export function TopNav() {
     };
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-50" style={{ paddingTop: "env(safe-area-inset-top)" }} aria-label="Menu principal">
+        <header ref={headerRef} className="fixed top-0 left-0 right-0 z-50" style={{ paddingTop: "env(safe-area-inset-top)" }} aria-label="Menu principal">
+            {/* Skip link a11y */}
+            <a href="#hero" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-2 bg-black/60 text-white px-3 py-2 rounded-md">
+                Aller au contenu
+            </a>
+
             <motion.nav
                 initial={false}
                 animate={{ opacity: solid ? 0.9 : 0.75, backdropFilter: "blur(10px)" }}
@@ -333,14 +342,14 @@ export function TopNav() {
                     <a
                         href="#dev"
                         onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); goToHomeAndScroll("dev"); }}
-                        className="text-zinc-200 hover:text-white transition"
+                        className="text-zinc-200 hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 rounded-md"
                     >
                         Approche
                     </a>
                     <a
                         href="#services"
                         onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); goToHomeAndScroll("services"); }}
-                        className="text-zinc-200 hover:text-white transition"
+                        className="text-zinc-200 hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 rounded-md"
                     >
                         Services
                     </a>
@@ -357,7 +366,7 @@ export function TopNav() {
                         <a
                             href="#works"
                             onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); goToHomeAndScroll("works"); }}
-                            className="text-zinc-200 hover:text-white transition"
+                            className="text-zinc-200 hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 rounded-md"
                             aria-haspopup="true"
                             aria-expanded={submenuOpen}
                             aria-controls="submenu-realisations"
@@ -377,10 +386,12 @@ export function TopNav() {
                             className="absolute left-0 mt-1.5 flex flex-col rounded-md bg-[#0B0B12]/95 backdrop-blur-md border border-white/10 shadow-lg overflow-hidden min-w-[220px] z-50"
                             role="menu"
                             aria-label="Sous-menu Réalisations"
-                            // Empêche la fermeture si on survole le panneau (hover-intent)
                             onMouseEnter={openNow}
                             onMouseLeave={() => scheduleClose(250)}
                         >
+                            {/* 🆕 Grace area pour éviter la fermeture en diagonale */}
+                            <div aria-hidden className="absolute -top-2 left-0 right-0 h-2" />
+
                             <a href="#/projects/web" className="px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 hover:text-white transition" role="menuitem">
                                 Nos sites web
                             </a>
@@ -396,7 +407,7 @@ export function TopNav() {
                     <a
                         href="#contact"
                         onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); goToHomeAndScroll("contact"); }}
-                        className="rounded-md border border-white/15 px-3 py-1.5 text-zinc-100 hover:text-white hover:border-white/25 transition"
+                        className="rounded-md border border-white/15 px-3 py-1.5 text-zinc-100 hover:text-white hover:border-white/25 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                     >
                         Contact
                     </a>
@@ -438,7 +449,6 @@ export function TopNav() {
 }
 
 /* -------- Footer -------- */
-/* -------- Footer (blended) -------- */
 export function Footer() {
     return (
         <footer
@@ -451,7 +461,6 @@ export function Footer() {
       "
             style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
         >
-            {/* Dégradé haut → fondu dans la page */}
             <div
                 aria-hidden
                 className="pointer-events-none absolute -top-8 left-0 right-0 h-8 
@@ -459,7 +468,6 @@ export function Footer() {
                    supports-[backdrop-filter]:from-[#0B0B12]/45"
             />
 
-            {/* Grain très léger pour matcher ton fond */}
             <div
                 aria-hidden
                 className="pointer-events-none absolute inset-0 mix-blend-overlay opacity-[0.05]"
