@@ -10,6 +10,7 @@ import {
 import ProjectsWeb from "./projects/web";
 import ProjectsApps from "./projects/apps";
 import ProjectsAutomation from "./projects/automation";
+import Mentions from "./projects/Mentions"; // ← AJOUT
 
 // 👉 Importer uniquement depuis le layout ce qui est partagé
 import {
@@ -362,7 +363,7 @@ const SERVICES = [
         tag: "Clarté visuelle",
         kicker: "UI/UX, branding, direction visuelle",
         desc:
-            "Nous concevons des interfaces et des identités sobres, lisibles et durables. Chaque élément visuel est pensé pour renforcer votre image et guider vos utilisateurs avec clarté.",
+            "Nous concevons des interfaces et des identités sobres, lisibles et intemporelles. Chaque élément visuel est pensé pour renforcer votre image et guider vos utilisateurs avec clarté.",
         pillars: [
             "Identité visuelle et direction artistique",
             "Interfaces nettes et lisibles",
@@ -376,7 +377,7 @@ const SERVICES = [
         tag: "Expérience soignée",
         kicker: "React, Next.js, Tailwind",
         desc:
-            "Des sites élégants et réactifs, construits pour durer. Du code propre, des transitions fluides et une attention particulière portée à l’expérience utilisateur et au contenu.",
+            "Des sites élégants et réactifs, construits pour durer. Du code propre, des transitions fluides et une attention particulière portée à l’expérience utilisateur ainsi qu'au contenu.",
         pillars: [
             "Développement web moderne et léger",
             "Expérience utilisateur et interface responsive",
@@ -978,6 +979,7 @@ export default function App() {
     if (hash === "/projects/web") return <ProjectsWeb />;
     if (hash === "/projects/apps") return <ProjectsApps />;
     if (hash === "/projects/automation") return <ProjectsAutomation />;
+    if (hash === "/mentions") return <Mentions />; // ← AJOUT
 
     return (
         <main className="relative min-h-screen text-white antialiased [text-size-adjust:100%] selection:bg-white/20">

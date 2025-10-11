@@ -204,7 +204,49 @@ export function TopNav() {
     );
 }
 
-/* -------- Footer minimal si besoin -------- */
+/* -------- Footer -------- */
 export function Footer() {
-    return null;
+    return (
+        <footer
+            className="relative mt-24 border-t border-white/10 bg-[#0B0B12]/90 text-zinc-400"
+            style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+        >
+            <div className="mx-auto max-w-6xl px-5 sm:px-8 py-10">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <p className="text-[11px] sm:text-[12px] uppercase tracking-[0.25em] text-zinc-500">
+                        SmartFlow
+                    </p>
+
+                    <nav className="flex flex-wrap items-center gap-4 text-sm">
+                        <a
+                            href="#/"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                goToHomeAndScroll("hero");
+                            }}
+                            className="hover:text-white transition"
+                        >
+                            smartflow
+                        </a>
+                        <a
+                            href="#/mentions"
+                            className="hover:text-white transition"
+                        >
+                            mentions légales
+                        </a>
+                        <a
+                            href="mailto:contact@smartflowgroup.ch"
+                            className="hover:text-white transition"
+                        >
+                            contact@smartflowgroup.ch
+                        </a>
+                    </nav>
+                </div>
+
+                <div className="mt-6 text-xs text-zinc-500">
+                    © {new Date().getFullYear()} SmartFlow. Tous droits réservés.
+                </div>
+            </div>
+        </footer>
+    );
 }
