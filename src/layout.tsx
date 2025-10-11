@@ -155,7 +155,7 @@ export function TopNav() {
                                 Nos apps métier
                             </a>
                             <a href="#/projects/automation" className="px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 hover:text-white transition" role="menuitem">
-                                Nos programmes automatisés
+                                Nos programmes
                             </a>
                         </motion.div>
                     </div>

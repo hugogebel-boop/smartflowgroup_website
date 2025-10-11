@@ -8,7 +8,6 @@ export default function ProjectsWeb() {
         window.scrollTo({ top: 0 });
     }, []);
 
-    // ⬇️ Helper local : Home → scroll jusqu'à la section demandée
     const goHomeThenScrollTo = (targetId: string) => {
         const isHome = window.location.hash === "#/" || window.location.hash === "" || window.location.hash === "#";
         const doScroll = () => {
@@ -21,19 +20,13 @@ export default function ProjectsWeb() {
             return;
         }
 
-        // 1) revenir à la home
         window.location.hash = "#/";
-        // 2) quand la home est montée, on scrolle (on réessaie un court instant si besoin)
         let tries = 0;
         const tryScroll = () => {
             const el = document.getElementById(targetId);
-            if (el) {
-                el.scrollIntoView({ behavior: "smooth", block: "start" });
-            } else if (tries++ < 20) {
-                requestAnimationFrame(tryScroll);
-            }
+            if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+            else if (tries++ < 20) requestAnimationFrame(tryScroll);
         };
-        // petit délai pour laisser le rendu se faire
         setTimeout(() => requestAnimationFrame(tryScroll), 200);
     };
 
@@ -43,7 +36,7 @@ export default function ProjectsWeb() {
             title: "Âme du Monde",
             client: "Agence de voyages sur mesure",
             excerpt:
-                "Identité raffinée, direction artistique complète et site vitrine fluide. Navigation claire, typographie élégante, design immersif.",
+                "Nous avons accompagné Âme du Monde dans la création d’une identité à son image : élégante et inspirante. De la direction artistique au développement du site vitrine, chaque détail a été pensé pour offrir une expérience fluide et immersive.",
             image: "/assets/ame-du-monde.png",
             url: "https://amedumonde.ch",
         },
@@ -52,7 +45,7 @@ export default function ProjectsWeb() {
             title: "Travel Génie Civil",
             client: "Association EPFL",
             excerpt:
-                "Site événementiel pour le voyage d’étude du Génie Civil 2025. Étapes, partenaires et équipe dans une interface épurée et mobile-first.",
+                "Création du site événementiel du voyage d’étude du Génie Civil 2025, conçu pour présenter le projet et ses étapes, et soutenir la recherche de partenaires.",
             image: "/assets/travel-gc.png",
             url: "https://travelgc.ch",
         },
@@ -68,7 +61,7 @@ export default function ProjectsWeb() {
                 <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-zinc-400">Projets</p>
                 <h1 className="mt-2 text-3xl sm:text-4xl font-semibold">Nos sites web</h1>
                 <p className="mt-3 text-sm sm:text-base text-zinc-300 max-w-2xl">
-                    Des sites élégants, rapides et lisibles — pensés pour être beaux, utiles et durables.
+                    Des sites élégants et soignés, conçus pour une expérience web naturelle et agréable.
                 </p>
             </section>
 
@@ -76,23 +69,31 @@ export default function ProjectsWeb() {
             <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-12 sm:pb-20">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-10">
                     {PROJECTS.map((p) => (
-                        <article key={p.id} className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm">
-                            <div className="aspect-[16/10] overflow-hidden">
+                        <article
+                            key={p.id}
+                            className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm transition hover:bg-white/[0.07]"
+                        >
+                            <a
+                                href={p.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block aspect-[16/10] overflow-hidden"
+                            >
                                 <img
                                     src={p.image}
                                     alt={`${p.title} – aperçu du site`}
-                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"
                                     loading="lazy"
                                     decoding="async"
                                 />
-                            </div>
+                            </a>
 
                             <div className="p-5 sm:p-6">
                                 <h2 className="text-lg sm:text-xl font-semibold tracking-tight">{p.title}</h2>
                                 <p className="mt-1 text-[12px] uppercase tracking-[0.2em] text-zinc-400">{p.client}</p>
                                 <p className="mt-3 text-sm text-zinc-300">{p.excerpt}</p>
 
-                                <div className="mt-5 flex flex-wrap gap-3">
+                                <div className="mt-5">
                                     <a
                                         href={p.url}
                                         target="_blank"
@@ -125,8 +126,10 @@ export default function ProjectsWeb() {
             {/* CTA */}
             <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-20">
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8 text-center">
-                    <h3 className="text-xl sm:text-2xl font-semibold">Un projet en tête ?</h3>
-                    <p className="mt-2 text-sm sm:text-base text-zinc-300">Parlez-nous de votre site. On vous propose une approche claire et efficace.</p>
+                    <h3 className="text-xl sm:text-2xl font-semibold">Un projet qui mérite de prendre forme ?</h3>
+                    <p className="mt-2 text-sm sm:text-base text-zinc-300">
+                        Parlez-nous de votre projet, nous lui donnerons vie.
+                    </p>
                     <button
                         onClick={() => goHomeThenScrollTo("contact")}
                         className="mt-5 inline-flex items-center justify-center rounded-full bg-white/10 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-white/20"
