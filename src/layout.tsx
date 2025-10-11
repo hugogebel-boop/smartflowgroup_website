@@ -285,6 +285,31 @@ export function TopNav() {
     const [open, setOpen] = useState(false);
     const [submenuOpen, setSubmenuOpen] = useState(false);
 
+    // état mémorisé (session) pour l’accordéon mobile
+    const [mobileSubOpen, setMobileSubOpen] = useState<boolean>(() => {
+        if (typeof window === "undefined") return false;
+        return sessionStorage.getItem("sf_mobile_sub_open") === "1";
+    });
+
+    useEffect(() => {
+        try {
+            sessionStorage.setItem("sf_mobile_sub_open", mobileSubOpen ? "1" : "0");
+        } catch { }
+    }, [mobileSubOpen]);
+
+    // ref pour scroller le sous-menu dans la vue quand on l’ouvre
+    const mobileSubRef = useRef<HTMLDivElement | null>(null);
+
+    // si le burger est ouvert ET l’accordéon aussi, on s’assure qu’il est visible
+    useEffect(() => {
+        if (open && mobileSubOpen && mobileSubRef.current) {
+            mobileSubRef.current.scrollIntoView({
+                behavior: reduced ? "auto" : "smooth",
+                block: "nearest",
+            });
+        }
+    }, [open, mobileSubOpen, reduced]);
+
     // 🆕 Mesure du header pour offset d’ancre précis
     const headerRef = useRef<HTMLElement | null>(null);
     useEffect(() => {
@@ -438,10 +463,77 @@ export function TopNav() {
                 className="sm:hidden overflow-hidden bg-[#0B0B12]/95 backdrop-blur-md border-b border-white/10"
             >
                 <div className="grid gap-1.5 p-4 text-[15px]">
-                    <a href="#dev" onClick={(e) => { e.preventDefault(); setOpen(false); setTimeout(() => goToHomeAndScroll("dev"), 120); }} className="block rounded-md px-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white">Approche</a>
-                    <a href="#services" onClick={(e) => { e.preventDefault(); setOpen(false); setTimeout(() => goToHomeAndScroll("services"), 120); }} className="block rounded-md px-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white">Services</a>
-                    <a href="#works" onClick={(e) => { e.preventDefault(); setOpen(false); setTimeout(() => goToHomeAndScroll("works"), 120); }} className="block rounded-md px-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white">Réalisations</a>
-                    <a href="#contact" onClick={(e) => { e.preventDefault(); setOpen(false); setTimeout(() => goToHomeAndScroll("contact"), 120); }} className="block rounded-md border border-white/15 px-2 py-2 text-zinc-200 hover:text-white hover:border-white/25">Contact</a>
+                    <a
+                        href="#dev"
+                        onClick={(e) => { e.preventDefault(); setOpen(false); setTimeout(() => goToHomeAndScroll("dev"), 120); }}
+                        className="block rounded-md px-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white"
+                    >
+                        Approche
+                    </a>
+
+                    <a
+                        href="#services"
+                        onClick={(e) => { e.preventDefault(); setOpen(false); setTimeout(() => goToHomeAndScroll("services"), 120); }}
+                        className="block rounded-md px-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white"
+                    >
+                        Services
+                    </a>
+
+                    {/* ===== Accordéon Réalisations (mobile) ===== */}
+                    <div className="rounded-md" ref={mobileSubRef}>
+                        <button
+                            type="button"
+                            aria-expanded={mobileSubOpen}
+                            onClick={() => setMobileSubOpen(v => !v)}
+                            className="w-full flex items-center justify-between gap-2 rounded-md px-2 py-2 text-left text-zinc-300 hover:bg-white/5 hover:text-white"
+                        >
+                            <span>Réalisations</span>
+                            <svg
+                                className={`transition-transform ${mobileSubOpen ? "rotate-180" : ""}`}
+                                width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"
+                            >
+                                <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+                            </svg>
+                        </button>
+
+                        <motion.div
+                            initial={false}
+                            animate={mobileSubOpen ? "open" : "closed"}
+                            variants={{ open: { height: "auto", opacity: 1 }, closed: { height: 0, opacity: 0 } }}
+                            transition={{ duration: 0.2, ease: "easeOut" }}
+                            className="overflow-hidden"
+                        >
+                            <a
+                                href="#/projects/web"
+                                onClick={(e) => { e.preventDefault(); setOpen(false); window.location.hash = "#/projects/web"; }}
+                                className="block pl-8 pr-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white"
+                            >
+                                Nos sites web
+                            </a>
+                            <a
+                                href="#/projects/apps"
+                                onClick={(e) => { e.preventDefault(); setOpen(false); window.location.hash = "#/projects/apps"; }}
+                                className="block pl-8 pr-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white"
+                            >
+                                Nos apps métier
+                            </a>
+                            <a
+                                href="#/projects/automation"
+                                onClick={(e) => { e.preventDefault(); setOpen(false); window.location.hash = "#/projects/automation"; }}
+                                className="block pl-8 pr-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white"
+                            >
+                                Nos programmes
+                            </a>
+                        </motion.div>
+                    </div>
+
+                    <a
+                        href="#contact"
+                        onClick={(e) => { e.preventDefault(); setOpen(false); setTimeout(() => goToHomeAndScroll("contact"), 120); }}
+                        className="block rounded-md border border-white/15 px-2 py-2 text-zinc-200 hover:text-white hover:border-white/25"
+                    >
+                        Contact
+                    </a>
                 </div>
             </motion.div>
         </header>
