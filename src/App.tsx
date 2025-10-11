@@ -329,13 +329,16 @@ type ShapeKey = "bolt" | "wave" | "diamond" | "hex";
 /* =========================================================
    DecoShape — glow centré qui s’étend vers l’extérieur (iOS-safe)
    ========================================================= */
+/* =========================================================
+   DecoShape — glow centré plus large et marqué (iOS-safe)
+   ========================================================= */
 export function DecoShape({
     shape,
     color,
     tint,
     active,
     sizePct = 30,
-    intensity = 1.15,
+    intensity = 1.25, // intensité légèrement augmentée
 }: {
     shape: ShapeKey;
     color: string;
@@ -354,17 +357,21 @@ export function DecoShape({
     const iosMode = isTouch || isIOS;
 
     const isNarrow = typeof window !== "undefined" ? window.innerWidth < 420 : false;
-    const BLUR_STD_DEV = iosMode ? (isNarrow ? 4 : 8) : 12;
+    const BLUR_STD_DEV = iosMode ? (isNarrow ? 8 : 12) : 26; // blur plus grand (desktop)
 
-    const widthPx = `min(${sizePct}%, 120px)`;
+    const widthPx = `min(${sizePct}%, 130px)`; // halo un peu plus large
     const strong = (a: number) => Math.min(1, a * intensity);
 
     const shapeEl = (() => {
         switch (shape) {
-            case "bolt": return { tag: "path" as const, props: { d: "M60 10 L35 55 H60 L30 110 L90 50 H60 L90 10 Z" } };
-            case "wave": return { tag: "path" as const, props: { d: "M10 70 C30 40, 70 100, 90 70 S150 40, 170 70" } };
-            case "diamond": return { tag: "polygon" as const, props: { points: "100,20 40,80 100,140 160,80" } };
-            default: return { tag: "polygon" as const, props: { points: "100,20 55,45 55,95 100,120 145,95 145,45" } };
+            case "bolt":
+                return { tag: "path" as const, props: { d: "M60 10 L35 55 H60 L30 110 L90 50 H60 L90 10 Z" } };
+            case "wave":
+                return { tag: "path" as const, props: { d: "M10 70 C30 40, 70 100, 90 70 S150 40, 170 70" } };
+            case "diamond":
+                return { tag: "polygon" as const, props: { points: "100,20 40,80 100,140 160,80" } };
+            default:
+                return { tag: "polygon" as const, props: { points: "100,20 55,45 55,95 100,120 145,95 145,45" } };
         }
     })();
 
@@ -379,71 +386,76 @@ export function DecoShape({
     const idClip = `sf-clip-${uid}`;
     const idGrad = `sf-inner-grad-${uid}`;
     const idBlur = `sf-inner-blur-${uid}`;
-
-    const FILTER_BOX = { x: -120, y: -120, w: 480, h: 420 };
+    const FILTER_BOX = { x: -150, y: -150, w: 520, h: 460 };
 
     return (
         <div
             className="absolute pointer-events-none z-0"
             style={{ right: "0.5rem", bottom: "0.5rem", width: widthPx, height: widthPx }}
         >
-            {/* Halo centré (CSS radial) — naît au centre puis se diffuse */}
+            {/* Halo centré plus large et marqué */}
             <motion.div
                 aria-hidden
                 className="absolute inset-0"
                 style={{
-                    // centre exact (50% 50%) ; closest-side pour partir du centre et remplir sans dépasser
-                    background: `radial-gradient(closest-side, ${color}40 0%, ${color}33 35%, transparent 70%)`,
-                    filter: `blur(${iosMode ? (isNarrow ? 8 : 12) : 22}px)`,
+                    // rayon agrandi, diffusion plus prononcée
+                    background: `radial-gradient(circle at 50% 50%, ${color}55 0%, ${color}44 30%, ${color}22 60%, transparent 80%)`,
+                    filter: `blur(${iosMode ? (isNarrow ? 12 : 16) : 32}px)`, // halo plus fort
                     borderRadius: "9999px",
                     transformOrigin: "50% 50%",
                     willChange: "opacity, transform, filter",
                 }}
-                initial={{ opacity: 0.12, scale: 0.85 }}
+                initial={{ opacity: 0.15, scale: 0.8 }}
                 animate={
                     active && !reduced
-                        ? { opacity: [0.16, 0.26, 0.30], scale: [0.88, 0.97, 1.0] }
-                        : { opacity: 0.12, scale: 0.85 }
+                        ? { opacity: [0.22, 0.32, 0.38], scale: [0.9, 0.98, 1.05] } // effet plus respirant
+                        : { opacity: 0.14, scale: 0.8 }
                 }
-                transition={{ duration: 1.0, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
             />
 
-            {/* SVG — léger peps (drop-shadows desktop), reste doux sur iOS */}
+            {/* SVG net avec drop-shadow */}
             <motion.svg
                 width="100%"
                 height="100%"
                 viewBox="0 0 200 160"
                 preserveAspectRatio="xMidYMid meet"
                 style={{ overflow: "visible" }}
-                initial={{ opacity: 0.1, transform: "scale(0.96)", filter: iosMode ? undefined : `drop-shadow(0 0 0 ${color}00)` }}
+                initial={{
+                    opacity: 0.12,
+                    transform: "scale(0.96)",
+                    filter: iosMode ? undefined : `drop-shadow(0 0 0 ${color}00)`,
+                }}
                 animate={
                     active && !reduced
                         ? iosMode
-                            ? { opacity: [0.12, 0.22, strong(0.9)], transform: ["scale(0.96)", "scale(0.99)", "scale(1)"] }
+                            ? {
+                                opacity: [0.15, 0.26, strong(0.9)],
+                                transform: ["scale(0.96)", "scale(1)", "scale(1.05)"],
+                            }
                             : {
-                                opacity: [0.12, 0.3, strong(1)],
-                                transform: ["scale(0.965)", "scale(0.995)", "scale(1)"],
+                                opacity: [0.18, 0.36, strong(1)],
+                                transform: ["scale(0.965)", "scale(1)", "scale(1.06)"],
                                 filter: [
                                     `drop-shadow(0 0 0 ${color}00)`,
-                                    `drop-shadow(0 0 8px ${color}66)`,
-                                    `drop-shadow(0 0 18px ${color}AA) drop-shadow(0 0 30px ${color}80)`,
+                                    `drop-shadow(0 0 10px ${color}88)`,
+                                    `drop-shadow(0 0 28px ${color}AA) drop-shadow(0 0 50px ${color}77)`,
                                 ] as any,
                             }
                         : iosMode
-                            ? { opacity: 0.1, transform: "scale(0.96)" }
-                            : { opacity: 0.1, transform: "scale(0.96)", filter: `drop-shadow(0 0 0 ${color}00)` }
+                            ? { opacity: 0.1, transform: "scale(0.95)" }
+                            : { opacity: 0.1, transform: "scale(0.95)", filter: `drop-shadow(0 0 0 ${color}00)` }
                 }
-                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 1.0, ease: [0.22, 1, 0.36, 1] }}
             >
                 <defs>
                     {shapeEl.tag === "path"
                         ? <path id={idShape} {...(shapeEl.props as any)} />
-                        : <polygon id={idShape} {...(shapeEl.props as any)} />
-                    }
+                        : <polygon id={idShape} {...(shapeEl.props as any)} />}
                     <clipPath id={idClip}><use href={`#${idShape}`} /></clipPath>
                     <radialGradient id={idGrad} cx="50%" cy="50%" r="55%">
-                        <stop offset="0%" stopColor={color} stopOpacity={0.58} />
-                        <stop offset="42%" stopColor={color} stopOpacity={0.30} />
+                        <stop offset="0%" stopColor={color} stopOpacity={0.6} />
+                        <stop offset="42%" stopColor={color} stopOpacity={0.35} />
                         <stop offset="80%" stopColor={color} stopOpacity={0} />
                     </radialGradient>
                     <filter
@@ -459,24 +471,36 @@ export function DecoShape({
                     </filter>
                 </defs>
 
-                {/* Remplissage interne doux (facultatif) */}
                 {iosMode ? (
                     <g clipPath={`url(#${idClip})`}>
-                        <rect x={-50} y={-40} width={300} height={240} fill={`url(#${idGrad})`} filter={`url(#${idBlur})`} opacity={active && !reduced ? 1 : 0} />
+                        <rect
+                            x={-50}
+                            y={-40}
+                            width={300}
+                            height={240}
+                            fill={`url(#${idGrad})`}
+                            filter={`url(#${idBlur})`}
+                            opacity={active && !reduced ? 1 : 0}
+                        />
                         <use href={`#${idShape}`} fill={tint} opacity="0.25" filter={`url(#${idBlur})`} />
                     </g>
                 ) : (
                     <g clipPath={`url(#${idClip})`} filter={`url(#${idBlur})`}>
-                        <rect x={-50} y={-40} width={300} height={240} fill={`url(#${idGrad})`} opacity={active && !reduced ? 1 : 0} />
+                        <rect
+                            x={-50}
+                            y={-40}
+                            width={300}
+                            height={240}
+                            fill={`url(#${idGrad})`}
+                            opacity={active && !reduced ? 1 : 0}
+                        />
                         <use href={`#${idShape}`} fill={tint} opacity="0.25" />
                     </g>
                 )}
 
-                {/* Trait net */}
                 {shapeEl.tag === "path"
                     ? <path {...(shapeEl.props as any)} {...baseStroke} />
-                    : <polygon {...(shapeEl.props as any)} {...(baseStroke as any)} />
-                }
+                    : <polygon {...(shapeEl.props as any)} {...(baseStroke as any)} />}
             </motion.svg>
         </div>
     );
