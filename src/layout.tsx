@@ -72,7 +72,7 @@ export function SiteBackground() {
     const reduced = usePrefersReducedMotion();
 
     /* ======================== Knobs (tes paramètres) ======================== */
-    const SPEED = 36;   // plus petit = plus rapide (sec A/R)
+    const SPEED = 45;   // plus petit = plus rapide (sec A/R)
     const AMP_X = 260;  // px
     const AMP_Y = 140;  // px
     const POWER = 1.08; // 1.00–1.40 → boost d’intensité
@@ -438,45 +438,62 @@ export function TopNav() {
 }
 
 /* -------- Footer -------- */
+/* -------- Footer (blended) -------- */
 export function Footer() {
     return (
         <footer
-            className="relative mt-24 border-t border-white/10 bg-[#0B0B12]/90 text-zinc-400"
+            className="
+        relative mt-24 border-t border-white/15 
+        bg-[#0B0B12]/55 
+        supports-[backdrop-filter]:bg-[#0B0B12]/45
+        supports-[backdrop-filter]:backdrop-blur-md
+        text-zinc-400
+      "
             style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
         >
-            <div className="mx-auto max-w-6xl px-5 sm:px-8 py-10">
+            {/* Dégradé haut → fondu dans la page */}
+            <div
+                aria-hidden
+                className="pointer-events-none absolute -top-8 left-0 right-0 h-8 
+                   bg-gradient-to-t from-[#0B0B12]/55 to-transparent
+                   supports-[backdrop-filter]:from-[#0B0B12]/45"
+            />
+
+            {/* Grain très léger pour matcher ton fond */}
+            <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 mix-blend-overlay opacity-[0.05]"
+                style={{
+                    backgroundImage:
+                        "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.5'/></svg>\")",
+                    backgroundSize: "160px 160px",
+                }}
+            />
+
+            <div className="relative mx-auto max-w-6xl px-5 sm:px-8 py-10">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <p className="text-[11px] sm:text-[12px] uppercase tracking-[0.25em] text-zinc-500">
+                    <p className="text-[11px] sm:text-[12px] uppercase tracking-[0.25em] text-zinc-500/90">
                         SmartFlow
                     </p>
 
                     <nav className="flex flex-wrap items-center gap-4 text-sm">
                         <a
                             href="#/"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                goToHomeAndScroll("hero");
-                            }}
+                            onClick={(e) => { e.preventDefault(); goToHomeAndScroll("hero"); }}
                             className="hover:text-white transition"
                         >
                             smartflow
                         </a>
-                        <a
-                            href="#/mentions"
-                            className="hover:text-white transition"
-                        >
+                        <a href="#/mentions" className="hover:text-white transition">
                             mentions légales
                         </a>
-                        <a
-                            href="mailto:contact@smartflowgroup.ch"
-                            className="hover:text-white transition"
-                        >
+                        <a href="mailto:contact@smartflowgroup.ch" className="hover:text-white transition">
                             contact@smartflowgroup.ch
                         </a>
                     </nav>
                 </div>
 
-                <div className="mt-6 text-xs text-zinc-500">
+                <div className="mt-6 text-xs text-zinc-500/80">
                     © {new Date().getFullYear()} SmartFlow. Tous droits réservés.
                 </div>
             </div>
