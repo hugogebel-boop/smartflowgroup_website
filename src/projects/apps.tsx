@@ -165,15 +165,19 @@ function ImageCarousel({ images, title }: { images: string[]; title: string }) {
                 )}
             </figure>
 
-            {/* Indicateurs (clic) */}
+            {/* Indicateurs (clic pour naviguer) */}
             {total > 1 && (
                 <div className="mt-3 flex items-center justify-center gap-2">
                     {images.map((_, i) => (
                         <button
                             key={i}
-                            onClick={() => goTo(i)}
+                            onClick={() => setIdx(i)}
                             aria-label={`Aller à l’image ${i + 1}`}
-                            className={`h-2.5 w-2.5 rounded-full ${i === idx ? "bg-zinc-200" : "bg-zinc-600/60 hover:bg-zinc-500/80"
+                            className={`flex items-center justify-center p-0 border-0 outline-none cursor-pointer
+          before:block before:h-[10px] before:w-[10px] before:rounded-full before:content-['']
+          before:transition-colors before:duration-300 ${i === idx
+                                    ? "before:bg-zinc-200"
+                                    : "before:bg-zinc-600/60 hover:before:bg-zinc-500/80"
                                 }`}
                         />
                     ))}
