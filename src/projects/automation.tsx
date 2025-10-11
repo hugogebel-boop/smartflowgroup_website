@@ -15,99 +15,41 @@ type Program = {
 const PROGRAMS: Program[] = [
     {
         id: "hooks-generator",
-        title: "Générateur d’accroches sponsors",
-        tagline: "Analyse de site + synthèse → phrase d’ouverture personnalisée.",
+        title: "Générateur d’accroches",
+        tagline: "CSV/Excel (entreprise, URL) → accroche + amorce d’e-mail.",
         description:
-            "Un script qui parcourt un site d’entreprise, extrait les éléments saillants (secteurs, projets, mots-clés) et rédige une accroche courte, claire et vérifiable pour vos emails de prospection.",
+            "À partir d’un fichier avec le nom d’entreprise et son URL, le script récupère quelques infos du site et rédige une accroche courte. En option, il génère aussi une amorce d’e-mail personnalisée via l’API de chat.",
         features: [
-            "Extraction sémantique (titre, méta, contenus clés)",
-            "Vérifications factuelles et filtrage du bruit",
-            "Accroche courte au ton étudiant-pro/pro",
-            "Export CSV/Excel pour intégration directe",
+            "Lecture CSV/Excel (company_name, website_url)",
+            "Récupération basique d’infos depuis le site (titres/sections)",
+            "Accroche courte et vérifiable (1–2 lignes)",
+            "Amorce d’e-mail 2–4 phrases (optionnelle)",
+            "Export CSV/XLSX avec statut et horodatage",
         ],
-        input: "Nom d’entreprise, URL (CSV)",
-        output: "Accroche personnalisée, statut, horodatage (CSV/XLSX)",
-        stack: "Python, parsing HTML, régex, pipeline de post-édition",
+        input: "CSV/XLSX : company_name, website_url (http/https)",
+        output:
+            "CSV/XLSX : hook, mail_opening (optionnel), status, timestamp",
+        stack:
+            "Python, extraction HTML, simple règles/regex, API de chat pour la génération",
     },
     {
         id: "bulk-mailer",
-        title: "Envoi d’emails en lot (personnalisés)",
-        tagline: "Objet + accroche personnalisée + corps standardisé, suivi automatique.",
+        title: "Envoi d’e-mails personnalisés",
+        tagline: "Construit et envoie le bon message à la bonne personne.",
         description:
-            "Automatise l’envoi d’emails depuis un fichier source en injectant l’accroche par contact et en traçant les envois, erreurs et relances.",
+            "À partir d’un fichier avec entreprise, e-mail, accroche et contenu, le programme assemble le message final et l’envoie au destinataire indiqué. Il journalise les envois et les erreurs éventuelles.",
         features: [
-            "Personnalisation par contact (objet/accroche)",
-            "Gestion des erreurs et reprise",
-            "Journal d’envoi, date/heure et statut",
-            "Pré-visualisation ‘dry-run’ avant envoi réel",
+            "Lecture CSV/Excel (company, email, hook, body)",
+            "Construction du mail (objet/corps) à partir des champs fournis",
+            "Envoi au destinataire exact (colonne email requise)",
+            "Mode test (dry-run) avant envoi réel",
+            "Journal d’envoi avec statut, date/heure et message d’erreur",
         ],
-        input: "CSV: email, objet, accroche, message, signature",
-        output: "Log d’envoi + fichier enrichi (statut, date)",
-        stack: "Python, SMTP/API mail, gestion des quotas",
-    },
-    {
-        id: "crm-enrichment",
-        title: "Enrichissement CRM depuis le web",
-        tagline: "Complète vos listes (emails, secteurs, mots-clés) de façon fiable.",
-        description:
-            "À partir d’un simple fichier d’entreprises, le programme tente de retrouver les sites, pages contacts et données utiles, puis met à jour votre base.",
-        features: [
-            "Recherche de domaines & contacts",
-            "Détection de secteurs (règles + mots-clés)",
-            "Nettoyage & normalisation des champs",
-            "Exports prêts pour Google Sheets/Excel",
-        ],
-        input: "CSV minimal (nom entreprise, éventuellement site)",
-        output: "CSV/XLSX enrichi (site, email, secteur, tags)",
-        stack: "Python, normalisation, heuristiques secteur",
-    },
-    {
-        id: "reporting-auto",
-        title: "Rapports automatiques hebdo/mensuels",
-        tagline: "Collecte, agrégation et envoi ponctuel sans intervention.",
-        description:
-            "Orchestre l’agrégation de données (comptabilité, ventes, trafic) et diffuse un rapport prêt à lire par email ou dans votre dossier partagé.",
-        features: [
-            "Planification (hebdo/mensuel)",
-            "Agrégation multi-sources (CSV, Sheets, APIs)",
-            "Génération PDF/HTML lisible",
-            "Envoi ou dépôt automatique (Drive/Share)",
-        ],
-        input: "Sources CSV/Sheets/APIs, gabarit de rapport",
-        output: "PDF/HTML + archive des versions",
-        stack: "Python, planificateur, génération PDF",
-    },
-    {
-        id: "files-to-sheets",
-        title: "Synchronisation Fichiers → Sheets/Excel",
-        tagline: "Met à jour vos tableaux à partir de dossiers vivants.",
-        description:
-            "Surveille un dossier (devis, factures, mesures) et recopie les métriques utiles dans un tableau, avec historisation, pour un suivi toujours à jour.",
-        features: [
-            "Surveillance de dossier (ajout/modif)",
-            "Extraction de champs (nommage intelligent)",
-            "Historisation des révisions",
-            "Tableau ‘toujours à jour’",
-        ],
-        input: "Dossier local/Drive et règles d’extraction",
-        output: "Google Sheets/Excel structuré",
-        stack: "Python, Watcher, APIs Sheets/Office",
-    },
-    {
-        id: "ops-windows",
-        title: "Automatisations Windows & PowerShell",
-        tagline: "Scripts d’exploitation pour postes et serveurs.",
-        description:
-            "Des scripts PowerShell fiables pour tâches d’ops : sauvegardes, nettoyage, packaging, déploiements ou génération de rapports systèmes.",
-        features: [
-            "Exécution planifiée & journaux",
-            "Sécurisation des variables/credentials",
-            "Rapports récapitulatifs",
-            "Intégrable à vos outils internes",
-        ],
-        input: "Paramètres d’environnement et planning",
-        output: "Logs, états, fichiers de sortie",
-        stack: "PowerShell, tâches planifiées, fichiers/REST",
+        input:
+            "CSV/XLSX : company_name, email, hook, body (+ éventuellement subject, signature)",
+        output:
+            "Log d’envoi + fichier enrichi (status, timestamp, error_message le cas échéant)",
+        stack: "Python, SMTP ou API e-mail, gestion d’erreurs et reprise simple",
     },
 ];
 
@@ -140,9 +82,7 @@ export default function ProjectsAutomation() {
                     Nos programmes automatisés
                 </h1>
                 <p className="mt-3 text-sm sm:text-base text-zinc-300 max-w-3xl">
-                    Des processus qui connectent vos outils et vous font gagner un temps précieux.
-                    Chaque cellule ci-dessous décrit un programme réel que nous adaptons à vos
-                    données et à vos contraintes.
+                    Des automatisations développées sur mesure : elles s’intègrent à vos outils, traitent vos données et exécutent vos tâches répétitives, pour simplifier, accélérer et fiabiliser vos processus.
                 </p>
             </section>
 
@@ -163,7 +103,9 @@ export default function ProjectsAutomation() {
                                 </p>
                             </header>
 
-                            <p className="mt-4 text-sm leading-6 text-zinc-200">{p.description}</p>
+                            <p className="mt-4 text-sm leading-6 text-zinc-200">
+                                {p.description}
+                            </p>
 
                             <ul className="mt-4 space-y-2">
                                 {p.features.map((f, i) => (
@@ -191,7 +133,7 @@ export default function ProjectsAutomation() {
 
                             <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
                                 <span className="text-[12px] text-zinc-400">
-                                    Adaptable à vos données et outils
+                                    Adaptable à vos colonnes et contraintes
                                 </span>
                                 <button
                                     onClick={goToContact}
@@ -207,13 +149,13 @@ export default function ProjectsAutomation() {
                 {/* Bandeau final */}
                 <div className="mt-10 sm:mt-12 rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6 text-center">
                     <p className="text-sm sm:text-base text-zinc-200">
-                        Vous avez un cas spécifique (API interne, ERP, mesures labo, reporting) ?
+                        Vous avez un processus, un fichier ou une tâche à automatiser ?
                     </p>
                     <button
                         onClick={goToContact}
                         className="mt-3 inline-block rounded-xl border border-white/20 px-4 py-2 text-sm font-medium hover:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/30"
                     >
-                        Décrivez-nous votre flux → on l’automatise proprement
+                        Décrivez-nous votre besoin → on le transforme en script efficace
                     </button>
                 </div>
             </section>
