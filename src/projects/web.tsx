@@ -1,6 +1,6 @@
 // …imports
 import React, { useEffect } from "react";
-import { SiteBackground, TopNav, Footer } from "../App";
+import { SiteBackground, TopNav, Footer } from "../layout";
 
 export default function ProjectsWeb() {
     useEffect(() => {

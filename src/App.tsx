@@ -1,438 +1,46 @@
+// src/App.tsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { motion, useScroll, useMotionValueEvent, useInView } from "framer-motion";
+import {
+    motion,
+    useScroll,
+    useMotionValueEvent,
+    useInView,
+} from "framer-motion";
+
 import ProjectsWeb from "./projects/web";
 import ProjectsApps from "./projects/apps";
 import ProjectsAutomation from "./projects/automation";
 
+// 👉 Importer uniquement depuis le layout ce qui est partagé
+import {
+    SiteBackground,
+    TopNav,
+    Footer,
+    goToHomeAndScroll,
+    usePrefersReducedMotion,
+} from "./layout";
 
 /* =========================================================
-   Constantes (hors composants pour éviter les recréations)
+   Helpers locaux
    ========================================================= */
 const isClient = typeof window !== "undefined";
-
-const NOISE_BG =
-    'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'160\' height=\'160\' viewBox=\'0 0 160 160\'><filter id=\'n\'><feTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'2\' stitchTiles=\'stitch\'/><feColorMatrix type=\'saturate\' values=\'0\'/></filter><rect width=\'100%\' height=\'100%\' filter=\'url(%23n)\' opacity=\'.5\'/></svg>")';
-
-/* =========================================================
-   Hooks utilitaires
-   ========================================================= */
-// Navigation fluide entre les sections, même depuis une autre page
-function goToHomeAndScroll(targetId: string) {
-    const current = window.location.hash;
-
-    // Fonction de scroll doux
-    const scrollToTarget = () => {
-        const el = document.getElementById(targetId);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    };
-
-    if (current === "#/" || current === "" || current === "#") {
-        // Déjà sur la home → on scroll directement
-        scrollToTarget();
-    } else {
-        // Autre page → retour à la home puis scroll après un court délai
-        window.location.hash = "#/";
-        setTimeout(scrollToTarget, 300);
-    }
-}
-
-function usePrefersReducedMotion() {
-    const [reduced, setReduced] = useState(false);
-    useEffect(() => {
-        if (!isClient) return;
-        const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-        const onChange = () => setReduced(media.matches);
-        onChange();
-        media.addEventListener?.("change", onChange);
-        media.addListener?.(onChange); // fallback Safari anciens
-        return () => {
-            media.removeEventListener?.("change", onChange);
-            media.removeListener?.(onChange);
-        };
-    }, []);
-    return reduced;
-}
 
 function useIsTouchDevice() {
     const [touch, setTouch] = useState(false);
     useEffect(() => {
         if (!isClient) return;
-        const q = "(hover: none), (pointer: coarse)";
-        const mq = window.matchMedia(q);
-        const update = () => setTouch(mq.matches);
-        update();
-        mq.addEventListener?.("change", update);
-        mq.addListener?.(update); // fallback
+        const mq = window.matchMedia("(hover: none), (pointer: coarse)");
+        const on = () => setTouch(mq.matches);
+        on();
+        mq.addEventListener?.("change", on);
+        mq.addListener?.(on); // Safari legacy
         return () => {
-            mq.removeEventListener?.("change", update);
-            mq.removeListener?.(update);
+            mq.removeEventListener?.("change", on);
+            mq.removeListener?.(on);
         };
     }, []);
     return touch;
 }
-
-/** Coupe les animations quand l’onglet est masqué (perf/batterie) */
-function usePageVisible() {
-    const [v, setV] = useState(true);
-    useEffect(() => {
-        const on = () => setV(!document.hidden);
-        on();
-        document.addEventListener("visibilitychange", on);
-        return () => document.removeEventListener("visibilitychange", on);
-    }, []);
-    return v;
-}
-
-/* =========================================================
-   Background — Color Mist amélioré (perf + phases désynchronisées)
-   ========================================================= */
-function SiteBackground() {
-    const reduced = usePrefersReducedMotion();
-    const visible = usePageVisible();
-
-    // Knobs
-    const SPEED = 45; // plus petit = plus rapide (sec A/R)
-    const AMP_X = 360; // px
-    const AMP_Y = 240; // px
-    const POWER = 1.08;
-    const SAT = 1.06;
-    const BRIGHT = 1.04;
-
-    // Phases aléatoires pour désynchroniser les nappes
-    const PHASE_1 = useRef(Math.random()).current;
-    const PHASE_2 = useRef(Math.random()).current;
-    const PHASE_3 = useRef(Math.random()).current;
-    const PHASE_4 = useRef(Math.random()).current;
-
-    const a = (x: number) => Math.min(1, x * POWER);
-    const animOn = !reduced && visible;
-
-    return (
-        <>
-            {/* base */}
-            <div className="fixed inset-0 -z-30 bg-[#0B0B12]" />
-            <div className="fixed inset-0 -z-20 opacity-[0.05] bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.6)_1px,transparent_1px)] [background-size:22px_22px]" />
-
-            {/* Saturation / brightness wrapper */}
-            <div
-                className="fixed inset-0 -z-10 overflow-hidden"
-                style={{ filter: `saturate(${SAT}) brightness(${BRIGHT})` }}
-                aria-hidden
-            >
-                {/* Nap 1 — violet/rose (1 seule avec will-change prononcé) */}
-                <motion.div
-                    className="absolute left-[-15%] top-[-10%] h-[70vh] w-[70vw] rounded-[9999px] pointer-events-none"
-                    style={{
-                        background: `radial-gradient(60% 60% at 50% 50%, rgba(168,85,247,${a(
-                            0.22
-                        )}) 0%, rgba(168,85,247,${a(0.1)}) 35%, rgba(168,85,247,0) 70%)`,
-                        filter: "blur(56px)",
-                        mixBlendMode: "screen",
-                        maskImage:
-                            "radial-gradient(70% 70% at 50% 50%, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.62) 65%, rgba(0,0,0,0) 100%)",
-                        WebkitMaskImage:
-                            "radial-gradient(70% 70% at 50% 50%, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.62) 65%, rgba(0,0,0,0) 100%)",
-                        willChange: "transform",
-                    }}
-                    animate={
-                        animOn
-                            ? { x: [-AMP_X, AMP_X, -AMP_X], y: [AMP_Y, -AMP_Y, AMP_Y], scale: [0.985, 1.02, 0.985] }
-                            : {}
-                    }
-                    transition={
-                        animOn
-                            ? {
-                                x: { duration: SPEED, ease: "easeInOut", repeat: Infinity, delay: PHASE_1 * 1.5 },
-                                y: { duration: SPEED * 0.9, ease: "easeInOut", repeat: Infinity, delay: PHASE_1 * 0.7 },
-                                scale: { duration: SPEED * 1.4, ease: "easeInOut", repeat: Infinity, delay: PHASE_1 * 0.3 },
-                            }
-                            : {}
-                    }
-                />
-
-                {/* Nap 2 — cyan (sans will-change pour économiser) */}
-                <motion.div
-                    className="absolute right-[-12%] top-[10%] h-[65vh] w-[60vw] rounded-[9999px] pointer-events-none"
-                    style={{
-                        background: `radial-gradient(60% 60% at 50% 50%, rgba(34,211,238,${a(
-                            0.18
-                        )}) 0%, rgba(34,211,238,${a(0.085)}) 35%, rgba(34,211,238,0) 70%)`,
-                        filter: "blur(54px)",
-                        mixBlendMode: "screen",
-                        maskImage:
-                            "radial-gradient(70% 70% at 50% 50%, rgba(0,0,0,0.88) 35%, rgba(0,0,0,0.52) 60%, rgba(0,0,0,0) 100%)",
-                        WebkitMaskImage:
-                            "radial-gradient(70% 70% at 50% 50%, rgba(0,0,0,0.88) 35%, rgba(0,0,0,0.52) 60%, rgba(0,0,0,0) 100%)",
-                    }}
-                    animate={
-                        animOn ? { x: [AMP_X * 1.2, -AMP_X * 1.2, AMP_X * 1.2], y: [-AMP_Y, AMP_Y, -AMP_Y] } : {}
-                    }
-                    transition={
-                        animOn
-                            ? {
-                                x: { duration: SPEED * 1.1, ease: "easeInOut", repeat: Infinity, delay: PHASE_2 * 1.2 },
-                                y: { duration: SPEED * 0.95, ease: "easeInOut", repeat: Infinity, delay: PHASE_2 * 0.5 },
-                            }
-                            : {}
-                    }
-                />
-
-                {/* Nap 3 — magenta (sans will-change) */}
-                <motion.div
-                    className="absolute left-[5%] bottom-[-12%] h-[60vh] w-[55vw] rounded-[9999px] pointer-events-none"
-                    style={{
-                        background: `radial-gradient(60% 60% at 50% 50%, rgba(232,121,249,${a(
-                            0.14
-                        )}) 0%, rgba(232,121,249,${a(0.06)}) 35%, rgba(232,121,249,0) 70%)`,
-                        filter: "blur(66px)",
-                        mixBlendMode: "screen",
-                        maskImage:
-                            "radial-gradient(70% 70% at 50% 50%, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.58) 65%, rgba(0,0,0,0) 100%)",
-                        WebkitMaskImage:
-                            "radial-gradient(70% 70% at 50% 50%, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.58) 65%, rgba(0,0,0,0) 100%)",
-                    }}
-                    animate={animOn ? { x: [-AMP_X * 0.8, AMP_X * 0.8, -AMP_X * 0.8], y: [0, AMP_Y * 0.6, 0] } : {}}
-                    transition={
-                        animOn
-                            ? {
-                                x: { duration: SPEED * 0.9, ease: "easeInOut", repeat: Infinity, delay: PHASE_3 * 0.8 },
-                                y: { duration: SPEED * 1.2, ease: "easeInOut", repeat: Infinity, delay: PHASE_3 * 0.4 },
-                            }
-                            : {}
-                    }
-                />
-
-                {/* Nap 4 — streak très faible (pas de will-change) */}
-                <motion.div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                        background: `radial-gradient(80% 100% at 20% 50%, rgba(168,85,247,${a(
-                            0.05
-                        )}) 0%, rgba(56,189,248,${a(0.04)}) 30%, rgba(232,121,249,${a(0.035)}) 55%, rgba(0,0,0,0) 70%)`,
-                        mixBlendMode: "screen",
-                        filter: "blur(90px)",
-                        transform: "translateZ(0)",
-                    }}
-                    animate={animOn ? { x: [-AMP_X * 1.4, AMP_X * 1.4, -AMP_X * 1.4] } : {}}
-                    transition={
-                        animOn
-                            ? { duration: Math.max(12, SPEED * 0.6), ease: "easeInOut", repeat: Infinity, delay: PHASE_4 }
-                            : {}
-                    }
-                />
-            </div>
-
-            {/* grain */}
-            <motion.div
-                aria-hidden
-                className="fixed inset-0 -z-5 mix-blend-overlay pointer-events-none"
-                style={{
-                    opacity: 0.06,
-                    backgroundImage: NOISE_BG,
-                    backgroundSize: "160px 160px",
-                }}
-                animate={animOn ? { opacity: [0.05, 0.08, 0.05] } : {}}
-                transition={animOn ? { duration: 14, ease: "easeInOut", repeat: Infinity } : {}}
-            />
-        </>
-    );
-}
-
-function TopNav() {
-    const reduced = usePrefersReducedMotion();
-    const { scrollY } = useScroll();
-    const [solid, setSolid] = useState(false);
-    const [open, setOpen] = useState(false);
-
-    useMotionValueEvent(scrollY, "change", (y) => setSolid(y > 20));
-
-    useEffect(() => {
-        const onResize = () => setOpen(false);
-        window.addEventListener("resize", onResize);
-        return () => window.removeEventListener("resize", onResize);
-    }, []);
-
-    const baseOpacity = 0.75;
-    const scrolledOpacity = 0.9;
-    const hoverOpacity = 1;
-
-    // --- Helper: aller à une section, depuis home ou autre page
-    const goToHomeAndScroll = (targetId: string) => {
-        const current = window.location.hash;
-        const scrollToTarget = () => {
-            const el = document.getElementById(targetId);
-            if (!el) return;
-            el.scrollIntoView({
-                behavior: reduced ? "auto" : "smooth",
-                block: "start",
-            });
-        };
-
-        if (current === "#/" || current === "" || current === "#") {
-            // Déjà sur la home → scroll direct
-            scrollToTarget();
-        } else {
-            // Autre page → revenir à la home puis scroll
-            window.location.hash = "#/";
-            setTimeout(scrollToTarget, 300);
-        }
-    };
-
-    // (optionnel) logo → remonte au hero proprement
-    const goHero = (e: React.MouseEvent) => {
-        e.preventDefault();
-        const current = window.location.hash;
-        const doScroll = () => {
-            const el = document.getElementById("hero");
-            if (el) el.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
-        };
-        if (current === "#/" || current === "" || current === "#") {
-            doScroll();
-        } else {
-            window.location.hash = "#/";
-            setTimeout(doScroll, 300);
-        }
-    };
-
-    return (
-        <header
-            className="fixed top-0 left-0 right-0 z-50"
-            style={{ paddingTop: "env(safe-area-inset-top)" }}
-            aria-label="Menu principal"
-        >
-            <motion.nav
-                initial={false}
-                animate={{
-                    opacity: solid ? scrolledOpacity : baseOpacity,
-                    backdropFilter: "blur(10px)",
-                }}
-                whileHover={!reduced ? { opacity: hoverOpacity } : {}}
-                transition={{ duration: 0.25, ease: "easeOut" }}
-                className="w-full border-b border-white/10 bg-[#0B0B12]/85 px-5 sm:px-8 py-2 sm:py-2.5 flex items-center justify-between"
-            >
-                {/* Logo */}
-                <a
-                    href="#/"
-                    onClick={goHero}
-                    className="text-[11px] sm:text-[12px] tracking-[0.25em] uppercase text-white/90 hover:text-white transition"
-                >
-                    SmartFlow
-                </a>
-
-                {/* Liens Desktop */}
-                <div className="hidden sm:flex items-center gap-6 text-[14px] font-light">
-                    <a
-                        href="#dev"
-                        onClick={(e) => { e.preventDefault(); goToHomeAndScroll("dev"); }}
-                        className="text-zinc-200 hover:text-white transition"
-                    >
-                        Approche
-                    </a>
-                    <a
-                        href="#services"
-                        onClick={(e) => { e.preventDefault(); goToHomeAndScroll("services"); }}
-                        className="text-zinc-200 hover:text-white transition"
-                    >
-                        Services
-                    </a>
-                    <a
-                        href="#works"
-                        onClick={(e) => { e.preventDefault(); goToHomeAndScroll("works"); }}
-                        className="text-zinc-200 hover:text-white transition"
-                    >
-                        Réalisations
-                    </a>
-                    <a
-                        href="#contact"
-                        onClick={(e) => { e.preventDefault(); goToHomeAndScroll("contact"); }}
-                        className="rounded-md border border-white/15 px-3 py-1.5 text-zinc-100 hover:text-white hover:border-white/25 transition"
-                    >
-                        Contact
-                    </a>
-                </div>
-
-                {/* Burger Mobile */}
-                <button
-                    type="button"
-                    aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
-                    aria-expanded={open}
-                    onClick={() => setOpen((v) => !v)}
-                    className="sm:hidden inline-flex items-center justify-center rounded-md border border-white/15 px-2.5 py-1.5 text-zinc-100 hover:text-white hover:border-white/25 transition"
-                >
-                    {!open ? (
-                        <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                        </svg>
-                    ) : (
-                        <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M6 6l12 12M18 6l-12 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                        </svg>
-                    )}
-                </button>
-            </motion.nav>
-
-            {/* Drawer Mobile */}
-            <motion.div
-                initial={false}
-                animate={open ? "open" : "closed"}
-                variants={{
-                    open: { height: "auto", opacity: 1 },
-                    closed: { height: 0, opacity: 0 },
-                }}
-                transition={{ duration: 0.25, ease: "easeOut" }}
-                className="sm:hidden overflow-hidden bg-[#0B0B12]/95 backdrop-blur-md border-b border-white/10"
-            >
-                <div className="grid gap-1.5 p-4 text-[15px]">
-                    <a
-                        href="#dev"
-                        onClick={(e) => {
-                            e.preventDefault();
-                            setOpen(false);
-                            setTimeout(() => goToHomeAndScroll("dev"), 120);
-                        }}
-                        className="block rounded-md px-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white"
-                    >
-                        Approche
-                    </a>
-                    <a
-                        href="#services"
-                        onClick={(e) => {
-                            e.preventDefault();
-                            setOpen(false);
-                            setTimeout(() => goToHomeAndScroll("services"), 120);
-                        }}
-                        className="block rounded-md px-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white"
-                    >
-                        Services
-                    </a>
-                    <a
-                        href="#works"
-                        onClick={(e) => {
-                            e.preventDefault();
-                            setOpen(false);
-                            setTimeout(() => goToHomeAndScroll("works"), 120);
-                        }}
-                        className="block rounded-md px-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white"
-                    >
-                        Réalisations
-                    </a>
-                    <a
-                        href="#contact"
-                        onClick={(e) => {
-                            e.preventDefault();
-                            setOpen(false);
-                            setTimeout(() => goToHomeAndScroll("contact"), 120);
-                        }}
-                        className="block rounded-md border border-white/15 px-2 py-2 text-zinc-200 hover:text-white hover:border-white/25"
-                    >
-                        Contact
-                    </a>
-                </div>
-            </motion.div>
-        </header>
-    );
-}
-
 
 /* =========================================================
    HERO
@@ -442,7 +50,7 @@ function HeroSection() {
     const [opacity, setOpacity] = useState(1);
     const reduced = usePrefersReducedMotion();
 
-    // Fade out la flèche 0 → 120px
+    // Fade de la flèche 0 → 120px
     useMotionValueEvent(scrollY, "change", (latest) => {
         const o = Math.max(0, 1 - latest / 120);
         setOpacity(o);
@@ -452,10 +60,15 @@ function HeroSection() {
         <section
             id="hero"
             className="relative flex min-h-[88vh] md:min-h-screen w-full items-center justify-center overflow-hidden text-white"
-            style={{ paddingTop: "max(env(safe-area-inset-top),1rem)", paddingBottom: "1rem" }}
+            style={{
+                paddingTop: "max(env(safe-area-inset-top),1rem)",
+                paddingBottom: "1rem",
+            }}
         >
             <div className="relative z-10 mx-auto w-full max-w-5xl px-4 sm:px-6 text-center">
-                <p className="mb-2 sm:mb-3 text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-zinc-400">SmartFlow</p>
+                <p className="mb-2 sm:mb-3 text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-zinc-400">
+                    SmartFlow
+                </p>
 
                 <h1 className="text-[30px] sm:text-5xl md:text-6xl font-semibold leading-[1.07]">
                     <span className="bg-clip-text text-transparent bg-[linear-gradient(120deg,#e0e7ff_0%,#a78bfa_35%,#22d3ee_65%,#e879f9_100%)]">
@@ -466,7 +79,8 @@ function HeroSection() {
                 </h1>
 
                 <p className="mx-auto mt-3 sm:mt-4 max-w-xl text-sm sm:text-base text-zinc-300">
-                    Sites, logiciels et automatisations pensés pour vous simplifier la vie.
+                    Sites, logiciels et automatisations pensés pour vous simplifier la
+                    vie.
                 </p>
 
                 <div className="mt-6 sm:mt-8 inline-flex w-full flex-col sm:w-auto sm:flex-row gap-3 justify-center">
@@ -475,6 +89,10 @@ function HeroSection() {
                         aria-label="Découvrir notre approche"
                         role="button"
                         className="rounded-xl border border-white/10 px-5 py-3 text-sm text-zinc-300 hover:text-white hover:border-white/20 transition w-full sm:w-auto"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            goToHomeAndScroll("dev");
+                        }}
                     >
                         Notre approche
                     </a>
@@ -483,6 +101,10 @@ function HeroSection() {
                         aria-label="Voir nos services"
                         role="button"
                         className="rounded-xl border border-white/10 px-5 py-3 text-sm text-zinc-300 hover:text-white hover:border-white/20 transition w-full sm:w-auto"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            goToHomeAndScroll("services");
+                        }}
                     >
                         Nos services
                     </a>
@@ -490,7 +112,11 @@ function HeroSection() {
             </div>
 
             {/* flèche fine, fondue au scroll */}
-            <motion.div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center" animate={{ opacity }} transition={{ duration: 0.4, ease: "easeOut" }}>
+            <motion.div
+                className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center"
+                animate={{ opacity }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+            >
                 <svg
                     width="20"
                     height="20"
@@ -498,7 +124,14 @@ function HeroSection() {
                     className={`opacity-80 ${!reduced ? "animate-bounce" : ""}`}
                     aria-hidden="true"
                 >
-                    <path d="M6 9l6 6 6-6" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <path
+                        d="M6 9l6 6 6-6"
+                        fill="none"
+                        stroke="white"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    />
                 </svg>
             </motion.div>
         </section>
@@ -506,16 +139,14 @@ function HeroSection() {
 }
 
 /* =========================================================
-   Mini highlighter — tokenized (safe) + détection "Notre approche"
+   Mini highlighter — tokenizer TS safe
    ========================================================= */
 type Token = { t: "str" | "kw" | "red" | "cm" | "plain"; v: string };
 
-/** Tokenizer TypeScript minimaliste avec surlignage "Notre approche" au sein des commentaires */
 function tokenizeTS(src: string): Token[] {
     const tokens: Token[] = [];
     const push = (t: Token["t"], v: string) => v && tokens.push({ t, v });
 
-    // Regexp: strings | keywords | single-line comments | block comments
     const re =
         /("[^"]*"|'[^']*'|`[^`]*`)|\b(export|function|return|const|let|type|interface|new|async|await|start|commit)\b|(\/\/.*$|\/\*[\s\S]*?\*\/)/gm;
 
@@ -525,13 +156,10 @@ function tokenizeTS(src: string): Token[] {
         if (m.index > i) push("plain", src.slice(i, m.index));
 
         if (m[1]) {
-            // string
             push("str", m[1]);
         } else if (m[2]) {
-            // keyword
             push(m[2] === "start" || m[2] === "commit" ? "red" : "kw", m[2]);
         } else if (m[3]) {
-            // comment — on surligne "Notre approche"
             const comment = m[3];
             if (/Notre approche/.test(comment)) {
                 const marked = comment.replace(/(Notre approche)/g, "\u0000$1\u0000");
@@ -548,9 +176,6 @@ function tokenizeTS(src: string): Token[] {
     return tokens;
 }
 
-/* =========================================================
-   Code content
-   ========================================================= */
 const APPROACH_LINES: string[] = [
     "/* Notre approche : simple et directe. */",
     "SmartFlow.start({",
@@ -580,10 +205,15 @@ function sliceByBudget(lines: string[], budget: number) {
     return out;
 }
 
-/* =========================================================
-   Code line
-   ========================================================= */
-function CodeLine({ text, index, active }: { text: string; index: number; active: boolean }) {
+function CodeLine({
+    text,
+    index,
+    active,
+}: {
+    text: string;
+    index: number;
+    active: boolean;
+}) {
     const tokens = useMemo(() => tokenizeTS(text), [text]);
     return (
         <motion.div
@@ -592,7 +222,9 @@ function CodeLine({ text, index, active }: { text: string; index: number; active
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.18 }}
         >
-            <span className="mr-2 sm:mr-3 text-white">{String(index + 1).padStart(2, "0")}</span>
+            <span className="mr-2 sm:mr-3 text-white">
+                {String(index + 1).padStart(2, "0")}
+            </span>
             {tokens.map((k, i) => {
                 const cls =
                     k.t === "str"
@@ -610,14 +242,13 @@ function CodeLine({ text, index, active }: { text: string; index: number; active
                     </span>
                 );
             })}
-            {active && <span className="inline-block w-2 h-4 align-baseline ml-0.5 bg-zinc-200 animate-pulse" />}
+            {active && (
+                <span className="inline-block w-2 h-4 align-baseline ml-0.5 bg-zinc-200 animate-pulse" />
+            )}
         </motion.div>
     );
 }
 
-/* =========================================================
-   Editor frame — glassy
-   ========================================================= */
 function EditorFrame({ children }: { children: React.ReactNode }) {
     return (
         <div className="relative w-full mx-auto max-w-[min(92vw,48rem)] sm:max-w-3xl rounded-2xl shadow-2xl border border-white/10 bg-gradient-to-b from-zinc-900/80 to-zinc-950/80 backdrop-blur p-3 sm:p-5 md:p-7">
@@ -625,7 +256,9 @@ function EditorFrame({ children }: { children: React.ReactNode }) {
                 <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-400/90" />
                 <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-400/90" />
                 <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-400/90" />
-                <div className="ml-2 sm:ml-3 text-[10px] sm:text-xs tracking-widest uppercase text-zinc-400">dev / approche.ts</div>
+                <div className="ml-2 sm:ml-3 text-[10px] sm:text-xs tracking-widest uppercase text-zinc-400">
+                    dev / approche.ts
+                </div>
             </div>
 
             <div className="rounded-xl border border-white/5 bg-black/30 px-2.5 sm:px-4 py-3 sm:py-5 overflow-x-auto">
@@ -641,35 +274,39 @@ function EditorFrame({ children }: { children: React.ReactNode }) {
 }
 
 /* =========================================================
-   DEV SECTION — sticky reveal optimisé (RAF throttle)
+   DEV SECTION — sticky reveal
    ========================================================= */
 function DevScrollCodeSection() {
     const sectionRef = useRef<HTMLElement | null>(null);
     const { scrollYProgress } = useScroll({
         target: sectionRef,
-        // progression plus douce sans allonger la page
         offset: ["start 10%", "end 90%"],
     });
 
     const [p, setP] = useState(0);
     const rafRef = useRef<number | null>(null);
 
-    // Throttle via requestAnimationFrame pour lisser la frappe
+    // Throttle via rAF
     useMotionValueEvent(scrollYProgress, "change", (v) => {
         if (rafRef.current) cancelAnimationFrame(rafRef.current);
         rafRef.current = requestAnimationFrame(() => setP(v));
     });
 
-    // Cleanup rAF à l’unmount
     useEffect(() => {
         return () => {
             if (rafRef.current) cancelAnimationFrame(rafRef.current);
         };
     }, []);
 
-    const totalChars = useMemo(() => APPROACH_LINES.reduce((a, l) => a + l.length, 0), []);
+    const totalChars = useMemo(
+        () => APPROACH_LINES.reduce((a, l) => a + l.length, 0),
+        []
+    );
     const budget = Math.round(totalChars * Math.max(0, Math.min(1, p)));
-    const visible = useMemo(() => sliceByBudget(APPROACH_LINES, budget), [budget]);
+    const visible = useMemo(
+        () => sliceByBudget(APPROACH_LINES, budget),
+        [budget]
+    );
 
     const lengths = useMemo(() => APPROACH_LINES.map((l) => l.length), []);
     const cum = useMemo(() => {
@@ -683,18 +320,29 @@ function DevScrollCodeSection() {
     }, [cum, budget]);
 
     return (
-        <section id="dev" ref={sectionRef} className="relative min-h-[320vh] sm:min-h-[420vh] md:min-h-[500vh] w-full text-white">
+        <section
+            id="dev"
+            ref={sectionRef}
+            className="relative min-h-[320vh] sm:min-h-[420vh] md:min-h-[500vh] w-full text-white"
+        >
             <div
                 className="sticky top-0 z-10 flex min-h-[100svh] w-full flex-col items-center justify-center px-3 sm:px-4"
                 style={{ paddingTop: "env(safe-area-inset-top)" }}
             >
                 <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-1 w-full max-w-[min(92vw,48rem)]">
-                    <h2 className="text-xl sm:text-2xl font-semibold text-white">Notre approche</h2>
+                    <h2 className="text-xl sm:text-2xl font-semibold text-white">
+                        Notre approche
+                    </h2>
                 </div>
 
                 <EditorFrame>
                     {visible.map((t, i) => (
-                        <CodeLine key={i} text={t} index={i} active={i === activeIdx && t.length < APPROACH_LINES[i].length} />
+                        <CodeLine
+                            key={i}
+                            text={t}
+                            index={i}
+                            active={i === activeIdx && t.length < APPROACH_LINES[i].length}
+                        />
                     ))}
                 </EditorFrame>
             </div>
@@ -705,7 +353,7 @@ function DevScrollCodeSection() {
 }
 
 /* =========================================================
-   Services — version finale SmartFlow
+   Services
    ========================================================= */
 const SERVICES = [
     {
@@ -783,19 +431,17 @@ export function DecoShape({
     sizePct?: number;
     intensity?: number;
 }) {
-    const isTouch = useIsTouchDevice?.() ?? false;
-    const reduced = usePrefersReducedMotion?.() ?? false;
+    const isTouch = useIsTouchDevice();
+    const reduced = usePrefersReducedMotion();
 
-    // uid "safe" sans useId (compat)
+    // uid sans useId (compat)
     const uidRef = useRef(Math.random().toString(36).slice(2));
     const uid = uidRef.current;
 
-    // Détection légère
     const ua = isClient ? navigator.userAgent : "";
     const isIOS = /iP(hone|ad|od)/i.test(ua);
-    const iosMode = isTouch || isIOS; // on force le mode iOS/touch
+    const iosMode = isTouch || isIOS;
 
-    // Blur différents selon mode
     const isNarrow = isClient ? window.innerWidth < 420 : false;
     const BLUR_STD_DEV = iosMode ? (isNarrow ? 4 : 8) : 12;
 
@@ -805,13 +451,25 @@ export function DecoShape({
     const shapeEl = (() => {
         switch (shape) {
             case "bolt":
-                return { tag: "path" as const, props: { d: "M60 10 L35 55 H60 L30 110 L90 50 H60 L90 10 Z" } };
+                return {
+                    tag: "path" as const,
+                    props: { d: "M60 10 L35 55 H60 L30 110 L90 50 H60 L90 10 Z" },
+                };
             case "wave":
-                return { tag: "path" as const, props: { d: "M10 70 C30 40, 70 100, 90 70 S150 40, 170 70" } };
+                return {
+                    tag: "path" as const,
+                    props: { d: "M10 70 C30 40, 70 100, 90 70 S150 40, 170 70" },
+                };
             case "diamond":
-                return { tag: "polygon" as const, props: { points: "100,20 40,80 100,140 160,80" } };
+                return {
+                    tag: "polygon" as const,
+                    props: { points: "100,20 40,80 100,140 160,80" },
+                };
             default:
-                return { tag: "polygon" as const, props: { points: "100,20 55,45 55,95 100,120 145,95 145,45" } };
+                return {
+                    tag: "polygon" as const,
+                    props: { points: "100,20 55,45 55,95 100,120 145,95 145,45" },
+                };
         }
     })();
 
@@ -827,7 +485,6 @@ export function DecoShape({
     const idGrad = `sf-inner-grad-${uid}`;
     const idBlur = `sf-inner-blur-${uid}`;
 
-    // Région de filtre — large sur desktop pour éviter le “rectangle”
     const FILTER_BOX = { x: -120, y: -120, w: 480, h: 420 };
 
     return (
@@ -835,7 +492,7 @@ export function DecoShape({
             className="absolute pointer-events-none z-0"
             style={{ right: "0.5rem", bottom: "0.5rem", width: widthPx, height: widthPx }}
         >
-            {/* Halo externe — seulement desktop (ne gêne pas iOS) */}
+            {/* Halo externe — desktop uniquement */}
             {!iosMode && (
                 <motion.div
                     className="absolute inset-0"
@@ -860,17 +517,19 @@ export function DecoShape({
                 height="100%"
                 viewBox="0 0 200 160"
                 preserveAspectRatio="xMidYMid meet"
-                style={{ overflow: "visible" }} // laisser déborder le glow
+                style={{ overflow: "visible" }}
                 initial={{
                     opacity: 0.1,
                     transform: "scale(0.96)",
-                    // Sur desktop on reprend le drop-shadow “riche”
                     filter: iosMode ? undefined : `drop-shadow(0 0 0 ${color}00)`,
                 }}
                 animate={
                     active && !reduced
                         ? iosMode
-                            ? { opacity: [0.1, 0.25, strong(1)], transform: ["scale(0.96)", "scale(0.99)", "scale(1)"] }
+                            ? {
+                                opacity: [0.1, 0.25, strong(1)],
+                                transform: ["scale(0.96)", "scale(0.99)", "scale(1)"],
+                            }
                             : {
                                 opacity: [0.12, 0.3, strong(1)],
                                 transform: ["scale(0.965)", "scale(0.995)", "scale(1)"],
@@ -882,7 +541,11 @@ export function DecoShape({
                             }
                         : iosMode
                             ? { opacity: 0.1, transform: "scale(0.96)" }
-                            : { opacity: 0.1, transform: "scale(0.96)", filter: `drop-shadow(0 0 0 ${color}00)` }
+                            : {
+                                opacity: 0.1,
+                                transform: "scale(0.96)",
+                                filter: `drop-shadow(0 0 0 ${color}00)`,
+                            }
                 }
                 transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
             >
@@ -916,9 +579,8 @@ export function DecoShape({
                     </filter>
                 </defs>
 
-                {/* === Rendu selon mode === */}
+                {/* iOS/touch: filtre sur éléments peints */}
                 {iosMode ? (
-                    // ----- iOS / Touch SAFE: clip le groupe, filtre sur les éléments peints
                     <g clipPath={`url(#${idClip})`}>
                         <rect
                             x={-50}
@@ -932,14 +594,21 @@ export function DecoShape({
                         <use href={`#${idShape}`} fill={tint} opacity="0.25" filter={`url(#${idBlur})`} />
                     </g>
                 ) : (
-                    // ----- Desktop RICHE: filtre sur le groupe entier (glow plus large)
+                    // Desktop: filtre sur le groupe entier
                     <g clipPath={`url(#${idClip})`} filter={`url(#${idBlur})`}>
-                        <rect x={-50} y={-40} width={300} height={240} fill={`url(#${idGrad})`} opacity={active && !reduced ? 1 : 0} />
+                        <rect
+                            x={-50}
+                            y={-40}
+                            width={300}
+                            height={240}
+                            fill={`url(#${idGrad})`}
+                            opacity={active && !reduced ? 1 : 0}
+                        />
                         <use href={`#${idShape}`} fill={tint} opacity="0.25" />
                     </g>
                 )}
 
-                {/* Trait net au-dessus, non filtré */}
+                {/* Trait net au-dessus */}
                 {shapeEl.tag === "path" ? (
                     <path {...(shapeEl.props as any)} {...baseStroke} />
                 ) : (
@@ -959,7 +628,6 @@ function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
     const reduced = usePrefersReducedMotion();
 
     const neonActive = isTouch ? inView : hovered;
-
     const headingId = `svc-${s.k}-title`;
 
     return (
@@ -974,7 +642,13 @@ function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
             role="article"
             aria-labelledby={headingId}
         >
-            <DecoShape shape={s.theme.shape as ShapeKey} color={s.theme.color} tint={s.theme.tint} active={neonActive} sizePct={32} />
+            <DecoShape
+                shape={s.theme.shape as ShapeKey}
+                color={s.theme.color}
+                tint={s.theme.tint}
+                active={neonActive}
+                sizePct={32}
+            />
 
             <div
                 aria-hidden
@@ -1004,19 +678,26 @@ function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
                 whileHover={!reduced && !isTouch ? { y: -4 } : {}}
             >
                 <div className="mb-1.5 flex items-center justify-between">
-                    <div className="text-[10px] sm:text-[11px] uppercase tracking-widest text-zinc-400">{s.k}</div>
+                    <div className="text-[10px] sm:text-[11px] uppercase tracking-widest text-zinc-400">
+                        {s.k}
+                    </div>
                     <span className="inline-flex items-center rounded-full border border-white/10 px-2 py-0.5 text-[11px] text-zinc-200/90">
                         {s.tag}
                     </span>
                 </div>
 
-                <div className="text-xs uppercase tracking-wide" style={{ color: s.theme.color + "CC" }}>
+                <div
+                    className="text-xs uppercase tracking-wide"
+                    style={{ color: s.theme.color + "CC" }}
+                >
                     {s.kicker}
                 </div>
                 <h3 id={headingId} className="mt-1 text-base sm:text-lg font-medium text-white/90">
                     {s.title}
                 </h3>
-                <p className="mt-2 text-[13px] sm:text-sm leading-relaxed text-zinc-300">{s.desc}</p>
+                <p className="mt-2 text-[13px] sm:text-sm leading-relaxed text-zinc-300">
+                    {s.desc}
+                </p>
 
                 {!!s.pillars?.length && (
                     <ul className="mt-3 space-y-1.5">
@@ -1051,7 +732,7 @@ function ServicesSection() {
 }
 
 /* =========================================================
-   Projets — cartes avec halo néon (violet discret)
+   Projets — cartes
    ========================================================= */
 type GlowColor = "yellow" | "red" | "green";
 const glowHex: Record<GlowColor, string> = {
@@ -1108,21 +789,27 @@ function ProjectCard({
                 onBlur={() => !isTouch && setHovered(false)}
                 className="relative block overflow-hidden rounded-2xl p-4 sm:p-5 transition-transform"
                 style={{
-                    background: "linear-gradient(180deg, rgba(22,24,31,0.45) 0%, rgba(12,14,18,0.42) 100%)",
+                    background:
+                        "linear-gradient(180deg, rgba(22,24,31,0.45) 0%, rgba(12,14,18,0.42) 100%)",
                     backdropFilter: "blur(8px)",
-                    border: `1px solid ${isTouch ? (active ? c : "rgba(255,255,255,0.15)") : "rgba(255,255,255,0.12)"}`,
-                    transition: "border-color 300ms ease, transform 300ms ease, outline-color 300ms ease",
+                    border: `1px solid ${isTouch ? (active ? c : "rgba(255,255,255,0.15)") : "rgba(255,255,255,0.12)"
+                        }`,
+                    transition:
+                        "border-color 300ms ease, transform 300ms ease, outline-color 300ms ease",
                 }}
                 aria-label={`${title} – en savoir plus`}
             >
                 <div
                     className="mb-2 sm:mb-3 h-28 sm:h-32 w-full overflow-hidden rounded-lg"
                     style={{
-                        background: "linear-gradient(180deg, rgba(40,43,53,0.25) 0%, rgba(22,24,31,0.25) 100%)",
+                        background:
+                            "linear-gradient(180deg, rgba(40,43,53,0.25) 0%, rgba(22,24,31,0.25) 100%)",
                     }}
                 />
                 <div className="flex items-center justify-between">
-                    <h3 className="text-sm sm:text-base font-medium text-white/85 group-hover:text-white">{title}</h3>
+                    <h3 className="text-sm sm:text-base font-medium text-white/85 group-hover:text-white">
+                        {title}
+                    </h3>
                     <span className="text-[10px] text-zinc-400">→</span>
                 </div>
                 <p className="mt-1 text-[13px] text-zinc-300">{subtitle}</p>
@@ -1135,19 +822,22 @@ function WorksSection() {
     const works = [
         {
             t: "Nos sites web",
-            d: "Découvrez une sélection de sites modernes, pensés pour raconter et sublimer chaque univers.",
+            d:
+                "Découvrez une sélection de sites modernes, pensés pour raconter et sublimer chaque univers.",
             href: "#/projects/web",
             color: "yellow" as GlowColor,
         },
         {
             t: "Nos apps métier",
-            d: "Des outils internes clairs et efficaces, conçus pour simplifier le quotidien de chaque équipe.",
+            d:
+                "Des outils internes clairs et efficaces, conçus pour simplifier le quotidien de chaque équipe.",
             href: "#/projects/apps",
             color: "red" as GlowColor,
         },
         {
             t: "Nos programmes automatisés",
-            d: "Des processus intelligents qui connectent vos outils et gagnent du temps sans compromis.",
+            d:
+                "Des processus intelligents qui connectent vos outils et gagnent du temps sans compromis.",
             href: "#/projects/automation",
             color: "green" as GlowColor,
         },
@@ -1162,13 +852,23 @@ function WorksSection() {
                         href="#contact"
                         className="text-sm text-zinc-300 underline-offset-4 hover:text-white hover:underline"
                         aria-label="Nous contacter"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            goToHomeAndScroll("contact");
+                        }}
                     >
                         Discuter d’un projet
                     </a>
                 </div>
                 <div className="grid gap-8 sm:gap-10 grid-cols-1 xs:grid-cols-2 lg:grid-cols-3">
                     {works.map((w, i) => (
-                        <ProjectCard key={i} title={w.t} subtitle={w.d} href={w.href} color={w.color} />
+                        <ProjectCard
+                            key={i}
+                            title={w.t}
+                            subtitle={w.d}
+                            href={w.href}
+                            color={w.color}
+                        />
                     ))}
                 </div>
             </div>
@@ -1177,18 +877,23 @@ function WorksSection() {
 }
 
 /* =========================================================
-   Contact — labels + autocomplete + endpoint robuste
+   Contact
    ========================================================= */
 function ContactSection() {
     return (
         <section id="contact" className="relative w-full text-white py-12 sm:py-16">
             <div className="relative z-10 mx-auto max-w-3xl px-4 sm:px-6">
                 <h2 className="text-xl sm:text-2xl font-semibold">Contact</h2>
-                <p className="mt-2 text-sm sm:text-base text-zinc-300">Parlez-nous de votre projet. Réponse rapide et conseils concrets.</p>
+                <p className="mt-2 text-sm sm:text-base text-zinc-300">
+                    Parlez-nous de votre projet. Réponse rapide et conseils concrets.
+                </p>
 
-                {/* FormSubmit : remplace l’email par le tien si besoin */}
-                <form className="mt-5 sm:mt-6 grid gap-4" action="https://formsubmit.co/hello@smartflow.dev" method="POST">
-                    {/* Anti-spam & options */}
+                {/* FormSubmit : remplace l’email si besoin */}
+                <form
+                    className="mt-5 sm:mt-6 grid gap-4"
+                    action="https://formsubmit.co/hello@smartflow.dev"
+                    method="POST"
+                >
                     <input type="hidden" name="_subject" value="Nouveau message SmartFlow" />
                     <input type="hidden" name="_captcha" value="false" />
                     <input type="hidden" name="_template" value="table" />
@@ -1255,45 +960,14 @@ function ContactSection() {
     );
 }
 
-function Footer() {
-    return (
-        <footer className="relative w-full text-white py-8 sm:py-10">
-            <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
-                <div className="flex flex-col items-start justify-between gap-6 sm:flex-row">
-                    <div>
-                        <div className="text-[11px] sm:text-sm uppercase tracking-[0.25em] text-zinc-400">SmartFlow</div>
-                        <p className="mt-2 text-zinc-400 text-xs sm:text-sm">Design & Développement, une expérience numérique.</p>
-                    </div>
-                    <div className="flex gap-5 sm:gap-6 text-sm">
-                        <a href="#services" className="text-zinc-300 hover:text-white" aria-label="Voir nos services">
-                            Services
-                        </a>
-                        <a href="#works" className="text-zinc-300 hover:text-white" aria-label="Voir nos réalisations">
-                            Réalisations
-                        </a>
-                        <a href="#contact" className="text-zinc-300 hover:text-white" aria-label="Nous contacter">
-                            Contact
-                        </a>
-                    </div>
-                </div>
-                <div className="mt-6 sm:mt-8 border-t border-white/10 pt-5 sm:pt-6 text-[11px] sm:text-xs text-zinc-500">
-                    © {new Date().getFullYear()} SmartFlow — Tous droits réservés.
-                </div>
-            </div>
-        </footer>
-    );
-}
-
 /* =========================================================
    APP
    ========================================================= */
-// Rends ces composants importables depuis src/projects/*
-export { SiteBackground, TopNav, Footer };
-
 export default function App() {
     const [hash, setHash] = React.useState(
-        typeof window !== "undefined" ? window.location.hash.replace(/^#/, "") : ""
+        isClient ? window.location.hash.replace(/^#/, "") : ""
     );
+
     React.useEffect(() => {
         const onHash = () => setHash(window.location.hash.replace(/^#/, ""));
         window.addEventListener("hashchange", onHash);
@@ -1308,7 +982,7 @@ export default function App() {
     return (
         <main className="relative min-h-screen text-white antialiased [text-size-adjust:100%] selection:bg-white/20">
             <SiteBackground />
-            <TopNav />          {/* ← nouveau menu discret */}
+            <TopNav />
             <HeroSection />
             <DevScrollCodeSection />
             <ServicesSection />
