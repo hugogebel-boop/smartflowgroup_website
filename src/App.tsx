@@ -351,7 +351,7 @@ export function DecoShape({
     const iosMode = isTouch || isIOS;
 
     const isNarrow = typeof window !== "undefined" ? window.innerWidth < 420 : false;
-    const BLUR_STD_DEV = iosMode ? (isNarrow ? 4 : 8) : 12;
+    const BLUR_STD_DEV = iosMode ? (isNarrow ? 6 : 9) : 14; // un peu plus doux iOS
 
     const widthPx = `min(${sizePct}%, 120px)`;
     const strong = (a: number) => Math.min(1, a * intensity);
@@ -378,83 +378,52 @@ export function DecoShape({
 
     const idShape = `sf-shape-${uid}`;
     const idClip = `sf-clip-${uid}`;
-    const idGrad = `sf-inner-grad-${uid}`;
-    const idBlur = `sf-inner-blur-${uid}`;
+    const idGrad = `sf-grad-${uid}`;
+    const idGlow = `sf-glow-${uid}`;
 
-    // boîte de filtre large (desktop) pour éviter le clipping du flou
-    const FILTER_BOX = { x: -120, y: -120, w: 480, h: 420 };
+    // région large pour éviter le clipping du flou
+    const FILTER_BOX = { x: -140, y: -140, w: 520, h: 460 };
 
     return (
         <div
             className="absolute pointer-events-none z-0"
             style={{ right: "0.5rem", bottom: "0.5rem", width: widthPx, height: widthPx }}
         >
-            {/* Couche de diffusion radiale (toujours active, iOS compris) */}
-            <motion.div
-                aria-hidden
-                className="absolute inset-0"
-                style={{
-                    background: `radial-gradient(120% 120% at 70% 70%, ${color}40 0%, transparent 70%)`,
-                    // blur plus léger sur iOS / écrans étroits
-                    filter: `blur(${iosMode ? (isNarrow ? 8 : 12) : 22}px)`,
-                    borderRadius: "9999px",
-                    transform: "translateZ(0)",
-                    willChange: "opacity, transform, filter",
-                }}
-                initial={{ opacity: 0.14, scale: 0.96 }}
-                animate={
-                    active && !reduced
-                        ? { opacity: [0.16, 0.26, 0.32], scale: [0.96, 0.995, 1] }
-                        : { opacity: 0.14, scale: 0.96 }
-                }
-                transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-            />
-
             <motion.svg
                 width="100%"
                 height="100%"
                 viewBox="0 0 200 160"
                 preserveAspectRatio="xMidYMid meet"
                 style={{ overflow: "visible" }}
-                initial={{ opacity: 0.1, transform: "scale(0.96)", filter: iosMode ? undefined : `drop-shadow(0 0 0 ${color}00)` }}
+                initial={{ opacity: 0.14, transform: "scale(0.965)" }}
                 animate={
                     active && !reduced
-                        ? iosMode
-                            ? {
-                                opacity: [0.12, 0.22, strong(0.9)],
-                                transform: ["scale(0.96)", "scale(0.99)", "scale(1)"],
-                            }
-                            : {
-                                opacity: [0.12, 0.3, strong(1)],
-                                transform: ["scale(0.965)", "scale(0.995)", "scale(1)"],
-                                filter: [
-                                    `drop-shadow(0 0 0 ${color}00)`,
-                                    `drop-shadow(0 0 8px ${color}66)`,
-                                    `drop-shadow(0 0 18px ${color}AA) drop-shadow(0 0 30px ${color}80)`,
-                                ] as any,
-                            }
-                        : iosMode
-                            ? { opacity: 0.1, transform: "scale(0.96)" }
-                            : { opacity: 0.1, transform: "scale(0.96)", filter: `drop-shadow(0 0 0 ${color}00)` }
+                        ? { opacity: [0.18, 0.28, strong(0.36)], transform: ["scale(0.965)", "scale(0.992)", "scale(1)"] }
+                        : { opacity: 0.14, transform: "scale(0.965)" }
                 }
-                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 1.0, ease: [0.22, 1, 0.36, 1] }}
             >
                 <defs>
+                    {/* Forme de référence */}
                     {shapeEl.tag === "path" ? (
                         <path id={idShape} {...(shapeEl.props as any)} />
                     ) : (
                         <polygon id={idShape} {...(shapeEl.props as any)} />
                     )}
+
+                    {/* Clip + dégradé interne (facultatif) */}
                     <clipPath id={idClip}>
                         <use href={`#${idShape}`} />
                     </clipPath>
                     <radialGradient id={idGrad} cx="50%" cy="50%" r="55%">
-                        <stop offset="0%" stopColor={color} stopOpacity={0.58} />
-                        <stop offset="42%" stopColor={color} stopOpacity={0.3} />
+                        <stop offset="0%" stopColor={color} stopOpacity={0.55} />
+                        <stop offset="42%" stopColor={color} stopOpacity={0.28} />
                         <stop offset="80%" stopColor={color} stopOpacity={0} />
                     </radialGradient>
+
+                    {/* Filtre qui crée un halo à partir DE la forme, seulement à l'extérieur */}
                     <filter
-                        id={idBlur}
+                        id={idGlow}
                         x={iosMode ? undefined : (FILTER_BOX.x as any)}
                         y={iosMode ? undefined : (FILTER_BOX.y as any)}
                         width={iosMode ? undefined : (FILTER_BOX.w as any)}
@@ -462,24 +431,39 @@ export function DecoShape({
                         filterUnits={iosMode ? "objectBoundingBox" : "userSpaceOnUse"}
                         colorInterpolationFilters="sRGB"
                     >
-                        <feGaussianBlur stdDeviation={BLUR_STD_DEV} edgeMode="duplicate" />
+                        {/* 1) On dilate légèrement l'alpha de la forme pour “accrocher” le blur */}
+                        <feMorphology in="SourceAlpha" operator="dilate" radius="1.2" result="DILATE" />
+                        {/* 2) On floute la forme dilatée */}
+                        <feGaussianBlur in="DILATE" stdDeviation={BLUR_STD_DEV} result="BLUR" />
+                        {/* 3) On soustrait l'alpha d'origine → anneau extérieur uniquement */}
+                        <feComposite in="BLUR" in2="SourceAlpha" operator="out" result="OUTER" />
+                        {/* 4) On applique la couleur sur le halo uniquement */}
+                        <feFlood floodColor={color} floodOpacity={iosMode ? 0.28 : 0.36} result="FLOOD" />
+                        <feComposite in="FLOOD" in2="OUTER" operator="in" result="COLORED" />
+                        {/* 5) Sortie du halo */}
+                        <feMerge>
+                            <feMergeNode in="COLORED" />
+                        </feMerge>
                     </filter>
                 </defs>
 
-                {/* Remplissage doux + teinte interne, avec blur contrôlé */}
-                {iosMode ? (
-                    <g clipPath={`url(#${idClip})`}>
-                        <rect x={-50} y={-40} width={300} height={240} fill={`url(#${idGrad})`} filter={`url(#${idBlur})`} opacity={active && !reduced ? 1 : 0} />
-                        <use href={`#${idShape}`} fill={tint} opacity="0.25" filter={`url(#${idBlur})`} />
-                    </g>
-                ) : (
-                    <g clipPath={`url(#${idClip})`} filter={`url(#${idBlur})`}>
-                        <rect x={-50} y={-40} width={300} height={240} fill={`url(#${idGrad})`} opacity={active && !reduced ? 1 : 0} />
-                        <use href={`#${idShape}`} fill={tint} opacity="0.25" />
-                    </g>
-                )}
+                {/* HALO : part du bord de la forme et s'étale dehors */}
+                <g
+                    filter={`url(#${idGlow})`}
+                    // animation de présence/respiration du halo
+                    opacity={active && !reduced ? 1 : 0.0}
+                >
+                    {/* SourceGraphic du filtre = cette "use" (la forme), non affichée directement (le filtre rend seulement l'anneau) */}
+                    <use href={`#${idShape}`} fill="white" />
+                </g>
 
-                {/* Trait du symbole */}
+                {/* REMPLISSAGE DOUX INTERNE (optionnel) */}
+                <g clipPath={`url(#${idClip})`} opacity={active && !reduced ? 1 : 0}>
+                    <rect x={-50} y={-40} width={300} height={240} fill={`url(#${idGrad})`} />
+                    <use href={`#${idShape}`} fill={tint} opacity="0.22" />
+                </g>
+
+                {/* TRAIT NET AU-DESSUS */}
                 {shapeEl.tag === "path" ? (
                     <path {...(shapeEl.props as any)} {...baseStroke} />
                 ) : (
