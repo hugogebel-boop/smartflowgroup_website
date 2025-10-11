@@ -762,7 +762,7 @@ function ProjectCard({
     const c = glowHex[color];
 
     return (
-        <div className="relative isolate">
+        <div className="relative isolate h-full">
             {!isTouch && (
                 <motion.div
                     aria-hidden
@@ -788,18 +788,14 @@ function ProjectCard({
                 onMouseLeave={() => !isTouch && setHovered(false)}
                 onFocus={() => !isTouch && setHovered(true)}
                 onBlur={() => !isTouch && setHovered(false)}
-                className="relative block overflow-hidden rounded-2xl p-4 sm:p-5 transition-transform"
-                style={{
-                    background:
-                        "linear-gradient(180deg, rgba(22,24,31,0.45) 0%, rgba(12,14,18,0.42) 100%)",
-                    backdropFilter: "blur(8px)",
-                    border: `1px solid ${isTouch ? (active ? c : "rgba(255,255,255,0.15)") : "rgba(255,255,255,0.12)"
-                        }`,
-                    transition:
-                        "border-color 300ms ease, transform 300ms ease, outline-color 300ms ease",
-                }}
+                className="relative block overflow-hidden rounded-2xl p-4 sm:p-5 transition-transform h-full
+                   bg-gradient-to-b from-[rgba(22,24,31,0.45)] to-[rgba(12,14,18,0.42)]
+                   backdrop-blur border border-white/15
+                   flex flex-col"
                 aria-label={`${title} – en savoir plus`}
+                style={{ transition: "border-color 300ms ease, transform 300ms ease, outline-color 300ms ease" }}
             >
+                {/* vignette / visuel */}
                 <div
                     className="mb-2 sm:mb-3 h-28 sm:h-32 w-full overflow-hidden rounded-lg"
                     style={{
@@ -807,13 +803,21 @@ function ProjectCard({
                             "linear-gradient(180deg, rgba(40,43,53,0.25) 0%, rgba(22,24,31,0.25) 100%)",
                     }}
                 />
-                <div className="flex items-center justify-between">
-                    <h3 className="text-sm sm:text-base font-medium text-white/85 group-hover:text-white">
-                        {title}
-                    </h3>
+
+                {/* titre */}
+                <h3 className="text-sm sm:text-base font-medium text-white/85">
+                    {title}
+                </h3>
+
+                {/* sous-titre / description — peut prendre de la hauteur */}
+                <p className="mt-1 text-[13px] text-zinc-300">
+                    {subtitle}
+                </p>
+
+                {/* rangée flèche accrochée en bas */}
+                <div className="mt-auto pt-3 flex items-center justify-end">
                     <span className="text-[10px] text-zinc-400">→</span>
                 </div>
-                <p className="mt-1 text-[13px] text-zinc-300">{subtitle}</p>
             </a>
         </div>
     );
@@ -831,14 +835,14 @@ function WorksSection() {
         {
             t: "Nos apps métier",
             d:
-                "Des outils internes clairs et efficaces, conçus pour simplifier le quotidien de chaque équipe.",
+                "Des outils internes clairs et efficaces, conçus pour simplifier le quotidien de chaque équipe. Peu importe le domaine",
             href: "#/projects/apps",
             color: "red" as GlowColor,
         },
         {
             t: "Nos programmes automatisés",
             d:
-                "Des processus intelligents qui connectent vos outils et gagnent du temps sans compromis.",
+                "Des processus intelligents et robustes qui connectent vos outils et gagnent du temps sans compromis.",
             href: "#/projects/automation",
             color: "green" as GlowColor,
         },

@@ -1,5 +1,5 @@
-// src/projects/ProjectsApps.tsx (ou même emplacement que ton fichier actuel)
-import React, { useEffect, useMemo, useState, useRef } from "react";
+// src/projects/ProjectsApps.tsx
+import React, { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import { SiteBackground, TopNav, Footer } from "../layout";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -14,46 +14,44 @@ type AppMeta = {
     resume: string;
     points: string[];
     tags: string[];
-    gallery: string[]; // chemins vers tes captures
+    gallery: string[]; // autant d'images que tu veux
 };
 
+/* ====== Contenu (sobre & exact) ====== */
 const APPS: AppMeta[] = [
     {
         key: "labapp",
         title: "LabApp",
-        tagline: "Gestion de laboratoire : échantillons, essais, traçabilité.",
+        tagline: "Planification des essais, gestion des échantillons, rapports.",
         resume:
-            "Application WPF/.NET pour la planification des essais, la traçabilité des échantillons et le reporting. Pensée pour accélérer le quotidien et fiabiliser les données.",
+            "LabApp est une application WPF/.NET pour organiser les essais de laboratoire : créer les échantillons, planifier les essais et produire des rapports. L’objectif est de clarifier le flux de travail et d’éviter les manipulations répétitives.",
         points: [
-            "Planification des essais & calendrier intégré",
-            "Fiches échantillon, codes QR & chaîne de traçabilité",
-            "Exports PDF/Excel & historisation des rapports",
+            "Planification des essais avec vues simples",
+            "Gestion d’échantillons (création, statuts, notes)",
+            "Export/rapport (PDF/Excel) selon les modèles du labo",
         ],
         tags: ["WPF", ".NET 8", "EF Core", "SQL Server"],
         gallery: [
-            asset("/assets/apps/labapp/overview.png"),
-            asset("/assets/apps/labapp/samples.png"),
-            asset("/assets/apps/labapp/tests.png"),
-            asset("/assets/apps/labapp/report.png"),
+            asset("/assets/apps/labapp/1.png"),
+            asset("/assets/apps/labapp/2.png"),
+            asset("/assets/apps/labapp/3.png"),
         ],
     },
     {
         key: "comptaapp",
         title: "ComptaApp",
-        tagline: "Facturation, marge & suivi projet — simplement.",
+        tagline: "Scan des fiches de salaire et envoi automatique par e-mail.",
         resume:
-            "Application interne pour centraliser devis, factures, coûts et marges par projet. Vue d’ensemble claire, exports et préparation des écritures.",
+            "ComptaApp prend un lot de fiches de salaire, les scanne (OCR si nécessaire) et les distribue automatiquement par e-mail à chaque salarié.",
         points: [
-            "Suivi par projet (coûts, marge, avancement)",
-            "Émission de factures & numérotation auto",
-            "Exports compatibles comptabilité & TVA",
+            "Dossier d’entrée pour les fiches (PDF/scan)",
+            "Association fiche → salarié (règles simples configurables)",
+            "Envoi automatique par e-mail aux destinataires",
         ],
-        tags: ["Desktop", "TypeScript/.NET", "SQLite/SQL", "Exports XLSX"],
+        tags: ["Desktop", "OCR", "Emailing"],
         gallery: [
-            asset("/assets/apps/comptaapp/dashboard.png"),
-            asset("/assets/apps/comptaapp/invoice.png"),
-            asset("/assets/apps/comptaapp/projects.png"),
-            asset("/assets/apps/comptaapp/export.png"),
+            asset("/assets/apps/comptaapp/1.png"),
+            asset("/assets/apps/comptaapp/2.png"),
         ],
     },
 ];
@@ -76,6 +74,125 @@ function Bullet({ children }: { children: React.ReactNode }) {
     );
 }
 
+/* ====== Carousel 16:9 (léger crop pour remplir) ====== */
+function ImageCarousel({
+    images,
+    title,
+}: {
+    images: string[];
+    title: string;
+}) {
+    const [idx, setIdx] = useState(0);
+    const total = images.length;
+    const wrap = useCallback(
+        (n: number) => {
+            if (total === 0) return 0;
+            return ((n % total) + total) % total;
+        },
+        [total]
+    );
+
+    const goPrev = () => setIdx((i) => wrap(i - 1));
+    const goNext = () => setIdx((i) => wrap(i + 1));
+
+    // Navigation clavier (← →)
+    const containerRef = useRef<HTMLDivElement | null>(null);
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === "ArrowLeft") goPrev();
+            if (e.key === "ArrowRight") goNext();
+        };
+        el.addEventListener("keydown", onKey);
+        return () => el.removeEventListener("keydown", onKey);
+    }, []);
+
+    return (
+        <div
+            ref={containerRef}
+            tabIndex={0}
+            className="group relative w-full outline-none"
+            aria-label={`Galerie ${title}`}
+        >
+            {/* Cadre 16/9 : padding-top:56.25% (exact) */}
+            <figure
+                className="relative w-full overflow-hidden rounded-xl border border-zinc-800/70 bg-zinc-950"
+                style={{ paddingTop: "56.25%" }} // 16/9 exact
+            >
+                {images.map((src, i) => (
+                    <img
+                        key={src + i}
+                        src={src}
+                        alt={`${title} — image ${i + 1}/${total}`}
+                        className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-300 ${i === idx ? "opacity-100" : "opacity-0"
+                            }`}
+                        loading={i === 0 ? "eager" : "lazy"}
+                        decoding="async"
+                    />
+                ))}
+
+                {/* Flèche gauche */}
+                {total > 1 && (
+                    <button
+                        type="button"
+                        onClick={goPrev}
+                        aria-label="Image précédente"
+                        className="
+              absolute left-3 top-1/2 -translate-y-1/2
+              hidden items-center justify-center rounded-full
+              bg-zinc-900/70 border border-zinc-700/60 backdrop-blur
+              p-2 text-zinc-200 hover:bg-zinc-800/80
+              group-hover:flex focus:flex
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60
+            "
+                    >
+                        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+                            <path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                        </svg>
+                    </button>
+                )}
+
+                {/* Flèche droite */}
+                {total > 1 && (
+                    <button
+                        type="button"
+                        onClick={goNext}
+                        aria-label="Image suivante"
+                        className="
+              absolute right-3 top-1/2 -translate-y-1/2
+              hidden items-center justify-center rounded-full
+              bg-zinc-900/70 border border-zinc-700/60 backdrop-blur
+              p-2 text-zinc-200 hover:bg-zinc-800/80
+              group-hover:flex focus:flex
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60
+            "
+                    >
+                        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+                            <path d="m10 6-1.41 1.41L13.17 12l-4.58 4.59L10 18l6-6z" />
+                        </svg>
+                    </button>
+                )}
+            </figure>
+
+            {/* Indicateurs (clic pour naviguer) */}
+            {total > 1 && (
+                <div className="mt-3 flex items-center justify-center gap-2">
+                    {images.map((_, i) => (
+                        <button
+                            key={i}
+                            onClick={() => setIdx(i)}
+                            aria-label={`Aller à l’image ${i + 1}`}
+                            className={`h-2.5 w-2.5 rounded-full ${i === idx ? "bg-zinc-200" : "bg-zinc-600/60 hover:bg-zinc-500/80"
+                                }`}
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
 type AppCardProps = { meta: AppMeta; defaultOpen?: boolean };
 
 function AppCard({ meta, defaultOpen = false }: AppCardProps) {
@@ -83,7 +200,6 @@ function AppCard({ meta, defaultOpen = false }: AppCardProps) {
     const panelId = `panel-${meta.key}`;
     const ref = useRef<HTMLDivElement | null>(null);
 
-    // scroll doux quand on ouvre
     useEffect(() => {
         if (open && ref.current) {
             ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -99,7 +215,9 @@ function AppCard({ meta, defaultOpen = false }: AppCardProps) {
             {/* En-tête compacte */}
             <div className="flex flex-col gap-3 p-5 sm:p-6">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                    <h3 className="text-xl sm:text-2xl font-semibold text-white">{meta.title}</h3>
+                    <h3 className="text-xl sm:text-2xl font-semibold text-white">
+                        {meta.title}
+                    </h3>
                     <div className="flex flex-wrap items-center gap-2">
                         {meta.tags.map((t) => (
                             <Chip key={t}>{t}</Chip>
@@ -153,24 +271,9 @@ function AppCard({ meta, defaultOpen = false }: AppCardProps) {
                                     </ul>
                                 </div>
 
-                                {/* Colonne galerie */}
-                                <div className="grid grid-cols-2 gap-3">
-                                    {meta.gallery.map((src, i) => (
-                                        <figure
-                                            key={i}
-                                            className="group relative overflow-hidden rounded-xl border border-zinc-800/70 bg-zinc-950"
-                                        >
-                                            <img
-                                                src={src}
-                                                alt={`${meta.title} — capture ${i + 1}`}
-                                                className="block h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                                                loading="lazy"
-                                            />
-                                            <figcaption className="sr-only">
-                                                {meta.title} — capture d’écran {i + 1}
-                                            </figcaption>
-                                        </figure>
-                                    ))}
+                                {/* Colonne galerie — carousel 16/9 (crop léger) */}
+                                <div className="min-w-0">
+                                    <ImageCarousel images={meta.gallery} title={meta.title} />
                                 </div>
                             </div>
                         </div>
@@ -190,7 +293,7 @@ export default function ProjectsApps() {
     const header = useMemo(
         () => ({
             k: "Apps métier",
-            sub: "Des outils internes robustes et clairs pour accélérer votre quotidien.",
+            sub: "Des outils internes clairs pour accélérer votre quotidien.",
         }),
         []
     );
@@ -217,9 +320,9 @@ export default function ProjectsApps() {
                     ))}
                 </div>
 
-                {/* Hint fichiers */}
                 <p className="mt-8 text-center text-xs text-zinc-500">
-                    Remplace les images dans <code className="text-zinc-400">/assets/apps/&lt;app&gt;/</code> par tes captures.
+                    Place autant d’images que tu veux par app dans{" "}
+                    <code className="text-zinc-400">/assets/apps/&lt;app&gt;/</code>. Elles seront affichées en 16/9, avec un léger crop pour remplir le cadre.
                 </p>
             </section>
 
