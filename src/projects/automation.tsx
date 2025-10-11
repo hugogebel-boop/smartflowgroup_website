@@ -6,7 +6,6 @@ type Program = {
     title: string;
     tagline: string;
     description: string;
-    features: string[];
     input: string;
     output: string;
     stack: string;
@@ -16,40 +15,24 @@ const PROGRAMS: Program[] = [
     {
         id: "hooks-generator",
         title: "Générateur d’accroches",
-        tagline: "CSV/Excel (entreprise, URL) → accroche + amorce d’e-mail.",
+        tagline: "Du site web à l’accroche prête à coller.",
         description:
-            "À partir d’un fichier avec le nom d’entreprise et son URL, le script récupère quelques infos du site et rédige une accroche courte. En option, il génère aussi une amorce d’e-mail personnalisée via l’API de chat.",
-        features: [
-            "Lecture CSV/Excel (company_name, website_url)",
-            "Récupération basique d’infos depuis le site (titres/sections)",
-            "Accroche courte et vérifiable (1–2 lignes)",
-            "Amorce d’e-mail 2–4 phrases (optionnelle)",
-            "Export CSV/XLSX avec statut et horodatage",
-        ],
-        input: "CSV/XLSX : company_name, website_url (http/https)",
-        output:
-            "CSV/XLSX : hook, mail_opening (optionnel), status, timestamp",
-        stack:
-            "Python, extraction HTML, simple règles/regex, API de chat pour la génération",
+            "Donnez-nous un fichier avec le nom de l’entreprise et son URL : le programme explore la page, repère le ton, les titres clés et ce qui fait la singularité de la marque. Il en ressort une accroche courte (1–2 lignes), nette et vérifiable. En option, il propose aussi une amorce d’e-mail personnalisée pour ouvrir la conversation sans tourner autour du pot.",
+        input: "CSV/XLSX → company_name, website_url",
+        output: "CSV/XLSX → hook, mail_opening, status, timestamp",
+        stack: "Python · extraction HTML · règles/regex · API de openAI",
     },
     {
         id: "bulk-mailer",
         title: "Envoi d’e-mails personnalisés",
-        tagline: "Construit et envoie le bon message à la bonne personne.",
+        tagline: "Assemble, vérifie, envoie.",
         description:
-            "À partir d’un fichier avec entreprise, e-mail, accroche et contenu, le programme assemble le message final et l’envoie au destinataire indiqué. Il journalise les envois et les erreurs éventuelles.",
-        features: [
-            "Lecture CSV/Excel (company, email, hook, body)",
-            "Construction du mail (objet/corps) à partir des champs fournis",
-            "Envoi au destinataire exact (colonne email requise)",
-            "Mode test (dry-run) avant envoi réel",
-            "Journal d’envoi avec statut, date/heure et message d’erreur",
-        ],
+            "À partir d’un tableau (entreprise, e-mail, accroche, contenu), le programme construit l’objet et le corps du message, injecte les bonnes variables et adresse le bon destinataire. Un mode essai permet de contrôler la mise en page avant l’envoi réel. Chaque action est journalisée avec le statut, la date et l’éventuel message d’erreur pour un suivi limpide.",
         input:
-            "CSV/XLSX : company_name, email, hook, body (+ éventuellement subject, signature)",
+            "CSV/XLSX → company_name, email, hook, body",
         output:
-            "Log d’envoi + fichier enrichi (status, timestamp, error_message le cas échéant)",
-        stack: "Python, SMTP ou API e-mail, gestion d’erreurs et reprise simple",
+            "Journal d’envoi + fichier enrichi (status, timestamp, error_message)",
+        stack: "Python · SMTP ou API e-mail · gestion d’erreurs et reprise simple",
     },
 ];
 
@@ -59,7 +42,7 @@ function goToContact() {
     setTimeout(() => {
         const contact = document.getElementById("contact");
         if (contact) contact.scrollIntoView({ behavior: "smooth" });
-    }, 500); // petit délai le temps que la page charge
+    }, 500);
 }
 
 export default function ProjectsAutomation() {
@@ -82,7 +65,7 @@ export default function ProjectsAutomation() {
                     Nos programmes automatisés
                 </h1>
                 <p className="mt-3 text-sm sm:text-base text-zinc-300 max-w-3xl">
-                    Des automatisations développées sur mesure : elles s’intègrent à vos outils, traitent vos données et exécutent vos tâches répétitives, pour simplifier, accélérer et fiabiliser vos processus.
+                    Des automatisations sur mesure qui s’intègrent à vos outils, traitent vos données et exécutent vos tâches répétitives — pour aller plus vite, sans perdre en qualité.
                 </p>
             </section>
 
@@ -96,44 +79,42 @@ export default function ProjectsAutomation() {
                         >
                             <header>
                                 <h3 className="text-xl sm:text-[22px] font-semibold tracking-tight">
-                                    {p.title}
+                                    <span className="bg-gradient-to-r from-emerald-300 via-cyan-200 to-sky-300 bg-clip-text text-transparent">
+                                        {p.title}
+                                    </span>
                                 </h3>
-                                <p className="mt-1 text-[13px] sm:text-sm text-zinc-300">
+                                <p className="mt-1 text-[13px] sm:text-sm text-zinc-300/90">
                                     {p.tagline}
                                 </p>
                             </header>
 
-                            <p className="mt-4 text-sm leading-6 text-zinc-200">
-                                {p.description}
-                            </p>
+                            {/* Texte (sans puces) */}
+                            <div className="mt-4 text-sm leading-6 text-zinc-200">
+                                <p>{p.description}</p>
+                            </div>
 
-                            <ul className="mt-4 space-y-2">
-                                {p.features.map((f, i) => (
-                                    <li key={i} className="text-sm text-zinc-200 leading-6">
-                                        <span className="inline-block mr-2 opacity-70">—</span>
-                                        {f}
-                                    </li>
-                                ))}
-                            </ul>
-
-                            <dl className="mt-5 grid grid-cols-1 gap-3 text-[13px] sm:text-sm">
-                                <div className="flex items-start gap-2">
-                                    <dt className="shrink-0 text-zinc-400 w-20">Entrée</dt>
-                                    <dd className="text-zinc-100">{p.input}</dd>
-                                </div>
-                                <div className="flex items-start gap-2">
-                                    <dt className="shrink-0 text-zinc-400 w-20">Sortie</dt>
-                                    <dd className="text-zinc-100">{p.output}</dd>
-                                </div>
-                                <div className="flex items-start gap-2">
-                                    <dt className="shrink-0 text-zinc-400 w-20">Stack</dt>
-                                    <dd className="text-zinc-100">{p.stack}</dd>
-                                </div>
-                            </dl>
+                            {/* Méta façon “variables” (monospace, sans bulles) */}
+                            <div className="mt-5 text-[12.5px] sm:text-[13px] font-mono leading-6">
+                                <p>
+                                    <span className="text-emerald-300">entrée</span>
+                                    <span className="text-zinc-400"> = </span>
+                                    <span className="text-zinc-100">{p.input}</span>
+                                </p>
+                                <p>
+                                    <span className="text-sky-300">sortie</span>
+                                    <span className="text-zinc-400"> = </span>
+                                    <span className="text-zinc-100">{p.output}</span>
+                                </p>
+                                <p>
+                                    <span className="text-fuchsia-300">stack</span>
+                                    <span className="text-zinc-400"> = </span>
+                                    <span className="text-zinc-100">{p.stack}</span>
+                                </p>
+                            </div>
 
                             <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
                                 <span className="text-[12px] text-zinc-400">
-                                    Adaptable à vos colonnes et contraintes
+                                    S’adapte à vos colonnes et à vos contraintes
                                 </span>
                                 <button
                                     onClick={goToContact}

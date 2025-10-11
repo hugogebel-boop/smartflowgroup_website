@@ -311,6 +311,16 @@ export default function ProjectsApps() {
                 <h1 className="mt-2 text-3xl sm:text-4xl font-semibold">{header.k}</h1>
                 <p className="mt-3 text-sm sm:text-base text-zinc-300">{header.sub}</p>
             </section>
+
+            {/* Liste des apps */}
+            <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-20 sm:pb-28">
+                <div className="grid gap-6 sm:gap-8">
+                    {APPS.map((meta, i) => (
+                        <AppCard key={meta.key} meta={meta} defaultOpen={i === 0} />
+                    ))}
+                </div>
+            </section>
+
             <Footer />
         </main>
     );
