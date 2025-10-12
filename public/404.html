@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Redirecting…</title>
+    <meta http-equiv="refresh" content="0; url=/" />
+    <script>
+        // Recompose l’URL demandée et la passe à index.html via ?p=
+        (function () {
+            var l = window.location;
+            var p = l.pathname + l.search + l.hash;
+            var target = "/" + (p.startsWith("/") ? "" : "") + "?p=" + encodeURIComponent(p);
+            // Remplace sans créer d’historique supplémentaire
+            window.location.replace(target);
+        })();
+    </script>
+</head>
+<body>
+    Redirecting…
+</body>
+</html>

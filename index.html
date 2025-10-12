@@ -7,9 +7,38 @@
     <link rel="preload" as="image" href="/assets/ame-du-monde.png" imagesrcset="/assets/ame-du-monde.png 1x" />
     <link rel="preload" as="image" href="/assets/travel-gc.png" imagesrcset="/assets/travel-gc.png 1x" />
     <meta name="theme-color" content="#0B0B12" />
+    <!-- (Optionnel) Canonical dynamique simple -->
+    <link id="canonical" rel="canonical" href="https://www.smartflowgroup.ch/" />
 </head>
-  <body class="bg-black">
+<body class="bg-black">
     <div id="root"></div>
+
+    <!-- 🔧 Restaurer l’URL propre si on vient de /404.html?p=... -->
+    <script>
+        (function () {
+            var params = new URLSearchParams(window.location.search);
+            var p = params.get("p");
+            if (p) {
+                var clean = decodeURIComponent(p);
+                // Enlève la query ?p=… visuellement, sans recharger
+                window.history.replaceState(null, "", clean);
+            }
+
+            // (Optionnel) Met à jour la canonical selon la route courante
+            var link = document.getElementById("canonical");
+            if (link) {
+                try {
+                    var u = new URL(window.location.href);
+                    u.search = "";
+                    if (u.pathname !== "/" && u.pathname.endsWith("/")) {
+                        u.pathname = u.pathname.replace(/\/+$/, "");
+                    }
+                    link.setAttribute("href", u.toString());
+                } catch { }
+            }
+        })();
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
-  </body>
+</body>
 </html>

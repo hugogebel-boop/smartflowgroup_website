@@ -1,6 +1,7 @@
 // src/App.tsx
 import React, { useEffect, useMemo, useRef, useState, Suspense } from "react";
 import { motion, useScroll, useMotionValueEvent, useInView } from "framer-motion";
+import { setHead } from "./seo";
 
 const ProjectsWeb = React.lazy(() => import("./projects/web"));
 const ProjectsApps = React.lazy(() => import("./projects/apps"));
