@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Exclure les fichiers techniques
+Disallow: /assets/
+Disallow: /node_modules/
+Disallow: /src/
+
+# Indiquer le sitemap
+Sitemap: https://www.smartflowgroup.ch/sitemap.xml
