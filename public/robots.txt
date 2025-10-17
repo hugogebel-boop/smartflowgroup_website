@@ -1,10 +1,21 @@
 User-agent: *
 Allow: /
 
-# Exclure les fichiers techniques
-Disallow: /assets/
-Disallow: /node_modules/
-Disallow: /src/
-
-# Indiquer le sitemap
+# Sitemap
 Sitemap: https://www.smartflowgroup.ch/sitemap.xml
+
+# Crawl-delay pour éviter la surcharge
+Crawl-delay: 1
+
+# Disallow pour les fichiers techniques
+Disallow: /node_modules/
+Disallow: /.git/
+Disallow: /src/
+Disallow: /*.ts
+Disallow: /*.tsx
+Disallow: /*.js.map
+Disallow: /*.css.map
+
+# Allow pour les assets publics
+Allow: /assets/
+Allow: /icon/

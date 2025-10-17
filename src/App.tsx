@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useRef, useState, Suspense } from "react";
 import { motion, useScroll, useMotionValueEvent, useInView } from "framer-motion";
 import { Routes, Route, useLocation } from "react-router-dom";
-import { setHead } from "./seo";
+import { setHead, DEFAULT_SEO, SEO_CONFIGS } from "./seo";
 
 const ProjectsWeb = React.lazy(() => import("./projects/web"));
 const ProjectsApps = React.lazy(() => import("./projects/apps"));
@@ -85,6 +85,9 @@ function HeroSection() {
                     <br />
                     une expérience numérique.
                 </h1>
+                
+                {/* H1 sémantique invisible pour le SEO */}
+                <h1 style={{ display: 'none' }}>SmartFlow — Design & Développement web, une expérience numérique</h1>
 
                 <p className="mx-auto mt-3 sm:mt-4 max-w-xl text-sm sm:text-base text-zinc-300">
                     Sites, logiciels et automatisations pensés pour vous simplifier la vie.
@@ -807,7 +810,7 @@ function ContactSection() {
                 <h2 id="contact-title" className="text-xl sm:text-2xl font-semibold">Contact</h2>
                 <p className="mt-2 text-sm sm:text-base text-zinc-300">Parlez-nous de votre projet. Réponse rapide et conseils concrets.</p>
 
-                <form className="mt-5 sm:mt-6 grid gap-4" action="https://formsubmit.co/hello@smartflow.dev" method="POST">
+                <form className="mt-5 sm:mt-6 grid gap-4" action="https://formsubmit.co/contact@smartflowgroup.ch" method="POST">
                     <input type="hidden" name="_subject" value="Nouveau message SmartFlow" />
                     <input type="hidden" name="_captcha" value="false" />
                     <input type="hidden" name="_template" value="table" />
@@ -846,18 +849,22 @@ function ContactSection() {
 export default function App() {
     const location = useLocation();
 
-    // Title + scroll restoration
+    // SEO + scroll restoration
     useEffect(() => {
         // simple scroll restoration on route change
         window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
-        // title
-        const titles: Record<string, string> = {
-            "/projects/web": "Sites web — SmartFlow",
-            "/projects/apps": "SmartFlow — Apps métier",
-            "/projects/automation": "SmartFlow — Programmes automatisés",
-            "/mentions": "Mentions légales — SmartFlow",
+        
+        // SEO configuration par page
+        const seoConfigs: Record<string, any> = {
+            "/": { ...DEFAULT_SEO, ...SEO_CONFIGS.home },
+            "/projects/web": { ...DEFAULT_SEO, ...SEO_CONFIGS.web },
+            "/projects/apps": { ...DEFAULT_SEO, ...SEO_CONFIGS.apps },
+            "/projects/automation": { ...DEFAULT_SEO, ...SEO_CONFIGS.automation },
+            "/mentions": { ...DEFAULT_SEO, ...SEO_CONFIGS.mentions },
         };
-        document.title = titles[location.pathname] ?? "SmartFlow";
+        
+        const config = seoConfigs[location.pathname] || { ...DEFAULT_SEO, ...SEO_CONFIGS.home };
+        setHead(config);
     }, [location.pathname]);
 
     return (

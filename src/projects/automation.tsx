@@ -37,10 +37,6 @@ const PROGRAMS: Program[] = [
 export default function ProjectsAutomation() {
     const goHomeAndScroll = useGoHomeAndScroll();
     
-    useEffect(() => {
-        document.title = "Programmes automatisés — SmartFlow";
-        window.scrollTo({ top: 0 });
-    }, []);
 
     return (
         <main className="relative min-h-screen text-white">
@@ -55,6 +51,9 @@ export default function ProjectsAutomation() {
                 <h1 className="mt-2 text-3xl sm:text-4xl font-semibold">
                     Nos programmes automatisés
                 </h1>
+                
+                {/* H1 sémantique invisible pour le SEO */}
+                <h1 style={{ display: 'none' }}>Programmes automatisés — SmartFlow | Scripts et automatisation</h1>
                 <p className="mt-3 text-sm sm:text-base text-zinc-300 max-w-3xl">
                     Des automatisations sur mesure qui s’intègrent à vos outils, traitent vos données et exécutent vos tâches répétitives pour aller plus vite, sans perdre en qualité.
                 </p>
