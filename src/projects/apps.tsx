@@ -347,7 +347,7 @@ export default function ProjectsApps() {
             {/* En-tête de page */}
             <section className="mx-auto max-w-5xl px-4 sm:px-6 py-[var(--section-y)]">
                 <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-zinc-400">
-                    Projets
+                    
                 </p>
                 <h1 className="mt-2 text-3xl sm:text-4xl font-semibold">{header.k}</h1>
                 

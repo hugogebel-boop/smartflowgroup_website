@@ -543,7 +543,10 @@ function useMobileDelay(active: boolean, delayMs: number, enabled: boolean) {
 
 function ServiceCard({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
     const ref = React.useRef<HTMLDivElement | null>(null);
-    const inView = useInView(ref, { margin: "-12% 0% -12% 0%", amount: 0.35 });
+    const inView = useInView(ref, {
+        margin: "-33% 0px -33% 0px", // "tiers central" de l'écran
+        amount: 0.01,                // suffit qu'un petit bout entre dans la bande
+      });
 
     const [hovered, setHovered] = React.useState(false);
     const isTouch = useIsTouchDevice();
@@ -662,87 +665,123 @@ function ProjectCard({
     href,
     color,
     overlay,
-}: {
+  }: {
     title: string;
     subtitle: string;
     href: string;
     color: GlowColor;
-    overlay?: OverlayWords; // ← nouveau
-}) {
+    overlay?: OverlayWords;
+  }) {
     const isTouch = useIsTouchDevice();
+    const reduced = usePrefersReducedMotion();
     const [hovered, setHovered] = React.useState(false);
     const ref = React.useRef<HTMLAnchorElement | null>(null);
-    const inView = useInView(ref, { margin: "-15% 0% -15% 0%", amount: 0.25 });
-
+  
+    // Activation mobile/tablette : quand la carte entre dans le tiers central
+    const inView = useInView(ref, {
+      margin: "-33% 0px -33% 0px",
+      amount: 0.01,
+    });
+  
+    // Desktop = hover ; Mobile/Tablet = in-view
     const active = isTouch ? inView : hovered;
     const c = glowHex[color];
-
+  
+    // Variants texte (titre + sous-titre)
+    const textVariants = {
+      idle: { opacity: 0.88, filter: "brightness(0.96)", scale: 1 },
+      on: reduced
+        ? { opacity: 1, filter: "brightness(1.06)", scale: 1 }
+        : { opacity: 1, filter: "brightness(1.12)", scale: 1.03 },
+    };
+  
+    // Variants overlay (WEB / APP / DEV)
+    const overlayVariants = {
+      idle: { opacity: 0.45, scale: 1, filter: "saturate(1.1) brightness(1)" },
+      on: reduced
+        ? { opacity: 0.6, scale: 1.02, filter: "saturate(1.2) brightness(1.08)" }
+        : { opacity: 0.75, scale: 1.08, filter: "saturate(1.3) brightness(1.1)" },
+    };
+  
     return (
-        <div className="relative isolate h-full">
-            {!isTouch && (
-                <motion.div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0 -z-10"
+      <div className="relative isolate h-full">
+        {/* Halo desktop existant */}
+        {!isTouch && (
+          <motion.div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-10"
+            style={{
+              borderRadius: "0.9rem",
+              boxShadow: `0 0 8px 2px ${c}33, 0 0 20px 6px ${c}29, 0 0 36px 12px ${c}20`,
+              filter: "blur(4px) saturate(1.4) brightness(1.1)",
+            }}
+            animate={{ opacity: active ? 1 : 0, scale: active ? 1.01 : 0.99 }}
+            transition={{ duration: active ? 1.0 : 4.0, ease: [0.22, 1, 0.36, 1] }}
+          />
+        )}
+  
+        <a
+          ref={ref}
+          href={href}
+          onMouseEnter={() => !isTouch && setHovered(true)}
+          onMouseLeave={() => !isTouch && setHovered(false)}
+          onFocus={() => !isTouch && setHovered(true)}
+          onBlur={() => !isTouch && setHovered(false)}
+          className="relative block overflow-hidden rounded-2xl p-4 sm:p-5 transition-transform h-full
+                     bg-gradient-to-b from-[rgba(22,24,31,0.45)] to-[rgba(12,14,18,0.42)]
+                     backdrop-blur border border-white/15
+                     flex flex-col focus:outline-none focus:ring-2 focus:ring-white/30"
+          aria-label={`${title} – en savoir plus`}
+          style={{ transition: "border-color 300ms ease, transform 300ms ease, outline-color 300ms ease" }}
+        >
+          {/* Zone image + overlay typographique */}
+          <div
+            className="relative mb-2 sm:mb-3 h-28 sm:h-32 w-full overflow-hidden rounded-lg"
+            style={{ background: "linear-gradient(180deg, rgba(40,43,53,0.25) 0%, rgba(22,24,31,0.25) 100%)" }}
+          >
+            {overlay && (
+              <div className="pointer-events-none absolute inset-0">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <motion.span
+                    variants={overlayVariants}
+                    initial="idle"
+                    animate={active ? "on" : "idle"}
+                    transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                    className="font-semibold uppercase select-none bg-clip-text text-transparent
+                               bg-[linear-gradient(120deg,#e0e7ff_0%,#a78bfa_35%,#22d3ee_65%,#e879f9_100%)] tracking-[0.22em]"
                     style={{
-                        borderRadius: "0.9rem",
-                        boxShadow: `0 0 8px 2px ${c}33, 0 0 20px 6px ${c}29, 0 0 36px 12px ${c}20`,
-                        filter: "blur(4px) saturate(1.4) brightness(1.1)",
+                      fontSize: "clamp(28px, 9vw, 48px)",
+                      letterSpacing: "0.2em",
+                      willChange: "transform, filter, opacity",
                     }}
-                    animate={{ opacity: active ? 1 : 0, scale: active ? 1.01 : 0.99 }}
-                    transition={{ duration: active ? 1.0 : 4.0, ease: [0.22, 1, 0.36, 1] }}
-                />
+                  >
+                    {overlay.primary}
+                  </motion.span>
+                </div>
+              </div>
             )}
-
-            <a
-                ref={ref}
-                href={href}
-                onMouseEnter={() => !isTouch && setHovered(true)}
-                onMouseLeave={() => !isTouch && setHovered(false)}
-                onFocus={() => !isTouch && setHovered(true)}
-                onBlur={() => !isTouch && setHovered(false)}
-                className="relative block overflow-hidden rounded-2xl p-4 sm:p-5 transition-transform h-full
-                   bg-gradient-to-b from-[rgba(22,24,31,0.45)] to-[rgba(12,14,18,0.42)]
-                   backdrop-blur border border-white/15
-                   flex flex-col focus:outline-none focus:ring-2 focus:ring-white/30"
-                aria-label={`${title} – en savoir plus`}
-                style={{ transition: "border-color 300ms ease, transform 300ms ease, outline-color 300ms ease" }}
-            >
-                {/* Zone image + overlay typographique */}
-                <div
-                    className="relative mb-2 sm:mb-3 h-28 sm:h-32 w-full overflow-hidden rounded-lg"
-                    style={{ background: "linear-gradient(180deg, rgba(40,43,53,0.25) 0%, rgba(22,24,31,0.25) 100%)" }}
-                >
-                    {overlay && (
-                        <div className="pointer-events-none absolute inset-0">
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <motion.span
-                                    className="font-semibold uppercase select-none bg-clip-text text-transparent
-                     bg-[linear-gradient(120deg,#e0e7ff_0%,#a78bfa_35%,#22d3ee_65%,#e879f9_100%)] tracking-[0.22em]"
-                                    style={{
-                                        fontSize: "clamp(28px, 9vw, 48px)",
-                                        letterSpacing: "0.2em",
-                                        opacity: 0.45,            // ← moins opaque
-                                        filter: "saturate(1.1)",  // léger boost pour le gradient
-                                    }}
-                                    animate={{ opacity: [0.38, 0.5, 0.45] }} // subtil vivant
-                                    transition={{ duration: 2.2, repeat: Infinity, ease: [0.45, 0, 0.55, 1] }}
-                                >
-                                    {overlay.primary}
-                                </motion.span>
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                <h3 className="text-sm sm:text-base font-medium text-white/85">{title}</h3>
-                <p className="mt-1 text-[13px] text-zinc-300">{subtitle}</p>
-                <div className="mt-auto pt-3 flex items-center justify-end">
-                    <span className="text-[10px] text-zinc-400">→</span>
-                </div>
-            </a>
-        </div>
+          </div>
+  
+          {/* Texte animé (éclaircissement + zoom léger) */}
+          <motion.div
+            variants={textVariants}
+            initial="idle"
+            animate={active ? "on" : "idle"}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            style={{ transformOrigin: "center", willChange: "transform, filter, opacity" }}
+          >
+            <h3 className="text-sm sm:text-base font-medium text-white/85">{title}</h3>
+            <p className="mt-1 text-[13px] text-zinc-300">{subtitle}</p>
+          </motion.div>
+  
+          <div className="mt-auto pt-3 flex items-center justify-end">
+            <span className="text-[10px] text-zinc-400">→</span>
+          </div>
+        </a>
+      </div>
     );
-}
+  }  
+  
 function WorksSection() {
     const goHomeAndScroll = useGoHomeAndScroll();
     
