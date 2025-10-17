@@ -1,37 +1,14 @@
 // …imports
 import React, { useEffect } from "react";
-import { SiteBackground, TopNav, Footer } from "../layout";
+import { SiteBackground, TopNav, Footer, useGoHomeAndScroll } from "../layout";
 
 export default function ProjectsWeb() {
+    const goHomeAndScroll = useGoHomeAndScroll();
+    
     useEffect(() => {
         document.title = "Sites web — SmartFlow";
         window.scrollTo({ top: 0 });
     }, []);
-
-    const goHomeThenScrollTo = (targetId: string) => {
-        const isHome =
-            window.location.hash === "#/" ||
-            window.location.hash === "" ||
-            window.location.hash === "#";
-        const doScroll = () => {
-            const el = document.getElementById(targetId);
-            if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-        };
-
-        if (isHome) {
-            doScroll();
-            return;
-        }
-
-        window.location.hash = "#/";
-        let tries = 0;
-        const tryScroll = () => {
-            const el = document.getElementById(targetId);
-            if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-            else if (tries++ < 20) requestAnimationFrame(tryScroll);
-        };
-        setTimeout(() => requestAnimationFrame(tryScroll), 200);
-    };
 
     const PROJECTS = [
         {
@@ -147,7 +124,7 @@ export default function ProjectsWeb() {
                         Parlez-nous de votre projet, nous lui donnerons vie.
                     </p>
                     <button
-                        onClick={() => goHomeThenScrollTo("contact")}
+                        onClick={() => goHomeAndScroll("contact")}
                         className="mt-5 inline-flex items-center justify-center rounded-full bg-white/10 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                     >
                         Discuter de votre site

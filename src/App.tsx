@@ -1,6 +1,7 @@
 // src/App.tsx
 import React, { useEffect, useMemo, useRef, useState, Suspense } from "react";
 import { motion, useScroll, useMotionValueEvent, useInView } from "framer-motion";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { setHead } from "./seo";
 
 const ProjectsWeb = React.lazy(() => import("./projects/web"));
@@ -13,6 +14,7 @@ import {
     TopNav,
     Footer,
     goToHomeAndScroll,
+    useGoHomeAndScroll,
     usePrefersReducedMotion,
 } from "./layout";
 
@@ -56,6 +58,7 @@ function HeroSection() {
     const { scrollY } = useScroll();
     const [opacity, setOpacity] = useState(1);
     const reduced = usePrefersReducedMotion();
+    const goHomeAndScroll = useGoHomeAndScroll();
 
     useMotionValueEvent(scrollY, "change", (latest) => {
         const o = Math.max(0, 1 - latest / 120);
@@ -89,25 +92,25 @@ function HeroSection() {
 
                 <div className="mt-6 sm:mt-8 inline-flex w-full flex-col sm:w-auto sm:flex-row gap-3 justify-center">
                     <a
-                        href="#dev"
+                        href="/"
                         aria-label="Découvrir notre approche"
                         role="button"
                         className="rounded-xl border border-white/10 px-5 py-3 text-sm text-zinc-300 hover:text-white hover:border-white/20 transition w-full sm:w-auto"
                         onClick={(e) => {
                             e.preventDefault();
-                            goToHomeAndScroll("dev");
+                            goHomeAndScroll("dev");
                         }}
                     >
                         Notre approche
                     </a>
                     <a
-                        href="#services"
+                        href="/"
                         aria-label="Voir nos services"
                         role="button"
                         className="rounded-xl border border-white/10 px-5 py-3 text-sm text-zinc-300 hover:text-white hover:border-white/20 transition w-full sm:w-auto"
                         onClick={(e) => {
                             e.preventDefault();
-                            goToHomeAndScroll("services");
+                            goHomeAndScroll("services");
                         }}
                     >
                         Nos services
@@ -738,25 +741,27 @@ function ProjectCard({
     );
 }
 function WorksSection() {
+    const goHomeAndScroll = useGoHomeAndScroll();
+    
     const works = [
         {
             t: "Nos sites web",
             d: "Découvrez une sélection de sites modernes, pensés pour raconter et sublimer chaque univers.",
-            href: "#/projects/web",
+            href: "/projects/web",
             color: "yellow" as GlowColor,
             overlay: { primary: "WEB", secondary: ["APP", "DEV"] }, // ← ici
         },
         {
             t: "Nos apps métier",
             d: "Des outils internes clairs et efficaces, conçus pour simplifier le quotidien de chaque équipe. Peu importe le domaine",
-            href: "#/projects/apps",
+            href: "/projects/apps",
             color: "red" as GlowColor,
             overlay: { primary: "APP", secondary: ["WEB", "DEV"] }, // ← ici
         },
         {
             t: "Nos programmes automatisés",
             d: "Des processus intelligents et robustes qui connectent vos outils et gagnent du temps sans compromis.",
-            href: "#/projects/automation",
+            href: "/projects/automation",
             color: "green" as GlowColor,
             overlay: { primary: "DEV", secondary: ["WEB", "APP"] }, // ← ici
         },
@@ -768,12 +773,12 @@ function WorksSection() {
                 <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-1">
                     <h2 id="works-title" className="text-xl sm:text-2xl font-semibold">Nos projets</h2>
                     <a
-                        href="#contact"
+                        href="/"
                         className="text-sm text-zinc-300 underline-offset-4 hover:text-white hover:underline"
                         aria-label="Nous contacter"
-                        onClick={(e) => { e.preventDefault(); goToHomeAndScroll("contact"); }}
+                        onClick={(e) => { e.preventDefault(); goHomeAndScroll("contact"); }}
                     >
-                        Discuter d’un projet
+                        Discuter d'un projet
                     </a>
                 </div>
 
@@ -839,69 +844,56 @@ function ContactSection() {
 
 /* ================= APP ================= */
 export default function App() {
-    const [hash, setHash] = React.useState(isClient ? window.location.hash.replace(/^#/, "") : "");
+    const location = useLocation();
 
     // Title + scroll restoration
     useEffect(() => {
-        const onHash = () => {
-            const newHash = window.location.hash.replace(/^#/, "");
-            setHash(newHash);
-            // simple scroll restoration on route change
-            window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
-            // title
-            const titles: Record<string, string> = {
-                "/projects/web": "Sites web — SmartFlow",
-                "/projects/apps": "SmartFlow — Apps métier",
-                "/projects/automation": "SmartFlow — Programmes automatisés",
-                "/mentions": "Mentions légales — SmartFlow",
-            };
-            document.title = titles[newHash] ?? "SmartFlow";
+        // simple scroll restoration on route change
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+        // title
+        const titles: Record<string, string> = {
+            "/projects/web": "Sites web — SmartFlow",
+            "/projects/apps": "SmartFlow — Apps métier",
+            "/projects/automation": "SmartFlow — Programmes automatisés",
+            "/mentions": "Mentions légales — SmartFlow",
         };
-        onHash();
-        window.addEventListener("hashchange", onHash);
-        return () => window.removeEventListener("hashchange", onHash);
-    }, []);
-
-    // Routes "projects"
-    if (hash === "/projects/web") {
-        return (
-            <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
-                <ProjectsWeb />
-            </Suspense>
-        );
-    }
-    if (hash === "/projects/apps") {
-        return (
-            <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
-                <ProjectsApps />
-            </Suspense>
-        );
-    }
-    if (hash === "/projects/automation") {
-        return (
-            <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
-                <ProjectsAutomation />
-            </Suspense>
-        );
-    }
-    if (hash === "/mentions") {
-        return (
-            <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
-                <Mentions />
-            </Suspense>
-        );
-    }
+        document.title = titles[location.pathname] ?? "SmartFlow";
+    }, [location.pathname]);
 
     return (
-        <main className="relative min-h-screen text-white antialiased [text-size-adjust:100%] selection:bg-white/20">
-            <SiteBackground />
-            <TopNav />
-            <HeroSection />
-            <DevScrollCodeSection />
-            <ServicesSection />
-            <WorksSection />
-            <ContactSection />
-            <Footer />
-        </main>
+        <Routes>
+            <Route path="/projects/web" element={
+                <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
+                    <ProjectsWeb />
+                </Suspense>
+            } />
+            <Route path="/projects/apps" element={
+                <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
+                    <ProjectsApps />
+                </Suspense>
+            } />
+            <Route path="/projects/automation" element={
+                <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
+                    <ProjectsAutomation />
+                </Suspense>
+            } />
+            <Route path="/mentions" element={
+                <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
+                    <Mentions />
+                </Suspense>
+            } />
+            <Route path="/" element={
+                <main className="relative min-h-screen text-white antialiased [text-size-adjust:100%] selection:bg-white/20">
+                    <SiteBackground />
+                    <TopNav />
+                    <HeroSection />
+                    <DevScrollCodeSection />
+                    <ServicesSection />
+                    <WorksSection />
+                    <ContactSection />
+                    <Footer />
+                </main>
+            } />
+        </Routes>
     );
 }

@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { SiteBackground, TopNav, Footer } from "../layout";
+import { SiteBackground, TopNav, Footer, useGoHomeAndScroll } from "../layout";
 
 type Program = {
     id: string;
@@ -34,16 +34,9 @@ const PROGRAMS: Program[] = [
     },
 ];
 
-/* ===== Fonction de redirection vers Contact (depuis l’accueil) ===== */
-function goToContact() {
-    window.location.hash = "/"; // revient à la page d’accueil
-    setTimeout(() => {
-        const contact = document.getElementById("contact");
-        if (contact) contact.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 500);
-}
-
 export default function ProjectsAutomation() {
+    const goHomeAndScroll = useGoHomeAndScroll();
+    
     useEffect(() => {
         document.title = "Programmes automatisés — SmartFlow";
         window.scrollTo({ top: 0 });
@@ -117,7 +110,7 @@ export default function ProjectsAutomation() {
                                     S’adapte à vos colonnes et à vos contraintes
                                 </span>
                                 <button
-                                    onClick={goToContact}
+                                    onClick={() => goHomeAndScroll("contact")}
                                     className="text-[12px] sm:text-sm font-medium underline underline-offset-4 decoration-zinc-400 hover:decoration-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                                     aria-label={`Demander une démo — ${p.title}`}
                                 >
@@ -134,7 +127,7 @@ export default function ProjectsAutomation() {
                         Vous avez un processus, un fichier ou une tâche à automatiser ?
                     </p>
                     <button
-                        onClick={goToContact}
+                        onClick={() => goHomeAndScroll("contact")}
                         className="mt-3 inline-block rounded-xl border border-white/20 px-4 py-2 text-sm font-medium hover:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/30"
                     >
                         Décrivez-nous votre besoin → on le transforme en script efficace

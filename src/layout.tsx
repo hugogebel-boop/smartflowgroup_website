@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { motion, useScroll, useTransform, useMotionValue, useSpring, useMotionValueEvent } from "framer-motion";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 
 /* -------- Helper global -------- */
 export function goToHomeAndScroll(targetId: string) {
@@ -28,6 +29,40 @@ export function goToHomeAndScroll(targetId: string) {
     let t = 0, max = 40;
     const tick = () => { t++; if (scrollToTarget() || t >= max) return; requestAnimationFrame(tick); };
     requestAnimationFrame(tick);
+}
+
+/* -------- Hook pour navigation + scroll -------- */
+export function useGoHomeAndScroll() {
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    return (targetId: string) => {
+        const reduced =
+            typeof window !== "undefined" &&
+            window.matchMedia &&
+            window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        const isHome = location.pathname === "/";
+        const scrollToTarget = () => {
+            const el = document.getElementById(targetId);
+            if (!el) return false;
+            el.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+            return true;
+        };
+
+        if (isHome) {
+            if (scrollToTarget()) return;
+            let t = 0, max = 20;
+            const tick = () => { t++; if (scrollToTarget() || t >= max) return; requestAnimationFrame(tick); };
+            requestAnimationFrame(tick);
+            return;
+        }
+
+        navigate("/");
+        let t = 0, max = 40;
+        const tick = () => { t++; if (scrollToTarget() || t >= max) return; requestAnimationFrame(tick); };
+        requestAnimationFrame(tick);
+    };
 }
 
 /* -------- Hooks util -------- */
@@ -284,6 +319,7 @@ export function TopNav() {
     const [solid, setSolid] = useState(false);
     const [open, setOpen] = useState(false);
     const [submenuOpen, setSubmenuOpen] = useState(false);
+    const goHomeAndScroll = useGoHomeAndScroll();
 
     // état mémorisé (session) pour l’accordéon mobile
     const [mobileSubOpen, setMobileSubOpen] = useState<boolean>(() => {
@@ -341,7 +377,7 @@ export function TopNav() {
     const goHero = (e: React.MouseEvent) => {
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
         e.preventDefault();
-        goToHomeAndScroll("hero");
+        goHomeAndScroll("hero");
     };
 
     return (
@@ -358,22 +394,22 @@ export function TopNav() {
                 transition={{ duration: 0.25, ease: "easeOut" }}
                 className="w-full border-b border-white/10 bg-[#0B0B12]/85 px-5 sm:px-8 py-2 sm:py-2.5 flex items-center justify-between"
             >
-                <a href="#/" onClick={goHero} className="text-[11px] sm:text-[12px] tracking-[0.25em] uppercase text-white/90 hover:text-white transition">
+                <a href="/" onClick={goHero} className="text-[11px] sm:text-[12px] tracking-[0.25em] uppercase text-white/90 hover:text-white transition">
                     SmartFlow
                 </a>
 
                 {/* Desktop */}
                 <div className="hidden sm:flex items-center gap-6 text-[14px] font-light">
                     <a
-                        href="#dev"
-                        onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); goToHomeAndScroll("dev"); }}
+                        href="/"
+                        onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); goHomeAndScroll("dev"); }}
                         className="text-zinc-200 hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 rounded-md"
                     >
                         Approche
                     </a>
                     <a
-                        href="#services"
-                        onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); goToHomeAndScroll("services"); }}
+                        href="/"
+                        onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); goHomeAndScroll("services"); }}
                         className="text-zinc-200 hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 rounded-md"
                     >
                         Services
@@ -389,8 +425,8 @@ export function TopNav() {
                         onKeyDown={(e) => { if (e.key === "Escape") setSubmenuOpen(false); }}
                     >
                         <a
-                            href="#works"
-                            onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); goToHomeAndScroll("works"); }}
+                            href="/"
+                            onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); goHomeAndScroll("works"); }}
                             className="text-zinc-200 hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 rounded-md"
                             aria-haspopup="true"
                             aria-expanded={submenuOpen}
@@ -417,21 +453,21 @@ export function TopNav() {
                             {/* 🆕 Grace area pour éviter la fermeture en diagonale */}
                             <div aria-hidden className="absolute -top-2 left-0 right-0 h-2" />
 
-                            <a href="#/projects/web" className="px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 hover:text-white transition" role="menuitem">
+                            <Link to="/projects/web" className="px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 hover:text-white transition" role="menuitem">
                                 Nos sites web
-                            </a>
-                            <a href="#/projects/apps" className="px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 hover:text-white transition" role="menuitem">
+                            </Link>
+                            <Link to="/projects/apps" className="px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 hover:text-white transition" role="menuitem">
                                 Nos apps métier
-                            </a>
-                            <a href="#/projects/automation" className="px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 hover:text-white transition" role="menuitem">
+                            </Link>
+                            <Link to="/projects/automation" className="px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 hover:text-white transition" role="menuitem">
                                 Nos programmes
-                            </a>
+                            </Link>
                         </motion.div>
                     </div>
 
                     <a
-                        href="#contact"
-                        onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); goToHomeAndScroll("contact"); }}
+                        href="/"
+                        onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); goHomeAndScroll("contact"); }}
                         className="rounded-md border border-white/15 px-3 py-1.5 text-zinc-100 hover:text-white hover:border-white/25 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                     >
                         Contact
@@ -464,16 +500,16 @@ export function TopNav() {
             >
                 <div className="grid gap-1.5 p-4 text-[15px]">
                     <a
-                        href="#dev"
-                        onClick={(e) => { e.preventDefault(); setOpen(false); setTimeout(() => goToHomeAndScroll("dev"), 120); }}
+                        href="/"
+                        onClick={(e) => { e.preventDefault(); setOpen(false); setTimeout(() => goHomeAndScroll("dev"), 120); }}
                         className="block rounded-md px-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white"
                     >
                         Approche
                     </a>
 
                     <a
-                        href="#services"
-                        onClick={(e) => { e.preventDefault(); setOpen(false); setTimeout(() => goToHomeAndScroll("services"), 120); }}
+                        href="/"
+                        onClick={(e) => { e.preventDefault(); setOpen(false); setTimeout(() => goHomeAndScroll("services"), 120); }}
                         className="block rounded-md px-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white"
                     >
                         Services
@@ -498,12 +534,12 @@ export function TopNav() {
                         >
                             {/* Cliquer sur le texte = NAVIGUER (et ne pas toggler) */}
                             <a
-                                href="#works"
+                                href="/"
                                 onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation(); // ← empêche le toggle
                                     setOpen(false);
-                                    setTimeout(() => goToHomeAndScroll("works"), 120);
+                                    setTimeout(() => goHomeAndScroll("works"), 120);
                                 }}
                                 className="flex-1 min-w-0"
                             >
@@ -527,33 +563,33 @@ export function TopNav() {
                             transition={{ duration: 0.2, ease: "easeOut" }}
                             className="overflow-hidden"
                         >
-                            <a
-                                href="#/projects/web"
-                                onClick={(e) => { e.preventDefault(); setOpen(false); window.location.hash = "#/projects/web"; }}
+                            <Link
+                                to="/projects/web"
+                                onClick={() => setOpen(false)}
                                 className="block pl-8 pr-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white"
                             >
                                 Nos sites web
-                            </a>
-                            <a
-                                href="#/projects/apps"
-                                onClick={(e) => { e.preventDefault(); setOpen(false); window.location.hash = "#/projects/apps"; }}
+                            </Link>
+                            <Link
+                                to="/projects/apps"
+                                onClick={() => setOpen(false)}
                                 className="block pl-8 pr-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white"
                             >
                                 Nos apps métier
-                            </a>
-                            <a
-                                href="#/projects/automation"
-                                onClick={(e) => { e.preventDefault(); setOpen(false); window.location.hash = "#/projects/automation"; }}
+                            </Link>
+                            <Link
+                                to="/projects/automation"
+                                onClick={() => setOpen(false)}
                                 className="block pl-8 pr-2 py-2 text-zinc-300 hover:bg-white/5 hover:text-white"
                             >
                                 Nos programmes
-                            </a>
+                            </Link>
                         </motion.div>
                     </div>
 
                     <a
-                        href="#contact"
-                        onClick={(e) => { e.preventDefault(); setOpen(false); setTimeout(() => goToHomeAndScroll("contact"), 120); }}
+                        href="/"
+                        onClick={(e) => { e.preventDefault(); setOpen(false); setTimeout(() => goHomeAndScroll("contact"), 120); }}
                         className="block rounded-md border border-white/15 px-2 py-2 text-zinc-200 hover:text-white hover:border-white/25"
                     >
                         Contact
@@ -602,15 +638,15 @@ export function Footer() {
 
                     <nav className="flex flex-wrap items-center gap-4 text-sm">
                         <a
-                            href="#/"
+                            href="/"
                             onClick={(e) => { e.preventDefault(); goToHomeAndScroll("hero"); }}
                             className="hover:text-white transition"
                         >
                             smartflow
                         </a>
-                        <a href="#/mentions" className="hover:text-white transition">
+                        <Link to="/mentions" className="hover:text-white transition">
                             mentions légales
-                        </a>
+                        </Link>
                         <a href="mailto:contact@smartflowgroup.ch" className="hover:text-white transition">
                             contact@smartflowgroup.ch
                         </a>
