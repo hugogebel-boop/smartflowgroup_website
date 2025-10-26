@@ -39,8 +39,6 @@ export default function ProjectsWeb() {
                 </p>
                 <h1 className="mt-2 text-3xl sm:text-4xl font-semibold">Nos sites web</h1>
                 
-                {/* H1 sémantique invisible pour le SEO */}
-                <h1 style={{ display: 'none' }}>Sites web — SmartFlow | Développement web moderne et élégant</h1>
                 <p className="mt-3 text-sm sm:text-base text-zinc-300 max-w-2xl">
                     Des sites élégants et soignés, conçus pour une expérience web naturelle et agréable.
                 </p>

@@ -350,9 +350,6 @@ export default function ProjectsApps() {
                     
                 </p>
                 <h1 className="mt-2 text-3xl sm:text-4xl font-semibold">{header.k}</h1>
-                
-                {/* H1 sémantique invisible pour le SEO */}
-                <h1 style={{ display: 'none' }}>Applications métier — SmartFlow | Outils internes sur mesure</h1>
                 <p className="mt-3 text-sm sm:text-base text-zinc-300">{header.sub}</p>
             </section>
 

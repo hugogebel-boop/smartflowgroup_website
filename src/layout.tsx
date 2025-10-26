@@ -642,10 +642,19 @@ export function Footer() {
                             onClick={(e) => { e.preventDefault(); goToHomeAndScroll("hero"); }}
                             className="hover:text-white transition"
                         >
-                            smartflow
+                            Accueil
                         </a>
+                        <Link to="/projects/web" className="hover:text-white transition">
+                            Sites web
+                        </Link>
+                        <Link to="/projects/apps" className="hover:text-white transition">
+                            Applications
+                        </Link>
+                        <Link to="/projects/automation" className="hover:text-white transition">
+                            Automatisation
+                        </Link>
                         <Link to="/mentions" className="hover:text-white transition">
-                            mentions légales
+                            Mentions légales
                         </Link>
                         <a href="mailto:contact@smartflowgroup.ch" className="hover:text-white transition">
                             contact@smartflowgroup.ch

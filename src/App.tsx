@@ -1,7 +1,7 @@
 // src/App.tsx
 import React, { useEffect, useMemo, useRef, useState, Suspense } from "react";
 import { motion, useScroll, useMotionValueEvent, useInView } from "framer-motion";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Link } from "react-router-dom";
 import { setHead, DEFAULT_SEO, SEO_CONFIGS } from "./seo";
 
 const ProjectsWeb = React.lazy(() => import("./projects/web"));

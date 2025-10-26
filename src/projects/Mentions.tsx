@@ -10,9 +10,6 @@ export default function Mentions() {
 
             <section className="mx-auto max-w-4xl px-6 sm:px-8 py-20">
                 <h1 className="text-3xl sm:text-4xl font-semibold mb-6">Mentions légales</h1>
-                
-                {/* H1 sémantique invisible pour le SEO */}
-                <h1 style={{ display: 'none' }}>Mentions légales — SmartFlow</h1>
 
                 <div className="text-zinc-300 text-sm sm:text-base leading-relaxed space-y-4">
                     <p>
