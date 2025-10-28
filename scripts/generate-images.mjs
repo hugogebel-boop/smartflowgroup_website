@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import sharp from 'sharp';
 
 const projectRoot = path.resolve(process.cwd());
 const publicDir = path.join(projectRoot, 'public');
@@ -17,7 +16,7 @@ async function ensureDir(p) {
   await fs.mkdir(p, { recursive: true }).catch(() => {});
 }
 
-async function processOne(srcPath, outBase, maxBytesMobile = 150_000, maxBytesDesktop = 400_000) {
+async function processOne(sharp, srcPath, outBase) {
   for (const w of widths) {
     const img = sharp(srcPath).resize({ width: w, withoutEnlargement: true });
 
@@ -34,6 +33,15 @@ async function processOne(srcPath, outBase, maxBytesMobile = 150_000, maxBytesDe
 }
 
 async function main() {
+  // Import dynamique de sharp: si absent, on sort proprement
+  let sharp;
+  try {
+    sharp = (await import('sharp')).default;
+  } catch (e) {
+    console.log('[images] Sharp non installé — génération des variantes ignorée.');
+    return;
+  }
+
   await ensureDir(assetsDir);
   for (const t of targets) {
     const src = path.join(assetsDir, t.file);
@@ -44,7 +52,7 @@ async function main() {
       continue;
     }
     console.log(`[images] Génération variantes pour ${t.file}…`);
-    await processOne(src, t.id);
+    await processOne(sharp, src, t.id);
   }
   console.log('[images] OK');
 }
