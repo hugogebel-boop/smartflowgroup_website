@@ -5,6 +5,19 @@ import { SiteBackground, TopNav, Footer, useGoHomeAndScroll } from "../layout";
 export default function ProjectsWeb() {
     const goHomeAndScroll = useGoHomeAndScroll();
     
+    // Précharge la première image (LCP probable) en haute priorité
+    useEffect(() => {
+        const firstId = "ame-du-monde";
+        const link = document.createElement("link");
+        link.rel = "preload";
+        link.as = "image";
+        link.href = `/assets/${firstId}-1200.avif`;
+        link.setAttribute("imagesrcset", `/assets/${firstId}-768.avif 768w, /assets/${firstId}-1200.avif 1200w, /assets/${firstId}-1920.avif 1920w`);
+        link.setAttribute("imagesizes", "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 600px");
+        document.head.appendChild(link);
+        return () => { try { document.head.removeChild(link); } catch {}
+        };
+    }, []);
 
     const PROJECTS = [
         {
@@ -48,7 +61,7 @@ export default function ProjectsWeb() {
             <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-[calc(var(--section-y)_-_0.5rem)]">
                 {/* items-stretch + h-full sur <article> → cartes de même hauteur */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-10 items-stretch">
-                    {PROJECTS.map((p) => (
+                    {PROJECTS.map((p, idx) => (
                         <article
                             key={p.id}
                             className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm transition hover:bg-white/[0.07] h-full"
@@ -61,13 +74,28 @@ export default function ProjectsWeb() {
                                 aria-label={`${p.title} — ouvrir le site dans un nouvel onglet`}
                             >
                                 {/* Image + harmonisation (légère) */}
-                                <img
-                                    src={p.image}
-                                    alt={`${p.title} – aperçu du site`}
-                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05] brightness-[.97] contrast-[1.02]"
-                                    loading="lazy"
-                                    decoding="async"
-                                />
+                                <picture>
+                                    <source
+                                        type="image/avif"
+                                        srcSet={`/assets/${p.id}-768.avif 768w, /assets/${p.id}-1200.avif 1200w, /assets/${p.id}-1920.avif 1920w`}
+                                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 600px"
+                                    />
+                                    <source
+                                        type="image/webp"
+                                        srcSet={`/assets/${p.id}-768.webp 768w, /assets/${p.id}-1200.webp 1200w, /assets/${p.id}-1920.webp 1920w`}
+                                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 600px"
+                                    />
+                                    <img
+                                        src={p.image}
+                                        alt={`${p.title} – aperçu du site`}
+                                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05] brightness-[.97] contrast-[1.02]"
+                                        loading="lazy"
+                                        decoding="async"
+                                        width={1600}
+                                        height={900}
+                                        fetchPriority={idx === 0 ? "high" : "low"}
+                                    />
+                                </picture>
                                 {/* Scrim discret pour que la photo n’écrase pas la typographie */}
                                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/10 via-black/0 to-black/25 opacity-100 transition-opacity duration-300 group-hover:from-black/15 group-hover:to-black/35" />
                             </a>
