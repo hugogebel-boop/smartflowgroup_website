@@ -7,19 +7,19 @@
         <priority>1.0</priority>
     </url>
     <url>
-        <loc>https://www.smartflowgroup.ch/projects/web</loc>
+        <loc>https://www.smartflowgroup.ch/projects/web/</loc>
         <lastmod>2024-12-19</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://www.smartflowgroup.ch/projects/apps</loc>
+        <loc>https://www.smartflowgroup.ch/projects/apps/</loc>
         <lastmod>2024-12-19</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://www.smartflowgroup.ch/projects/automation</loc>
+        <loc>https://www.smartflowgroup.ch/projects/automation/</loc>
         <lastmod>2024-12-19</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
