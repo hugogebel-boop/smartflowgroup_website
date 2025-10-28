@@ -174,6 +174,14 @@ export default function ProjectsWeb() {
             </section>
 
             <Footer />
+            
+            {/* Liens internes SEO invisibles */}
+            <nav aria-label="Navigation interne SEO" className="sr-only">
+                <a href="/">Accueil</a>
+                <a href="/projects/apps/">Applications métier</a>
+                <a href="/projects/automation/">Programmes automatisés</a>
+                <a href="/mentions/">Mentions légales</a>
+            </nav>
         </main>
     );
 }

@@ -132,6 +132,14 @@ export default function ProjectsAutomation() {
             </section>
 
             <Footer />
+            
+            {/* Liens internes SEO invisibles */}
+            <nav aria-label="Navigation interne SEO" className="sr-only">
+                <a href="/">Accueil</a>
+                <a href="/projects/web/">Sites web</a>
+                <a href="/projects/apps/">Applications métier</a>
+                <a href="/mentions/">Mentions légales</a>
+            </nav>
         </main>
     );
 }

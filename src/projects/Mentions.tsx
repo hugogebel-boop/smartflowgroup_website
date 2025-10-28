@@ -47,6 +47,14 @@ export default function Mentions() {
             </section>
 
             <Footer />
+            
+            {/* Liens internes SEO invisibles */}
+            <nav aria-label="Navigation interne SEO" className="sr-only">
+                <a href="/">Accueil</a>
+                <a href="/projects/web/">Sites web</a>
+                <a href="/projects/apps/">Applications métier</a>
+                <a href="/projects/automation/">Programmes automatisés</a>
+            </nav>
         </main>
     );
 }
