@@ -9,14 +9,9 @@ export default function ProjectsWeb() {
     const [hasVariants, setHasVariants] = React.useState<Record<string, boolean>>({});
 
     useEffect(() => {
-        // On teste les AVIF de plus petite taille; si 200 OK => on activera <picture>
-        const ids = ["ame-du-monde", "travel-gc"] as const;
-        ids.forEach((id) => {
-            const test = new Image();
-            test.onload = () => setHasVariants(prev => ({ ...prev, [id]: true }));
-            test.onerror = () => setHasVariants(prev => ({ ...prev, [id]: false }));
-            test.src = `/assets/${id}-768.avif`;
-        });
+        // Désactivation temporaire des variantes AVIF/WebP pour éviter les 404
+        // Les variantes seront réactivées une fois les images générées avec le script
+        setHasVariants({ "ame-du-monde": false, "travel-gc": false });
 
         // Preload LCP en PNG pour éviter 404 si variantes absentes
         const firstPng = document.createElement("link");
