@@ -205,7 +205,7 @@ export const DEFAULT_SEO = {
     twitterSite: "@smartflowgroup",
     twitterCreator: "@smartflowgroup",
     robots: "index, follow",
-    ogImage: `${BASE_URL}/assets/icon/android-chrome-512x512.png`
+    ogImage: `${BASE_URL}/assets/og-image.png`
 };
 
 // Configurations SEO spécifiques par page

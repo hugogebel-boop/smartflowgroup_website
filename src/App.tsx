@@ -86,8 +86,8 @@ function HeroSection() {
                     une expérience numérique.
                 </h1>
                 
-                {/* H1 sémantique invisible pour le SEO */}
-                <h1 style={{ display: 'none' }}>SmartFlow — Design & Développement web, une expérience numérique</h1>
+                {/* Titre SEO invisible (span pour éviter double H1) */}
+                <span style={{ display: 'none' }}>SmartFlow — Design & Développement web, une expérience numérique</span>
 
                 <p className="mx-auto mt-3 sm:mt-4 max-w-xl text-sm sm:text-base text-zinc-300">
                     Sites, logiciels et automatisations pensés pour vous simplifier la vie.
