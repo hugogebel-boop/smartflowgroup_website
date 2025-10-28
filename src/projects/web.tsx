@@ -5,18 +5,26 @@ import { SiteBackground, TopNav, Footer, useGoHomeAndScroll } from "../layout";
 export default function ProjectsWeb() {
     const goHomeAndScroll = useGoHomeAndScroll();
     
-    // Précharge la première image (LCP probable) en haute priorité
+    // Map des variantes disponibles (avif/webp) par id projet
+    const [hasVariants, setHasVariants] = React.useState<Record<string, boolean>>({});
+
     useEffect(() => {
-        const firstId = "ame-du-monde";
-        const link = document.createElement("link");
-        link.rel = "preload";
-        link.as = "image";
-        link.href = `/assets/${firstId}-1200.avif`;
-        link.setAttribute("imagesrcset", `/assets/${firstId}-768.avif 768w, /assets/${firstId}-1200.avif 1200w, /assets/${firstId}-1920.avif 1920w`);
-        link.setAttribute("imagesizes", "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 600px");
-        document.head.appendChild(link);
-        return () => { try { document.head.removeChild(link); } catch {}
-        };
+        // On teste les AVIF de plus petite taille; si 200 OK => on activera <picture>
+        const ids = ["ame-du-monde", "travel-gc"] as const;
+        ids.forEach((id) => {
+            const test = new Image();
+            test.onload = () => setHasVariants(prev => ({ ...prev, [id]: true }));
+            test.onerror = () => setHasVariants(prev => ({ ...prev, [id]: false }));
+            test.src = `/assets/${id}-768.avif`;
+        });
+
+        // Preload LCP en PNG pour éviter 404 si variantes absentes
+        const firstPng = document.createElement("link");
+        firstPng.rel = "preload";
+        firstPng.as = "image";
+        firstPng.href = "/assets/ame-du-monde.png";
+        document.head.appendChild(firstPng);
+        return () => { try { document.head.removeChild(firstPng); } catch {} };
     }, []);
 
     const PROJECTS = [
@@ -74,17 +82,30 @@ export default function ProjectsWeb() {
                                 aria-label={`${p.title} — ouvrir le site dans un nouvel onglet`}
                             >
                                 {/* Image + harmonisation (légère) */}
-                                <picture>
-                                    <source
-                                        type="image/avif"
-                                        srcSet={`/assets/${p.id}-768.avif 768w, /assets/${p.id}-1200.avif 1200w, /assets/${p.id}-1920.avif 1920w`}
-                                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 600px"
-                                    />
-                                    <source
-                                        type="image/webp"
-                                        srcSet={`/assets/${p.id}-768.webp 768w, /assets/${p.id}-1200.webp 1200w, /assets/${p.id}-1920.webp 1920w`}
-                                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 600px"
-                                    />
+                                {hasVariants[p.id] ? (
+                                    <picture>
+                                        <source
+                                            type="image/avif"
+                                            srcSet={`/assets/${p.id}-768.avif 768w, /assets/${p.id}-1200.avif 1200w, /assets/${p.id}-1920.avif 1920w`}
+                                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 600px"
+                                        />
+                                        <source
+                                            type="image/webp"
+                                            srcSet={`/assets/${p.id}-768.webp 768w, /assets/${p.id}-1200.webp 1200w, /assets/${p.id}-1920.webp 1920w`}
+                                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 600px"
+                                        />
+                                        <img
+                                            src={p.image}
+                                            alt={`${p.title} – aperçu du site`}
+                                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05] brightness-[.97] contrast-[1.02]"
+                                            loading="lazy"
+                                            decoding="async"
+                                            width={1600}
+                                            height={900}
+                                            fetchPriority={idx === 0 ? "high" : "low"}
+                                        />
+                                    </picture>
+                                ) : (
                                     <img
                                         src={p.image}
                                         alt={`${p.title} – aperçu du site`}
@@ -95,7 +116,7 @@ export default function ProjectsWeb() {
                                         height={900}
                                         fetchPriority={idx === 0 ? "high" : "low"}
                                     />
-                                </picture>
+                                )}
                                 {/* Scrim discret pour que la photo n’écrase pas la typographie */}
                                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/10 via-black/0 to-black/25 opacity-100 transition-opacity duration-300 group-hover:from-black/15 group-hover:to-black/35" />
                             </a>
