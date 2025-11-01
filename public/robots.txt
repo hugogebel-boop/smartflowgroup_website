@@ -17,4 +17,3 @@ Disallow: /*.css.map
 
 # Allow pour les assets publics
 Allow: /assets/
-Allow: /icon/
