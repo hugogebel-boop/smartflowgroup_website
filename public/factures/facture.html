@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Facture - SmartFlow</title>
+    <!-- Bibliothèques pour génération PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -736,40 +739,67 @@
         const qrData = `SmartFlow-Invoice-${numeroFacture}`;
         document.getElementById('qr-code-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(qrData)}`;
         
-        // Fonction d'impression PDF
-        function imprimerPDF() {
-            // Option 1: Impression native du navigateur (meilleure qualité)
-            window.print();
+        // Fonction d'impression PDF avec html2canvas + jsPDF
+        async function imprimerPDF() {
+            try {
+                // Désactiver le bouton
+                event.target.disabled = true;
+                event.target.textContent = '⏳ Génération en cours...';
+                
+                // Attendre un peu pour que les styles se chargent
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Cacher le bouton temporairement pour la capture
+                const button = event.target;
+                const originalDisplay = button.style.display;
+                button.style.display = 'none';
+                
+                // Capturer la facture avec html2canvas
+                const canvas = await html2canvas(document.querySelector('.invoice-container'), {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    width: 900,
+                    windowWidth: 900,
+                    backgroundColor: '#ffffff'
+                });
+                
+                // Réafficher le bouton
+                button.style.display = originalDisplay;
+                button.disabled = false;
+                button.textContent = '🖨️ Imprimer en PDF';
+                
+                // Créer le PDF avec jsPDF
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+                
+                // Calculer les dimensions pour A4
+                const imgWidth = 210; // A4 width in mm
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                
+                // Ajouter l'image au PDF
+                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
+                
+                // Générer un nom de fichier avec le numéro de facture
+                const filename = `facture-${numeroFacture}.pdf`;
+                
+                // Sauvegarder le PDF
+                pdf.save(filename);
+                
+            } catch (error) {
+                console.error('Erreur lors de la génération PDF:', error);
+                alert('Une erreur est survenue lors de la génération du PDF. Essayez d\'utiliser la fonction d\'impression du navigateur.');
+                if (event.target) {
+                    event.target.disabled = false;
+                    event.target.textContent = '🖨️ Imprimer en PDF';
+                }
+            }
         }
     </script>
-    
-    <!-- Styles pour l'impression PDF -->
-    <style type="text/css" media="print">
-        @page {
-            size: A4;
-            margin: 0;
-        }
-        
-        body {
-            background: white !important;
-            padding: 0 !important;
-        }
-        
-        .invoice-container {
-            max-width: 100% !important;
-            border-radius: 0 !important;
-            box-shadow: none !important;
-            margin: 0 !important;
-        }
-        
-        .invoice-header {
-            border-radius: 0 !important;
-        }
-        
-        button {
-            display: none !important;
-        }
-    </style>
 </body>
 </html>
 
