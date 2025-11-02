@@ -849,10 +849,8 @@ function ContactSection() {
                 <h2 id="contact-title" className="text-xl sm:text-2xl font-semibold">Contact</h2>
                 <p className="mt-2 text-sm sm:text-base text-zinc-300">Parlez-nous de votre projet. Réponse rapide et conseils concrets.</p>
 
-                <form className="mt-5 sm:mt-6 grid gap-4" action="https://formsubmit.co/contact@smartflowgroup.ch" method="POST">
+                <form className="mt-5 sm:mt-6 grid gap-4" action="https://formspree.io/f/xldooqek" method="POST">
                     <input type="hidden" name="_subject" value="Nouveau message SmartFlow" />
-                    <input type="hidden" name="_captcha" value="false" />
-                    <input type="hidden" name="_template" value="table" />
 
                     <div className="grid gap-4 sm:grid-cols-2">
                         <div>
