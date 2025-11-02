@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facture - SmartFlow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #0B0B12;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px 20px;
+            min-height: 100vh;
+        }
+
+        .invoice-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        /* Header avec gradient SmartFlow */
+        .invoice-header {
+            background: linear-gradient(135deg, #0B0B12 0%, #1a1a2e 100%);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .invoice-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 20% 80%, rgba(34, 211, 238, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            position: relative;
+            z-index: 1;
+        }
+
+        .company-brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .brand-name {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+
+        .brand-name span:first-child {
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-gradient {
+            background: linear-gradient(120deg, #e0e7ff 0%, #a78bfa 35%, #22d3ee 65%, #e879f9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .tagline {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
+        .invoice-title {
+            text-align: right;
+            color: white;
+        }
+
+        .invoice-title h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+        }
+
+        .invoice-number {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Informations de facturation */
+        .invoice-info {
+            padding: 24px;
+            background: white;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .info-block h3 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: #6B7280;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .info-block p {
+            font-size: 13px;
+            color: #0B0B12;
+            line-height: 1.6;
+        }
+
+        .period-block {
+            display: block;
+        }
+
+        .info-block strong {
+            font-weight: 600;
+            color: #0B0B12;
+        }
+
+        /* Tableau de facturation */
+        .invoice-table {
+            margin-top: 24px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
+            padding: 12px 16px;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 12px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .table-header span {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: #6B7280;
+            font-weight: 600;
+        }
+
+        .table-row {
+            padding: 16px;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 12px;
+            border-bottom: 1px solid #f3f4f6;
+            transition: background-color 0.2s;
+        }
+
+        .table-row:hover {
+            background-color: #fafbfc;
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .table-cell {
+            font-size: 13px;
+            color: #0B0B12;
+        }
+
+        .table-cell:last-child {
+            text-align: right;
+            font-weight: 600;
+            color: #0B0B12;
+        }
+
+        /* Totaux */
+        .invoice-totals {
+            margin-top: 24px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .totals-box {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .total-row {
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .total-row:last-child {
+            border-bottom: none;
+            background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
+        }
+
+        .total-label {
+            font-size: 13px;
+            color: #6B7280;
+        }
+
+        .total-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0B0B12;
+        }
+
+        .total-row:last-child .total-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0B0B12;
+        }
+
+        .total-row:last-child .total-value {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(120deg, #a78bfa 0%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Coordonnées bancaires */
+        .payment-info {
+            margin-top: 24px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .payment-info h3 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: #6B7280;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .payment-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .payment-item {
+            display: flex;
+            gap: 8px;
+        }
+
+        .payment-label {
+            font-size: 12px;
+            color: #6B7280;
+            font-weight: 500;
+            min-width: 90px;
+        }
+
+        .payment-value {
+            font-size: 13px;
+            color: #0B0B12;
+            font-weight: 600;
+        }
+
+        .payment-details-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 8px;
+        }
+
+        .qr-section {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 16px;
+            margin-top: 12px;
+            padding: 12px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .qr-left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .qr-code-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 8px;
+            aspect-ratio: 1;
+            min-height: 120px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .qr-amount-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 14px;
+            min-height: 50px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .qr-amount-label {
+            font-size: 7px;
+            font-weight: 600;
+            color: #6B7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .qr-amount-value {
+            font-size: 10px;
+            font-weight: 700;
+            color: #0B0B12;
+        }
+
+        .qr-info-box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .qr-info-section {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .qr-info-label {
+            font-size: 7px;
+            font-weight: 700;
+            color: #6B7280;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .qr-info-value {
+            font-size: 10px;
+            color: #0B0B12;
+            line-height: 1.4;
+            font-weight: 600;
+        }
+
+        .qr-code-placeholder {
+            text-align: center;
+            color: #9CA3AF;
+            font-size: 9px;
+            font-weight: 500;
+        }
+
+        /* Footer */
+        .invoice-footer {
+            padding: 20px;
+            background: #fafbfc;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .footer-text {
+            font-size: 11px;
+            color: #6B7280;
+            line-height: 1.5;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-links a {
+            color: #6B7280;
+            text-decoration: none;
+            font-size: 11px;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: #a78bfa;
+        }
+
+        /* Séparateur décoratif avec gradient */
+        .separator {
+            height: 2px;
+            background: linear-gradient(90deg, #e0e7ff 0%, #a78bfa 35%, #22d3ee 65%, #e879f9 100%);
+            margin: 20px 0;
+            border-radius: 1px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: row !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                gap: 0 !important;
+            }
+
+            .invoice-title {
+                text-align: right !important;
+            }
+
+            .invoice-title h1 {
+                display: inline !important;
+                margin-right: 12px !important;
+                margin-bottom: 0 !important;
+            }
+
+            .invoice-number {
+                display: inline !important;
+                margin-right: 12px !important;
+            }
+
+            .invoice-number:last-child {
+                margin-right: 0 !important;
+            }
+
+            .invoice-title {
+                text-align: left;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .table-header,
+            .table-row {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .table-header {
+                display: none;
+            }
+
+            .table-row {
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                margin-bottom: 12px;
+                padding: 16px;
+            }
+
+            .table-cell::before {
+                content: attr(data-label) ': ';
+                font-weight: 600;
+                color: #6B7280;
+                font-size: 13px;
+            }
+
+            .payment-details {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <!-- Header -->
+        <div class="invoice-header">
+            <div class="header-content">
+                <div class="company-brand">
+                    <img src="https://www.smartflowgroup.ch/assets/icon/android-chrome-512x512.png" alt="SmartFlow Logo" class="logo">
+                    <div>
+                        <div class="brand-name">
+                            <span>Smart</span><span class="brand-gradient">Flow</span>
+                        </div>
+                        <div class="tagline">Design ✕ Développement</div>
+                    </div>
+                </div>
+                <div class="invoice-title">
+                    <h1>FACTURE</h1>
+                    <div class="invoice-number" id="numero-facture">Chargement...</div>
+                    <div class="invoice-number" style="margin-top: 4px;" id="date-emission">Chargement...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informations de facturation -->
+        <div class="invoice-info">
+            <!-- Client et période -->
+            <div class="info-grid">
+                <div class="info-block">
+                    <h3>Facturé à</h3>
+                    <p id="client-info">
+                        Chargement...
+                    </p>
+                </div>
+                <div class="info-block">
+                    <h3>Facturé par</h3>
+                    <p>
+                        <strong>SmartFlow</strong><br>
+                        Hugo Gebel<br>
+                        [VOTRE_ADRESSE]<br>
+                        [CODE_POSTAL] [VILLE]<br>
+                        Suisse
+                    </p>
+                </div>
+            </div>
+
+            <!-- Période -->
+            <div class="separator"></div>
+            <div class="info-block">
+                <h3>Période de facturation</h3>
+                <p id="periode-facturation"><strong>Chargement...</strong></p>
+            </div>
+
+            <!-- Tableau des prestations -->
+            <div class="invoice-table">
+                <div class="table-header">
+                    <span>Description</span>
+                    <span>Domaine</span>
+                    <span>Quantité</span>
+                    <span>Montant</span>
+                </div>
+
+                <div id="prestations-table">
+                    <!-- Sera généré par JavaScript -->
+                </div>
+            </div>
+
+            <!-- Totaux -->
+            <div class="invoice-totals">
+                <div class="totals-box">
+                    <div class="total-row">
+                        <span class="total-label">Sous-total hors taxes</span>
+                        <span class="total-value" id="sous-total">Chargement...</span>
+                    </div>
+                    <div class="total-row">
+                        <span class="total-label">TVA (7.7%)</span>
+                        <span class="total-value" id="tva">Chargement...</span>
+                    </div>
+                    <div class="total-row">
+                        <span class="total-label">Montant total</span>
+                        <span class="total-value" id="montant-total">Chargement...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section QR Code avec informations -->
+            <div class="qr-section">
+                <!-- Colonne gauche: QR Code + Monnaie/Montant -->
+                <div class="qr-left-column">
+                    <!-- QR Code -->
+                    <div class="qr-code-box">
+                        <img id="qr-code-img" src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=SmartFlow-Invoice-Example" alt="QR Code de paiement" style="width: 100%; height: 100%; object-fit: contain;">
+                    </div>
+                    
+                    <!-- Monnaie / Montant -->
+                    <div class="qr-amount-box">
+                        <div>
+                            <div class="qr-amount-label">Monnaie</div>
+                            <div class="qr-amount-value">CHF</div>
+                        </div>
+                        <div>
+                            <div class="qr-amount-label">Montant</div>
+                            <div class="qr-amount-value" id="montant-qr">10'339.20</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Colonne droite: Informations -->
+                <div class="qr-info-box">
+                    <!-- Compte -->
+                    <div class="qr-info-section">
+                        <div class="qr-info-label">Compte / Payable à</div>
+                        <div class="qr-info-value">
+                            [VOTRE_IBAN]<br>
+                            SmartFlow<br>
+                            Hugo Gebel<br>
+                            [VOTRE_ADRESSE]
+                        </div>
+                    </div>
+                    
+                    <!-- Référence -->
+                    <div class="qr-info-section">
+                        <div class="qr-info-label">Référence</div>
+                        <div class="qr-info-value" id="reference-qr">N° FACT-2025-001</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Extraction des paramètres URL
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Fonction pour récupérer un paramètre ou valeur par défaut
+        function getParam(key, defaultValue) {
+            return urlParams.get(key) || defaultValue || '[NON_DÉFINI]';
+        }
+        
+        // Remplissage des informations
+        document.getElementById('numero-facture').textContent = 'N° ' + getParam('numero', 'FACT-2025-001');
+        document.getElementById('date-emission').textContent = 'Date: ' + getParam('date', new Date().toLocaleDateString('fr-CH'));
+        
+        // Client
+        const nomClient = getParam('client', 'Entreprise Client');
+        const adresseClient = getParam('adresse', '[ADRESSE_CLIENT]');
+        const codePostalClient = getParam('cp', '[CODE_POSTAL_CLIENT]');
+        const villeClient = getParam('ville', '[VILLE_CLIENT]');
+        const paysClient = getParam('pays', 'Suisse');
+        
+        document.getElementById('client-info').innerHTML = `
+            <strong>${nomClient}</strong><br>
+            ${adresseClient}<br>
+            ${codePostalClient} ${villeClient}<br>
+            ${paysClient}
+        `;
+        
+        // Période
+        const dateDebut = getParam('date_debut', '01.01.2025');
+        const dateFin = getParam('date_fin', '31.01.2025');
+        document.getElementById('periode-facturation').innerHTML = `<strong>${dateDebut} au ${dateFin}</strong>`;
+        
+        // Prestations (JSON dans l'URL ou données par défaut)
+        let prestations = [];
+        try {
+            const prestationsParam = urlParams.get('prestations');
+            if (prestationsParam) {
+                prestations = JSON.parse(decodeURIComponent(prestationsParam));
+            } else {
+                // Données par défaut
+                prestations = [
+                    { description: 'Développement web • Conception et implémentation', domaine: 'Sites web', quantite: '24 heures', montant: "4'800.00 CHF" },
+                    { description: 'Application métier • Développement .NET', domaine: 'Applications métier', quantite: '16 heures', montant: "3'200.00 CHF" },
+                    { description: 'Automatisation • Scripts personnalisés', domaine: 'Automatisation', quantite: '8 heures', montant: "1'600.00 CHF" }
+                ];
+            }
+        } catch(e) {
+            console.error('Erreur parsing prestations:', e);
+        }
+        
+        // Génération du tableau de prestations
+        const tableBody = document.getElementById('prestations-table');
+        tableBody.innerHTML = prestations.map(p => `
+            <div class="table-row">
+                <div class="table-cell" data-label="Description">${p.description}</div>
+                <div class="table-cell" data-label="Domaine">${p.domaine}</div>
+                <div class="table-cell" data-label="Quantité">${p.quantite}</div>
+                <div class="table-cell" data-label="Montant">${p.montant}</div>
+            </div>
+        `).join('');
+        
+        // Calcul des totaux
+        let sousTotal = 0;
+        prestations.forEach(p => {
+            const montant = parseFloat(p.montant.replace(/'/g, '').replace(' CHF', '').replace(/[^\d.-]/g, ''));
+            sousTotal += montant;
+        });
+        
+        const tva = sousTotal * 0.077;
+        const total = sousTotal + tva;
+        
+        document.getElementById('sous-total').textContent = sousTotal.toLocaleString('fr-CH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' CHF';
+        document.getElementById('tva').textContent = tva.toLocaleString('fr-CH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' CHF';
+        document.getElementById('montant-total').textContent = total.toLocaleString('fr-CH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' CHF';
+        
+        // QR Code et montant
+        const numeroFacture = getParam('numero', 'FACT-2025-001');
+        document.getElementById('reference-qr').textContent = 'N° ' + numeroFacture;
+        document.getElementById('montant-qr').textContent = total.toLocaleString('fr-CH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        
+        // Génération du QR Code avec les données de paiement
+        const qrData = `SmartFlow-Invoice-${numeroFacture}`;
+        document.getElementById('qr-code-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(qrData)}`;
+    </script>
+</body>
+</html>
+
