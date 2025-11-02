@@ -600,6 +600,13 @@
                 </div>
             </div>
 
+            <!-- Bouton Imprimer PDF -->
+            <div style="padding: 24px; text-align: center;">
+                <button onclick="imprimerPDF()" style="background: linear-gradient(135deg, #a78bfa 0%, #22d3ee 100%); color: white; border: none; padding: 14px 32px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(167, 139, 250, 0.3); transition: all 0.3s;">
+                    🖨️ Imprimer en PDF
+                </button>
+            </div>
+
             <!-- Section QR Code avec informations -->
             <div class="qr-section">
                 <!-- Colonne gauche: QR Code + Monnaie/Montant -->
@@ -728,7 +735,41 @@
         // Génération du QR Code avec les données de paiement
         const qrData = `SmartFlow-Invoice-${numeroFacture}`;
         document.getElementById('qr-code-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(qrData)}`;
+        
+        // Fonction d'impression PDF
+        function imprimerPDF() {
+            // Option 1: Impression native du navigateur (meilleure qualité)
+            window.print();
+        }
     </script>
+    
+    <!-- Styles pour l'impression PDF -->
+    <style type="text/css" media="print">
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        
+        body {
+            background: white !important;
+            padding: 0 !important;
+        }
+        
+        .invoice-container {
+            max-width: 100% !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+        }
+        
+        .invoice-header {
+            border-radius: 0 !important;
+        }
+        
+        button {
+            display: none !important;
+        }
+    </style>
 </body>
 </html>
 
