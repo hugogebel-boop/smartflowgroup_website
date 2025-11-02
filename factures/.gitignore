@@ -1,0 +1,15 @@
+# Ignorer les factures générées (garder uniquement le template)
+FACT-*.html
+facture-*.html
+*.pdf
+!template-facture.html
+
+# Garder les fichiers de documentation et d'export
+!README*.md
+!GUIDE-RAPIDE.md
+!TEST-EXPORT.md
+!COMPARAISON-EXPORT.md
+!export-pdf.html
+!generate-pdf.js
+!signature-facture.html
+
