@@ -8,6 +8,7 @@ const ProjectsWeb = React.lazy(() => import("./projects/web"));
 const ProjectsApps = React.lazy(() => import("./projects/apps"));
 const ProjectsAutomation = React.lazy(() => import("./projects/automation"));
 const Mentions = React.lazy(() => import("./projects/Mentions"));
+const Contact = React.lazy(() => import("./projects/Contact"));
 
 import {
     SiteBackground,
@@ -986,6 +987,7 @@ export default function App() {
             "/projects/apps": { ...DEFAULT_SEO, ...SEO_CONFIGS.apps },
             "/projects/automation": { ...DEFAULT_SEO, ...SEO_CONFIGS.automation },
             "/mentions": { ...DEFAULT_SEO, ...SEO_CONFIGS.mentions },
+            "/contact": { ...DEFAULT_SEO, ...SEO_CONFIGS.contact },
         };
         
         const config = seoConfigs[location.pathname] || { ...DEFAULT_SEO, ...SEO_CONFIGS.home };
@@ -1014,6 +1016,11 @@ export default function App() {
                     <Mentions />
                 </Suspense>
             } />
+            <Route path="/contact" element={
+                <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
+                    <Contact />
+                </Suspense>
+            } />
             <Route path="/" element={
                 <main className="relative min-h-screen text-white antialiased [text-size-adjust:100%] selection:bg-white/20">
                     <SiteBackground />
@@ -1030,6 +1037,7 @@ export default function App() {
                         <a href="/projects/apps/">Applications métier</a>
                         <a href="/projects/web/">Sites web</a>
                         <a href="/projects/automation/">Programmes automatisés</a>
+                        <a href="/contact/">Contact</a>
                         <a href="/mentions/">Mentions légales</a>
                     </nav>
                 </main>

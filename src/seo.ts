@@ -259,5 +259,15 @@ export const SEO_CONFIGS = {
         ogDescription: "Mentions légales et informations sur l'éditeur du site SmartFlow.",
         ogUrl: `${BASE_URL}/mentions`,
         robots: "noindex, follow"
+    },
+    
+    contact: {
+        title: "Contact — SmartFlow | Parlez-nous de votre projet",
+        description: "Contactez SmartFlow pour discuter de votre projet. Sites web, applications métier et outils d'automatisation sur mesure. Réponse rapide et conseils concrets.",
+        keywords: "contact, SmartFlow, devis, projet web, application métier, automatisation, consultation, Suisse, Lausanne",
+        canonical: `${BASE_URL}/contact`,
+        ogTitle: "Contact — SmartFlow",
+        ogDescription: "Parlez-nous de votre projet. Réponse rapide et conseils concrets pour vos besoins en développement web et applications métier.",
+        ogUrl: `${BASE_URL}/contact`,
     }
 };

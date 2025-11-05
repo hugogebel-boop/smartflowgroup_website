@@ -138,6 +138,7 @@ export default function ProjectsAutomation() {
                 <a href="/">Accueil</a>
                 <a href="/projects/web/">Sites web</a>
                 <a href="/projects/apps/">Applications métier</a>
+                <a href="/contact/">Contact</a>
                 <a href="/mentions/">Mentions légales</a>
             </nav>
         </main>

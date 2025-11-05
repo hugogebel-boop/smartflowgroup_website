@@ -54,6 +54,7 @@ export default function Mentions() {
                 <a href="/projects/web/">Sites web</a>
                 <a href="/projects/apps/">Applications métier</a>
                 <a href="/projects/automation/">Programmes automatisés</a>
+                <a href="/contact/">Contact</a>
             </nav>
         </main>
     );

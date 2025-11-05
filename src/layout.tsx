@@ -656,6 +656,9 @@ export function Footer() {
                         <Link to="/mentions" className="hover:text-white transition">
                             Mentions légales
                         </Link>
+                        <Link to="/contact" className="hover:text-white transition">
+                            Contact
+                        </Link>
                         <a href="mailto:contact@smartflowgroup.ch" className="hover:text-white transition">
                             contact@smartflowgroup.ch
                         </a>

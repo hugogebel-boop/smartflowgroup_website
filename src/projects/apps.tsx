@@ -369,6 +369,7 @@ export default function ProjectsApps() {
                 <a href="/">Accueil</a>
                 <a href="/projects/web/">Sites web</a>
                 <a href="/projects/automation/">Programmes automatisés</a>
+                <a href="/contact/">Contact</a>
                 <a href="/mentions/">Mentions légales</a>
             </nav>
         </main>
