@@ -1,6 +1,6 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { SiteBackground, TopNav, Footer } from "../layout";
 
 export default function Contact() {
@@ -8,6 +8,49 @@ export default function Contact() {
     const [isSuccess, setIsSuccess] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const formRef = useRef<HTMLFormElement>(null);
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const trackContactSuccess = React.useCallback(() => {
+        if (typeof window === "undefined") return;
+        const w = window as typeof window & {
+            gtag?: (...args: any[]) => void;
+            dataLayer?: any[];
+        };
+
+        if (typeof w.gtag === "function") {
+            w.gtag("event", "contact_form_submitted", {
+                event_category: "contact",
+                event_label: "Contact page",
+            });
+        } else {
+            w.dataLayer = w.dataLayer || [];
+            w.dataLayer.push({ event: "contact_form_submitted" });
+        }
+    }, []);
+
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        const isSuccessView = location.pathname.endsWith("/success");
+
+        if (isSuccessView) {
+            const fromSubmit =
+                typeof window !== "undefined" && window.sessionStorage?.getItem("contactJustSubmitted") === "1";
+
+            if (fromSubmit) {
+                setIsSuccess(true);
+                trackContactSuccess();
+                try {
+                    window.sessionStorage?.removeItem("contactJustSubmitted");
+                } catch { /* ignore */ }
+            } else {
+                navigate("/contact", { replace: true });
+                setIsSuccess(false);
+            }
+        } else {
+            setIsSuccess(false);
+        }
+    }, [location.pathname, navigate, trackContactSuccess]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -29,10 +72,10 @@ export default function Contact() {
             if (response.ok) {
                 setIsSuccess(true);
                 form.reset();
-                // Masquer le message de succès après 5 secondes
-                setTimeout(() => {
-                    setIsSuccess(false);
-                }, 5000);
+                try {
+                    window.sessionStorage?.setItem("contactJustSubmitted", "1");
+                } catch { /* ignore */ }
+                navigate("/contact/success", { replace: true });
             } else {
                 const data = await response.json();
                 setError(data.error || "Une erreur est survenue. Veuillez réessayer.");

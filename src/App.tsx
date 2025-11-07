@@ -856,9 +856,12 @@ export default function App() {
             "/projects/automation": { ...DEFAULT_SEO, ...SEO_CONFIGS.automation },
             "/mentions": { ...DEFAULT_SEO, ...SEO_CONFIGS.mentions },
             "/contact": { ...DEFAULT_SEO, ...SEO_CONFIGS.contact },
+            "/contact/success": { ...DEFAULT_SEO, ...SEO_CONFIGS.contact },
         };
         
-        const config = seoConfigs[location.pathname] || { ...DEFAULT_SEO, ...SEO_CONFIGS.home };
+        const config = seoConfigs[location.pathname] || (location.pathname.startsWith("/contact")
+            ? { ...DEFAULT_SEO, ...SEO_CONFIGS.contact }
+            : { ...DEFAULT_SEO, ...SEO_CONFIGS.home });
         setHead(config);
     }, [location.pathname]);
 
@@ -885,6 +888,11 @@ export default function App() {
                 </Suspense>
             } />
             <Route path="/contact" element={
+                <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
+                    <Contact />
+                </Suspense>
+            } />
+            <Route path="/contact/success" element={
                 <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
                     <Contact />
                 </Suspense>
