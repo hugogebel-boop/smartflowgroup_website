@@ -1,9 +1,10 @@
 // …imports
 import React, { useEffect } from "react";
-import { SiteBackground, TopNav, Footer, useGoHomeAndScroll } from "../layout";
+import { useNavigate } from "react-router-dom";
+import { SiteBackground, TopNav, Footer } from "../layout";
 
 export default function ProjectsWeb() {
-    const goHomeAndScroll = useGoHomeAndScroll();
+    const navigate = useNavigate();
     
     // Map des variantes disponibles (avif/webp) par id projet
     const [hasVariants, setHasVariants] = React.useState<Record<string, boolean>>({});
@@ -165,7 +166,7 @@ export default function ProjectsWeb() {
                         Parlez-nous de votre projet, nous lui donnerons vie.
                     </p>
                     <button
-                        onClick={() => goHomeAndScroll("contact")}
+                        onClick={() => navigate("/contact")}
                         className="mt-5 inline-flex items-center justify-center rounded-full bg-white/10 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                     >
                         Discuter de votre site

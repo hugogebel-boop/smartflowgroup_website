@@ -465,13 +465,12 @@ export function TopNav() {
                         </motion.div>
                     </div>
 
-                    <a
-                        href="/"
-                        onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); goHomeAndScroll("contact"); }}
+                    <Link
+                        to="/contact"
                         className="rounded-md border border-white/15 px-3 py-1.5 text-zinc-100 hover:text-white hover:border-white/25 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                     >
                         Contact
-                    </a>
+                    </Link>
                 </div>
 
                 {/* Burger Mobile */}
@@ -587,13 +586,13 @@ export function TopNav() {
                         </motion.div>
                     </div>
 
-                    <a
-                        href="/"
-                        onClick={(e) => { e.preventDefault(); setOpen(false); setTimeout(() => goHomeAndScroll("contact"), 120); }}
+                    <Link
+                        to="/contact"
+                        onClick={() => setOpen(false)}
                         className="block rounded-md border border-white/15 px-2 py-2 text-zinc-200 hover:text-white hover:border-white/25"
                     >
                         Contact
-                    </a>
+                    </Link>
                 </div>
             </motion.div>
         </header>
