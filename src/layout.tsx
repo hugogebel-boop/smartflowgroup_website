@@ -658,6 +658,9 @@ export function Footer() {
                         <Link to="/confidentialite" className="hover:text-white transition">
                             Politique de confidentialité
                         </Link>
+                        <Link to="/conditions-generales" className="hover:text-white transition">
+                            Conditions générales de vente
+                        </Link>
                         <Link to="/contact" className="hover:text-white transition">
                             Contact
                         </Link>

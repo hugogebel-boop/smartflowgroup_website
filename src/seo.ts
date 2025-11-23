@@ -271,6 +271,17 @@ export const SEO_CONFIGS = {
         ogUrl: `${BASE_URL}/confidentialite`,
         robots: "noindex, follow"
     },
+
+    conditions: {
+        title: "Conditions générales de vente — SmartFlow",
+        description: "Conditions générales de vente (CG) de SmartFlow Group : formation du contrat, obligations des parties, prix, propriété intellectuelle, responsabilité et droit applicable.",
+        keywords: "conditions générales, CGV, contrat, SmartFlow, Suisse, droit suisse, prestations numériques",
+        canonical: `${BASE_URL}/conditions-generales`,
+        ogTitle: "Conditions générales de vente — SmartFlow",
+        ogDescription: "Conditions générales de vente applicables aux prestations de SmartFlow Group en matière de sites web, applications métier et automatisations.",
+        ogUrl: `${BASE_URL}/conditions-generales`,
+        robots: "noindex, follow"
+    },
     
     contact: {
         title: "Contact — SmartFlow | Parlez-nous de votre projet",

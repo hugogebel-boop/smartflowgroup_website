@@ -9,6 +9,7 @@ const ProjectsApps = React.lazy(() => import("./projects/apps"));
 const ProjectsAutomation = React.lazy(() => import("./projects/automation"));
 const Mentions = React.lazy(() => import("./projects/Mentions"));
 const Privacy = React.lazy(() => import("./projects/Privacy"));
+const Conditions = React.lazy(() => import("./projects/Conditions"));
 const Contact = React.lazy(() => import("./projects/Contact"));
 
 import {
@@ -857,6 +858,7 @@ export default function App() {
             "/projects/automation": { ...DEFAULT_SEO, ...SEO_CONFIGS.automation },
             "/mentions": { ...DEFAULT_SEO, ...SEO_CONFIGS.mentions },
             "/confidentialite": { ...DEFAULT_SEO, ...SEO_CONFIGS.privacy },
+            "/conditions-generales": { ...DEFAULT_SEO, ...SEO_CONFIGS.conditions },
             "/contact": { ...DEFAULT_SEO, ...SEO_CONFIGS.contact },
             "/contact/success": { ...DEFAULT_SEO, ...SEO_CONFIGS.contact },
         };
@@ -894,6 +896,11 @@ export default function App() {
                     <Privacy />
                 </Suspense>
             } />
+            <Route path="/conditions-generales" element={
+                <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
+                    <Conditions />
+                </Suspense>
+            } />
             <Route path="/contact" element={
                 <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
                     <Contact />
@@ -922,6 +929,7 @@ export default function App() {
                         <a href="/contact/">Contact</a>
                         <a href="/mentions/">Mentions légales</a>
                         <a href="/confidentialite/">Politique de confidentialité</a>
+                        <a href="/conditions-generales/">Conditions générales de vente</a>
                     </nav>
                 </main>
             } />
