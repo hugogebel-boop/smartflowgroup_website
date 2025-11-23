@@ -604,21 +604,21 @@ export function Footer() {
     return (
         <footer
             className="
-        relative mt-24 border-t border-white/15 
-        bg-[#0B0B12]/55 
-        supports-[backdrop-filter]:bg-[#0B0B12]/45
-        supports-[backdrop-filter]:backdrop-blur-md
-        text-zinc-400
-      "
+                relative mt-24 border-t border-white/10
+                bg-[#05050B]/95
+                supports-[backdrop-filter]:bg-[#05050B]/80
+                supports-[backdrop-filter]:backdrop-blur-xl
+                text-zinc-300
+            "
             style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
         >
+            {/* Liseré et grain léger, en cohérence avec le fond du site */}
             <div
                 aria-hidden
-                className="pointer-events-none absolute -top-8 left-0 right-0 h-8 
-                   bg-gradient-to-t from-[#0B0B12]/55 to-transparent
-                   supports-[backdrop-filter]:from-[#0B0B12]/45"
+                className="pointer-events-none absolute -top-6 left-0 right-0 h-6 
+                    bg-gradient-to-t from-black/70 to-transparent
+                    supports-[backdrop-filter]:from-black/55"
             />
-
             <div
                 aria-hidden
                 className="pointer-events-none absolute inset-0 mix-blend-overlay opacity-[0.05]"
@@ -629,49 +629,154 @@ export function Footer() {
                 }}
             />
 
-            <div className="relative mx-auto max-w-6xl px-5 sm:px-8 py-10">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <p className="text-[11px] sm:text-[12px] uppercase tracking-[0.25em] text-zinc-500/90">
-                        SmartFlow
-                    </p>
+            <div className="relative mx-auto max-w-6xl px-5 sm:px-8 py-10 sm:py-12">
+                {/* Ligne haute : marque + navigation principale */}
+                <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+                    <div>
+                        <p className="text-[11px] sm:text-[12px] uppercase tracking-[0.28em] text-zinc-400">
+                            SmartFlow
+                        </p>
+                        <p className="mt-1 text-xs text-zinc-500 max-w-xs">
+                            Design ✕ Développement pour des projets numériques sobres, lisibles et agréables à utiliser.
+                        </p>
+                    </div>
 
-                    <nav className="flex flex-wrap items-center gap-4 text-sm">
-                        <a
-                            href="/"
-                            onClick={(e) => { e.preventDefault(); goToHomeAndScroll("hero"); }}
-                            className="hover:text-white transition"
-                        >
-                            Accueil
-                        </a>
-                        <Link to="/projects/web" className="hover:text-white transition">
-                            Sites web
-                        </Link>
-                        <Link to="/projects/apps" className="hover:text-white transition">
-                            Applications
-                        </Link>
-                        <Link to="/projects/automation" className="hover:text-white transition">
-                            Automatisation
-                        </Link>
-                        <Link to="/mentions" className="hover:text-white transition">
-                            Mentions légales
-                        </Link>
-                        <Link to="/confidentialite" className="hover:text-white transition">
-                            Politique de confidentialité
-                        </Link>
-                        <Link to="/conditions-generales" className="hover:text-white transition">
-                            Conditions générales de vente
-                        </Link>
-                        <Link to="/contact" className="hover:text-white transition">
-                            Contact
-                        </Link>
-                        <a href="mailto:contact@smartflowgroup.ch" className="hover:text-white transition">
-                            contact@smartflowgroup.ch
-                        </a>
+                    <nav className="flex flex-col gap-3 text-sm md:text-[13px]">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+                            {/* Colonne principale : Navigation */}
+                            <div>
+                                <h2 className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-500">
+                                    Navigation
+                                </h2>
+                                <div className="mt-3 flex flex-col gap-1.5">
+                                    <a
+                                        href="/"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            goToHomeAndScroll("hero");
+                                        }}
+                                        className="text-zinc-200 hover:text-white transition"
+                                    >
+                                        Accueil
+                                    </a>
+                                    <a
+                                        href="/"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            goToHomeAndScroll("dev");
+                                        }}
+                                        className="text-zinc-200 hover:text-white transition"
+                                    >
+                                        Approche
+                                    </a>
+                                    <a
+                                        href="/"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            goToHomeAndScroll("services");
+                                        }}
+                                        className="text-zinc-200 hover:text-white transition"
+                                    >
+                                        Services
+                                    </a>
+                                    <a
+                                        href="/"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            goToHomeAndScroll("works");
+                                        }}
+                                        className="text-zinc-200 hover:text-white transition"
+                                    >
+                                        Réalisations
+                                    </a>
+                                    <Link
+                                        to="/contact"
+                                        className="text-zinc-200 hover:text-white transition"
+                                    >
+                                        Contact
+                                    </Link>
+                                </div>
+                            </div>
+
+                            {/* Colonne Réalisations / projets */}
+                            <div>
+                                <h2 className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-500">
+                                    Réalisations
+                                </h2>
+                                <div className="mt-3 flex flex-col gap-1.5">
+                                    <Link
+                                        to="/projects/web"
+                                        className="text-zinc-200 hover:text-white transition"
+                                    >
+                                        Sites web
+                                    </Link>
+                                    <Link
+                                        to="/projects/apps"
+                                        className="text-zinc-200 hover:text-white transition"
+                                    >
+                                        Applications métier
+                                    </Link>
+                                    <Link
+                                        to="/projects/automation"
+                                        className="text-zinc-200 hover:text-white transition"
+                                    >
+                                        Programmes & automatisations
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
                     </nav>
                 </div>
 
-                <div className="mt-6 text-xs text-zinc-500/80">
-                    © {new Date().getFullYear()} SmartFlow. Tous droits réservés.
+                {/* Ligne basse : Studio / Légal & infos */}
+                <div className="mt-10 grid gap-8 sm:grid-cols-2 text-sm">
+                    {/* Bloc studio / présentation courte */}
+                    <div className="text-zinc-400">
+                        <h2 className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-500">
+                            Studio
+                        </h2>
+                        <p className="mt-3 leading-relaxed">
+                            Nous accompagnons des équipes qui veulent des sites et des outils numériques simples,
+                            confortables et faciles à faire évoluer dans le temps.
+                        </p>
+                    </div>
+
+                    {/* Bloc légal + infos pratiques */}
+                    <div>
+                        <h2 className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-500">
+                            Légal
+                        </h2>
+                        <nav className="mt-3 flex flex-col gap-2">
+                            <Link to="/mentions" className="text-zinc-300 hover:text-white transition">
+                                Mentions légales
+                            </Link>
+                            <Link to="/confidentialite" className="text-zinc-300 hover:text-white transition">
+                                Politique de confidentialité
+                            </Link>
+                            <Link to="/conditions-generales" className="text-zinc-300 hover:text-white transition">
+                                Conditions générales de vente
+                            </Link>
+                        </nav>
+                        <div className="mt-4 text-xs text-zinc-500 space-y-1">
+                            <p>SmartFlow Group</p>
+                            <p>
+                                <a
+                                    href="mailto:hugo.gebel@smartflowgroup.ch"
+                                    className="text-zinc-300 hover:text-white transition"
+                                >
+                                    hugo.gebel@smartflowgroup.ch
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Bas de page */}
+                <div className="mt-8 flex flex-col gap-2 border-t border-white/10 pt-4 text-[11px] text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
+                    <p>© {new Date().getFullYear()} SmartFlow. Tous droits réservés.</p>
+                    <p className="text-zinc-600">
+                        Un site designé et développé par SmartFlow.
+                    </p>
                 </div>
             </div>
         </footer>
