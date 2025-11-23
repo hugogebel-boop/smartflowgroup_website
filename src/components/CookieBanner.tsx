@@ -354,17 +354,17 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ title, description, checked, 
                     disabled={locked}
                     onClick={locked ? undefined : onToggle}
                     className={`
-                        relative inline-flex h-[12px] w-[24px] flex-shrink-0 cursor-pointer items-center rounded-full
-                        border border-white/20 bg-zinc-900 transition-colors
+                        sf-toggle relative inline-flex h-[16px] w-[40px] min-h-0 p-0 flex-shrink-0 cursor-pointer items-center rounded-full
+                        border border-white/30 bg-zinc-900 transition-colors
                         ${locked ? "opacity-55 cursor-not-allowed" : "hover:border-white/40"}
-                        ${isOn ? "bg-emerald-400 border-emerald-300/90" : "bg-zinc-900"}
+                        ${isOn ? "bg-emerald-500 border-emerald-300/90 shadow-[0_0_0_1px_rgba(16,185,129,0.9)]" : "bg-zinc-900"}
                     `}
                 >
                     <span
                         className={`
-                            pointer-events-none inline-block h-[8px] w-[8px] rounded-full bg-white shadow-sm
+                            pointer-events-none inline-block h-[12px] w-[12px] rounded-full bg-white shadow-sm
                             transform transition-transform
-                            ${isOn ? "translate-x-[14px]" : "translate-x-[2px]"}
+                            ${isOn ? "translate-x-[24px]" : "translate-x-[2px]"}
                         `}
                     />
                 </button>

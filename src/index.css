@@ -66,9 +66,12 @@ small, .text-xs {
 }
 
 
-/* Buttons: comfortable tap targets by default */
+/* Buttons: comfortable tap targets by default (sauf petits switches) */
 button, .btn {
     min-height: 44px;
+}
+button.sf-toggle {
+    min-height: 0;
 }
 
 
