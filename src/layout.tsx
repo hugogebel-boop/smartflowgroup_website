@@ -655,6 +655,9 @@ export function Footer() {
                         <Link to="/mentions" className="hover:text-white transition">
                             Mentions légales
                         </Link>
+                        <Link to="/confidentialite" className="hover:text-white transition">
+                            Politique de confidentialité
+                        </Link>
                         <Link to="/contact" className="hover:text-white transition">
                             Contact
                         </Link>

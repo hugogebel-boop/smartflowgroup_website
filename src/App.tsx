@@ -8,6 +8,7 @@ const ProjectsWeb = React.lazy(() => import("./projects/web"));
 const ProjectsApps = React.lazy(() => import("./projects/apps"));
 const ProjectsAutomation = React.lazy(() => import("./projects/automation"));
 const Mentions = React.lazy(() => import("./projects/Mentions"));
+const Privacy = React.lazy(() => import("./projects/Privacy"));
 const Contact = React.lazy(() => import("./projects/Contact"));
 
 import {
@@ -855,6 +856,7 @@ export default function App() {
             "/projects/apps": { ...DEFAULT_SEO, ...SEO_CONFIGS.apps },
             "/projects/automation": { ...DEFAULT_SEO, ...SEO_CONFIGS.automation },
             "/mentions": { ...DEFAULT_SEO, ...SEO_CONFIGS.mentions },
+            "/confidentialite": { ...DEFAULT_SEO, ...SEO_CONFIGS.privacy },
             "/contact": { ...DEFAULT_SEO, ...SEO_CONFIGS.contact },
             "/contact/success": { ...DEFAULT_SEO, ...SEO_CONFIGS.contact },
         };
@@ -887,6 +889,11 @@ export default function App() {
                     <Mentions />
                 </Suspense>
             } />
+            <Route path="/confidentialite" element={
+                <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
+                    <Privacy />
+                </Suspense>
+            } />
             <Route path="/contact" element={
                 <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
                     <Contact />
@@ -914,6 +921,7 @@ export default function App() {
                         <a href="/projects/automation/">Programmes automatisés</a>
                         <a href="/contact/">Contact</a>
                         <a href="/mentions/">Mentions légales</a>
+                        <a href="/confidentialite/">Politique de confidentialité</a>
                     </nav>
                 </main>
             } />

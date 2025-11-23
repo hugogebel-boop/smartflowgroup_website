@@ -260,6 +260,17 @@ export const SEO_CONFIGS = {
         ogUrl: `${BASE_URL}/mentions`,
         robots: "noindex, follow"
     },
+
+    privacy: {
+        title: "Politique de confidentialité — SmartFlow",
+        description: "Politique de confidentialité de SmartFlow Group. Informations sur le traitement des données personnelles, la sécurité et vos droits.",
+        keywords: "politique de confidentialité, données personnelles, LPD, RGPD, SmartFlow",
+        canonical: `${BASE_URL}/confidentialite`,
+        ogTitle: "Politique de confidentialité — SmartFlow",
+        ogDescription: "Politique de confidentialité de SmartFlow Group et informations sur la protection des données personnelles.",
+        ogUrl: `${BASE_URL}/confidentialite`,
+        robots: "noindex, follow"
+    },
     
     contact: {
         title: "Contact — SmartFlow | Parlez-nous de votre projet",
