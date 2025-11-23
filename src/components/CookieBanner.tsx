@@ -260,7 +260,7 @@ export const CookieBanner: React.FC = () => {
                             className="
                                 inline-flex items-center justify-center rounded-full
                                 border border-white/14 bg-white/[0.03]
-                                px-3 sm:px-4 py-2 text-[11px] sm:text-[12px]
+                                px-3 sm:px-4 py-1.5 text-[11px] sm:text-[12px]
                                 text-zinc-100 hover:bg-white/[0.06] hover:border-white/25
                                 transition-colors
                             "
@@ -273,7 +273,7 @@ export const CookieBanner: React.FC = () => {
                             className="
                                 inline-flex items-center justify-center rounded-full
                                 border border-white/16 bg-white text-[11px] sm:text-[12px]
-                                px-3 sm:px-4 py-2 font-medium text-black
+                                px-3 sm:px-4 py-1.5 font-medium text-black
                                 shadow-[0_8px_24px_rgba(0,0,0,0.55)]
                                 hover:bg-zinc-100 hover:border-white/30 transition-colors
                             "
@@ -315,7 +315,7 @@ export const CookieBanner: React.FC = () => {
                         <button
                             type="button"
                             onClick={handleSaveChoices}
-                            className="w-full inline-flex items-center justify-center rounded-full border border-white/16 px-3.5 py-2 text-xs text-zinc-100 hover:bg-white/5 transition-colors"
+                            className="w-full inline-flex items-center justify-center rounded-full border border-white/16 px-3.5 py-1.5 text-xs text-zinc-100 hover:bg-white/5 transition-colors"
                         >
                             Enregistrer mes choix
                         </button>
@@ -339,7 +339,7 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ title, description, checked, 
     const isOn = !!checked;
 
     return (
-        <div className="flex gap-3 rounded-xl bg-white/[0.03] border border-white/8 px-3 py-2.5">
+        <div className="flex gap-3 rounded-xl bg-white/[0.03] border border-white/8 px-3 py-2">
             <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-medium text-white">{title}</p>
                 <p className="mt-1 text-[11px] text-zinc-300 leading-relaxed">{description}</p>
@@ -354,17 +354,17 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ title, description, checked, 
                     disabled={locked}
                     onClick={locked ? undefined : onToggle}
                     className={`
-                        relative inline-flex h-4 w-8 flex-shrink-0 cursor-pointer items-center rounded-full
-                        border border-white/20 bg-zinc-800/80 transition-colors
+                        relative inline-flex h-[14px] w-[26px] flex-shrink-0 cursor-pointer items-center rounded-full
+                        border border-white/20 bg-zinc-900 transition-colors
                         ${locked ? "opacity-55 cursor-not-allowed" : "hover:border-white/40"}
-                        ${isOn ? "bg-emerald-400/70 border-emerald-300/80" : "bg-zinc-800/80"}
+                        ${isOn ? "bg-emerald-400/75 border-emerald-300/80" : "bg-zinc-900"}
                     `}
                 >
                     <span
                         className={`
-                            pointer-events-none inline-block h-3 w-3 rounded-full bg-white shadow-sm
+                            pointer-events-none inline-block h-[10px] w-[10px] rounded-full bg-white shadow-sm
                             transform transition-transform
-                            ${isOn ? "translate-x-[10px]" : "translate-x-[2px]"}
+                            ${isOn ? "translate-x-[11px]" : "translate-x-[3px]"}
                         `}
                     />
                 </button>
