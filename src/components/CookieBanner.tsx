@@ -272,10 +272,10 @@ export const CookieBanner: React.FC = () => {
                             onClick={handleAcceptAll}
                             className="
                                 inline-flex items-center justify-center rounded-full
-                                bg-[linear-gradient(120deg,#e0e7ff,#a78bfa,#22d3ee,#e879f9)]
-                                px-3 sm:px-4 py-2 text-[11px] sm:text-[12px]
-                                font-medium text-black shadow-[0_0_14px_rgba(0,0,0,0.65)]
-                                hover:brightness-110 transition
+                                border border-white/16 bg-white text-[11px] sm:text-[12px]
+                                px-3 sm:px-4 py-2 font-medium text-black
+                                shadow-[0_8px_24px_rgba(0,0,0,0.55)]
+                                hover:bg-zinc-100 hover:border-white/30 transition-colors
                             "
                         >
                             Accepter tout
@@ -354,17 +354,17 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ title, description, checked, 
                     disabled={locked}
                     onClick={locked ? undefined : onToggle}
                     className={`
-                        relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full
-                        border border-white/18 bg-transparent transition
+                        relative inline-flex h-4 w-8 flex-shrink-0 cursor-pointer items-center rounded-full
+                        border border-white/20 bg-zinc-800/80 transition-colors
                         ${locked ? "opacity-55 cursor-not-allowed" : "hover:border-white/40"}
-                        ${isOn ? "bg-white/[0.18]" : "bg-transparent"}
+                        ${isOn ? "bg-emerald-400/70 border-emerald-300/80" : "bg-zinc-800/80"}
                     `}
                 >
                     <span
                         className={`
-                            pointer-events-none inline-block h-3 w-3 translate-y-[3px] transform rounded-full bg-white shadow-sm
-                            transition-transform
-                            ${isOn ? "translate-x-[18px]" : "translate-x-[2px]"}
+                            pointer-events-none inline-block h-3 w-3 rounded-full bg-white shadow-sm
+                            transform transition-transform
+                            ${isOn ? "translate-x-[10px]" : "translate-x-[2px]"}
                         `}
                     />
                 </button>
