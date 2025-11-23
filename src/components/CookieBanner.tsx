@@ -286,15 +286,9 @@ export const CookieBanner: React.FC = () => {
                         <button
                             type="button"
                             onClick={() => setShowDetails((v) => !v)}
-                            className="text-[11px] sm:text-xs text-zinc-300 hover:text-white inline-flex items-center gap-1"
+                            className="text-[11px] sm:text-xs text-zinc-300 hover:text-white"
                         >
-                            <span>{showDetails ? "Masquer les détails" : "Personnaliser mes choix"}</span>
-                            <span
-                                className={`inline-block transform transition-transform ${showDetails ? "rotate-180" : ""}`}
-                                aria-hidden="true"
-                            >
-                                ˅
-                            </span>
+                            {showDetails ? "Masquer les détails" : "Personnaliser mes choix"}
                         </button>
 
                         {showDetails && (
