@@ -20,6 +20,7 @@ import {
     useGoHomeAndScroll,
     usePrefersReducedMotion,
 } from "./layout";
+import { CookieBanner } from "./components/CookieBanner";
 
 /* ================= Helpers ================= */
 const isClient = typeof window !== "undefined";
@@ -870,69 +871,72 @@ export default function App() {
     }, [location.pathname]);
 
     return (
-        <Routes>
-            <Route path="/projects/web" element={
+        <>
+            <Routes>
+                <Route path="/projects/web" element={
                 <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
-                    <ProjectsWeb />
-                </Suspense>
-            } />
-            <Route path="/projects/apps" element={
+                        <ProjectsWeb />
+                    </Suspense>
+                } />
+                <Route path="/projects/apps" element={
                 <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
-                    <ProjectsApps />
-                </Suspense>
-            } />
-            <Route path="/projects/automation" element={
+                        <ProjectsApps />
+                    </Suspense>
+                } />
+                <Route path="/projects/automation" element={
                 <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
-                    <ProjectsAutomation />
-                </Suspense>
-            } />
-            <Route path="/mentions" element={
+                        <ProjectsAutomation />
+                    </Suspense>
+                } />
+                <Route path="/mentions" element={
                 <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
-                    <Mentions />
-                </Suspense>
-            } />
-            <Route path="/confidentialite" element={
+                        <Mentions />
+                    </Suspense>
+                } />
+                <Route path="/confidentialite" element={
                 <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
-                    <Privacy />
-                </Suspense>
-            } />
-            <Route path="/conditions-generales" element={
+                        <Privacy />
+                    </Suspense>
+                } />
+                <Route path="/conditions-generales" element={
                 <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
-                    <Conditions />
-                </Suspense>
-            } />
-            <Route path="/contact" element={
+                        <Conditions />
+                    </Suspense>
+                } />
+                <Route path="/contact" element={
                 <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
-                    <Contact />
-                </Suspense>
-            } />
-            <Route path="/contact/success" element={
+                        <Contact />
+                    </Suspense>
+                } />
+                <Route path="/contact/success" element={
                 <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
-                    <Contact />
-                </Suspense>
-            } />
-            <Route path="/" element={
-                <main className="relative min-h-screen text-white antialiased [text-size-adjust:100%] selection:bg-white/20">
-                    <SiteBackground />
-                    <TopNav />
-                    <HeroSection />
-                    <DevScrollCodeSection />
-                    <ServicesSection />
-                    <WorksSection />
-                    <Footer />
-                    
-                    {/* Liens internes SEO invisibles */}
-                    <nav aria-label="Navigation interne SEO" className="sr-only">
-                        <a href="/projects/apps/">Applications métier</a>
-                        <a href="/projects/web/">Sites web</a>
-                        <a href="/projects/automation/">Programmes automatisés</a>
-                        <a href="/contact/">Contact</a>
-                        <a href="/mentions/">Mentions légales</a>
-                        <a href="/confidentialite/">Politique de confidentialité</a>
-                        <a href="/conditions-generales/">Conditions générales de vente</a>
-                    </nav>
-                </main>
-            } />
-        </Routes>
+                        <Contact />
+                    </Suspense>
+                } />
+                <Route path="/" element={
+                    <main className="relative min-h-screen text-white antialiased [text-size-adjust:100%] selection:bg-white/20">
+                        <SiteBackground />
+                        <TopNav />
+                        <HeroSection />
+                        <DevScrollCodeSection />
+                        <ServicesSection />
+                        <WorksSection />
+                        <Footer />
+                        
+                        {/* Liens internes SEO invisibles */}
+                        <nav aria-label="Navigation interne SEO" className="sr-only">
+                            <a href="/projects/apps/">Applications métier</a>
+                            <a href="/projects/web/">Sites web</a>
+                            <a href="/projects/automation/">Programmes automatisés</a>
+                            <a href="/contact/">Contact</a>
+                            <a href="/mentions/">Mentions légales</a>
+                            <a href="/confidentialite/">Politique de confidentialité</a>
+                            <a href="/conditions-generales/">Conditions générales de vente</a>
+                        </nav>
+                    </main>
+                } />
+            </Routes>
+            <CookieBanner />
+        </>
     );
 }

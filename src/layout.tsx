@@ -601,6 +601,13 @@ export function TopNav() {
 
 /* -------- Footer -------- */
 export function Footer() {
+    const openCookiePrefs = () => {
+        if (typeof window === "undefined") return;
+        if (window.sfOpenCookiePreferences) {
+            window.sfOpenCookiePreferences();
+        }
+    };
+
     return (
         <footer
             className="
@@ -746,7 +753,7 @@ export function Footer() {
                         <h2 className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-500">
                             Légal
                         </h2>
-                        <nav className="mt-3 flex flex-col gap-2">
+                        <nav className="mt-3 flex flex-col gap-2 text-sm">
                             <Link to="/mentions" className="text-zinc-300 hover:text-white transition">
                                 Mentions légales
                             </Link>
@@ -756,6 +763,13 @@ export function Footer() {
                             <Link to="/conditions-generales" className="text-zinc-300 hover:text-white transition">
                                 Conditions générales de vente
                             </Link>
+                            <button
+                                type="button"
+                                onClick={openCookiePrefs}
+                                className="text-left text-zinc-300 hover:text-white underline underline-offset-2 transition"
+                            >
+                                Gérer les cookies
+                            </button>
                         </nav>
                         <div className="mt-4 text-xs text-zinc-500 space-y-1">
                             <p>SmartFlow Group</p>
