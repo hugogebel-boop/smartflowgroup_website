@@ -173,25 +173,17 @@ export const CookieBanner: React.FC = () => {
             >
                 <div className="relative px-4 sm:px-6 pt-3.5 sm:pt-4 pb-3 border-b border-white/8">
                     <div className="flex items-start gap-3 sm:gap-4">
-                        <div className="mt-1 hidden sm:flex h-8 w-8 items-center justify-center rounded-xl bg-white/5 border border-white/10">
-                            <svg
-                                aria-hidden="true"
-                                viewBox="0 0 24 24"
-                                className="h-4 w-4 text-zinc-100"
-                            >
-                                <path
-                                    d="M12 3a7 7 0 0 0-7 7 7 7 0 0 0 9.7 6.5 4 4 0 0 1-1.2-2.9 4 4 0 0 1 4-4c.3 0 .6 0 .8.1A7 7 0 0 0 12 3Zm-2.75 5.25a1 1 0 0 1 .96.74l.03.11a1 1 0 0 1-1.69.9 1 1 0 0 1 .7-1.75Zm-1 4a1 1 0 0 1 .96.74l.03.11a1 1 0 0 1-1.69.9 1 1 0 0 1 .7-1.75Zm4.5-4a1 1 0 0 1 .96.74l.03.11a1 1 0 0 1-1.69.9 1 1 0 0 1 .7-1.75Zm.25 4a1 1 0 1 1 0 2 1 1 0 0 1 0-2Zm3-2a1 1 0 0 1 .96.74l.03.11a1 1 0 0 1-1.69.9 1 1 0 0 1 .7-1.75Z"
-                                    fill="currentColor"
-                                />
-                                <path
-                                    d="M17 13a3 3 0 0 0 3 3h.5a3.5 3.5 0 1 1-3.5-3Z"
-                                    fill="currentColor"
-                                />
-                            </svg>
+                        <div className="mt-0.5 hidden sm:flex h-8 w-8 items-center justify-center rounded-xl bg-white/5 border border-white/10 overflow-hidden">
+                            <img
+                                src="/assets/icon/SmartFlow.png"
+                                alt="SmartFlow"
+                                className="h-5 w-5 object-contain"
+                                loading="lazy"
+                            />
                         </div>
                         <div>
                             <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-400 mb-0.5">
-                                SmartFlow — cookies
+                                SmartFlow
                             </p>
                             <h2
                                 id="cookie-banner-title"
@@ -347,12 +339,12 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ title, description, checked, 
     const isOn = !!checked;
 
     return (
-        <div className="flex gap-3 rounded-xl bg-white/3 border border-white/8 px-3 py-2.5">
+        <div className="flex gap-3 rounded-xl bg-white/[0.03] border border-white/8 px-3 py-2.5">
             <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-medium text-white">{title}</p>
                 <p className="mt-1 text-[11px] text-zinc-300 leading-relaxed">{description}</p>
             </div>
-            <div className="flex items-start pt-1">
+            <div className="flex items-start pt-0.5">
                 <button
                     type="button"
                     id={id}
@@ -362,16 +354,16 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ title, description, checked, 
                     disabled={locked}
                     onClick={locked ? undefined : onToggle}
                     className={`
-                        relative inline-flex h-6 w-10 flex-shrink-0 cursor-pointer rounded-full
-                        border border-white/10 transition
-                        ${locked ? "opacity-60 cursor-not-allowed" : "hover:border-white/30"}
-                        ${isOn ? "bg-emerald-400/80" : "bg-zinc-700/80"}
+                        relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full
+                        border border-white/18 bg-transparent transition
+                        ${locked ? "opacity-55 cursor-not-allowed" : "hover:border-white/40"}
+                        ${isOn ? "bg-white/[0.18]" : "bg-transparent"}
                     `}
                 >
                     <span
                         className={`
-                            pointer-events-none inline-block h-4 w-4 translate-y-[2px] transform rounded-full bg-white shadow
-                            transition
+                            pointer-events-none inline-block h-3 w-3 translate-y-[3px] transform rounded-full bg-white shadow-sm
+                            transition-transform
                             ${isOn ? "translate-x-[18px]" : "translate-x-[2px]"}
                         `}
                     />
