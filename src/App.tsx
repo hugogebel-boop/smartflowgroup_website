@@ -175,14 +175,14 @@ function tokenizeTS(src: string): Token[] {
 const APPROACH_LINES: string[] = [
     "/* Notre approche : simple et directe. */",
     "SmartFlow.start({",
-    '  idée: "on comprend le besoin",',
-    '  design: "on imagine une expérience fluide",',
-    '  dev: "on code avec clarté et exigence",',
-    '  suivi: "on reste proches et réactifs",',
-    '  valeur: "un rendu soigné, sans friction",',
+    '  idée: "Comprendre les besoins",',
+    '  design: "Imaginer une expérience fluide",',
+    '  dev: "Coder avec clarté et exigence",',
+    '  suivi: "Rester proches et réactifs",',
+    '  valeur: "Un rendu soigné, sans friction",',
     "});",
     "",
-    'SmartFlow.commit("livrer, apprendre, améliorer");',
+    'SmartFlow.commit("Livrer, Apprendre, Améliorer");',
     'console.log("Chaque projet est créé sur mesure.");',
 ];
 
