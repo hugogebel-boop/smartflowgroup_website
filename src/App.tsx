@@ -949,86 +949,97 @@ function RedirectBanner() {
             <style>{GLIKER_FONT_FACE}</style>
             <div
                 className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden"
-                style={{
-                    background: "#070A10",
-                    animation: "sf-overlay-fade-in 0.6s ease-out both",
-                }}
+                style={{ backgroundColor: "#110317", animation: "sf-overlay-fade-in 0.6s ease-out both" }}
             >
-                {/* Fond radial decoratif par-dessus le noir opaque */}
-                <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0"
-                    style={{ background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(30, 20, 55, 0.7) 0%, transparent 70%)" }}
-                />
-                {/* Glow decoratif */}
+                {/* Glow ambiant */}
                 <div
                     aria-hidden
                     className="pointer-events-none absolute"
                     style={{
-                        width: "min(500px, 80vw)",
-                        height: "min(500px, 80vw)",
+                        width: "min(700px, 90vw)",
+                        height: "min(700px, 90vw)",
                         top: "50%",
                         left: "50%",
-                        transform: "translate(-50%, -55%)",
-                        background: "radial-gradient(circle, rgba(147,42,248,0.12) 0%, rgba(35,121,245,0.06) 40%, transparent 70%)",
-                        filter: "blur(40px)",
-                        animation: "sf-glow-pulse 6s ease-in-out infinite",
+                        transform: "translate(-50%, -50%)",
+                        background: "radial-gradient(ellipse, rgba(147,42,248,0.10) 0%, rgba(40,75,229,0.04) 40%, transparent 65%)",
+                        filter: "blur(60px)",
+                        animation: "sf-glow-pulse 8s ease-in-out infinite",
                     }}
                 />
 
                 <div
-                    className="relative flex flex-col items-center gap-6 sm:gap-8 px-6 text-center"
-                    style={{ animation: "sf-overlay-rise 0.8s ease-out 0.2s both" }}
+                    className="relative flex flex-col items-center px-6 text-center"
+                    style={{ animation: "sf-overlay-rise 0.8s ease-out 0.15s both" }}
                 >
-                    {/* Logo icon */}
-                    <img
-                        src="/redirection-smartflowsa/icon/smartflow-logo.svg"
-                        alt="SmartFlow logo"
-                        className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24"
-                        style={{ filter: "drop-shadow(0 0 24px rgba(147,42,248,0.3))" }}
-                    />
+                    {/* Logo */}
+                    <div className="mb-8 sm:mb-10" style={{ width: "min(140px, 30vw)", height: "min(140px, 30vw)" }}>
+                        <img
+                            src="/redirection-smartflowsa/icon/smartflow-logo.svg"
+                            alt=""
+                            className="w-full h-full object-contain"
+                            style={{ filter: "drop-shadow(0 0 30px rgba(147,42,248,0.25))" }}
+                        />
+                    </div>
 
-                    {/* Text logo */}
-                    <img
-                        src="/redirection-smartflowsa/logo-text/smartflow-text-white.svg"
-                        alt="smartflow"
-                        className="w-48 sm:w-56 md:w-64"
-                        style={{ opacity: 0.9 }}
-                    />
+                    {/* Brand name in Gliker font */}
+                    <span
+                        className="mb-6 sm:mb-8 text-3xl sm:text-4xl md:text-5xl select-none"
+                        style={{ fontFamily: "'Gliker', serif", color: "#932af8", letterSpacing: "0.01em" }}
+                    >
+                        smartflow
+                    </span>
+
+                    {/* Shimmer line */}
+                    <div className="h-[2px] w-20 sm:w-24 rounded-full overflow-hidden mb-8 sm:mb-10" style={{ background: "rgba(255,255,255,0.08)" }}>
+                        <div
+                            className="h-full w-full rounded-full"
+                            style={{
+                                background: "linear-gradient(90deg, #36affe, #932af8, #36affe)",
+                                backgroundSize: "200% 100%",
+                                animation: "loading-shimmer 1.4s ease-in-out infinite",
+                            }}
+                        />
+                    </div>
 
                     {/* Message */}
-                    <div className="flex flex-col items-center gap-2 max-w-md">
-                        <p className="text-[13px] sm:text-[15px] text-zinc-400 leading-relaxed">
-                            SmartFlow a évolué. Retrouvez-nous sur notre nouveau site.
-                        </p>
-                    </div>
+                    <p className="mb-8 sm:mb-10 max-w-sm text-[14px] sm:text-[16px] leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+                        SmartFlow a évolué.<br />
+                        Retrouvez-nous sur notre nouveau site.
+                    </p>
 
                     {/* CTA */}
                     <a
                         href="https://smartflowsa.ch"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group relative inline-flex items-center gap-2 rounded-xl px-7 py-3 sm:px-8 sm:py-3.5 text-[13px] sm:text-[14px] font-medium text-white transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_32px_rgba(147,42,248,0.3)]"
+                        className="group inline-flex items-center gap-2 sm:gap-3 rounded-xl px-6 py-3 sm:px-8 sm:py-3.5 text-[14px] sm:text-[16px] font-medium text-white transition-all duration-500 hover:scale-[1.02] active:scale-[0.98]"
                         style={{
-                            background: "linear-gradient(135deg, #932af8 0%, #5b21b6 40%, #2563eb 100%)",
-                            boxShadow: "0 0 16px rgba(147,42,248,0.15), inset 0 1px 0 rgba(255,255,255,0.1)",
+                            background: "linear-gradient(135deg, #932af8 0%, #284be5 100%)",
+                            boxShadow: "0 0 40px rgba(147,42,248,0.25)",
                         }}
                     >
                         Découvrir smartflowsa.ch
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true">
-                            <path d="M7 17L17 7M17 7H7M17 7V17" />
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true">
+                            <path d="M7 17L17 7" /><path d="M7 7h10v10" />
                         </svg>
                     </a>
                 </div>
 
                 {/* Tag en bas */}
                 <div
-                    className="absolute bottom-6 sm:bottom-8 left-0 right-0 flex justify-center text-zinc-500"
-                    style={{ animation: "sf-overlay-rise 0.8s ease-out 0.6s both" }}
+                    className="absolute bottom-6 sm:bottom-8 left-0 right-0 flex justify-center"
+                    style={{ color: "rgba(255,255,255,0.35)", animation: "sf-overlay-rise 0.8s ease-out 0.5s both" }}
                 >
                     <SmartFlowTag />
                 </div>
             </div>
+
+            <style>{`
+                @keyframes loading-shimmer {
+                    0%   { background-position: 200% 0; }
+                    100% { background-position: -200% 0; }
+                }
+            `}</style>
         </>
     );
 }
