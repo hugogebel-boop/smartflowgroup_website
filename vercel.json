@@ -4,7 +4,7 @@
   "redirects": [
     {
       "source": "/(.*)",
-      "destination": "https://smartflowsa.ch/$1",
+      "destination": "https://smartflowsa.ch/",
       "statusCode": 301
     }
   ]
