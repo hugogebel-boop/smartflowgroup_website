@@ -5,7 +5,7 @@
     {
       "source": "/(.*)",
       "destination": "https://smartflowsa.ch/$1",
-      "permanent": true
+      "statusCode": 301
     }
   ]
 }
