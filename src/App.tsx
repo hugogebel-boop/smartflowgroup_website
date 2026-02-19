@@ -842,72 +842,177 @@ function WorksSection() {
     );
 }
 
-/* ================= Redirect Banner ================= */
-function RedirectBanner() {
-    const [visible, setVisible] = useState(() => {
-        if (typeof window === "undefined") return true;
-        return sessionStorage.getItem("sf_banner_dismissed") !== "1";
-    });
+/* ================= Redirect Banner (full-page) ================= */
+const GLIKER_FONT_FACE = `
+@font-face {
+    font-family: 'Gliker';
+    src: url('/redirection-smartflowsa/fonts/gliker/Gliker-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@keyframes sf-overlay-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+@keyframes sf-overlay-rise {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes sf-glow-pulse {
+    0%, 100% { opacity: 0.35; transform: scale(1); }
+    50%      { opacity: 0.55; transform: scale(1.08); }
+}
+`;
 
-    if (!visible) return null;
+function SmartFlowTag() {
+    const letters = "smartflow".split("");
+    const [hovering, setHovering] = useState(false);
+    const [glitched, setGlitched] = useState<boolean[]>(new Array(letters.length).fill(false));
+    const [iconVisible, setIconVisible] = useState(false);
+    const timers = useRef<number[]>([]);
+    const delays = [0, 35, 60, 100, 130, 175, 210, 260, 310];
 
-    const dismiss = () => {
-        setVisible(false);
-        try { sessionStorage.setItem("sf_banner_dismissed", "1"); } catch {}
-    };
+    useEffect(() => {
+        timers.current.forEach(clearTimeout);
+        timers.current = [];
+        if (hovering) {
+            letters.forEach((_, i) => {
+                timers.current.push(window.setTimeout(() => {
+                    setGlitched(prev => { const n = [...prev]; n[i] = true; return n; });
+                    if (i === letters.length - 1) window.setTimeout(() => setIconVisible(true), 40);
+                }, delays[i] ?? i * 35));
+            });
+        } else {
+            setIconVisible(false);
+            letters.forEach((_, i) => {
+                timers.current.push(window.setTimeout(() => {
+                    setGlitched(prev => { const n = [...prev]; n[letters.length - 1 - i] = false; return n; });
+                }, i * 30));
+            });
+        }
+        return () => timers.current.forEach(clearTimeout);
+    }, [hovering]);
 
     return (
-        <>
-            <style>{`
-                .sf-redirect-banner ~ header,
-                .sf-redirect-banner ~ * header { top: 40px !important; }
-                @media (min-width: 640px) {
-                    .sf-redirect-banner ~ header,
-                    .sf-redirect-banner ~ * header { top: 36px !important; }
-                }
-            `}</style>
-            <div
-                className="sf-redirect-banner fixed top-0 left-0 right-0 z-[60] flex items-center justify-center gap-3 px-4 py-2.5 sm:py-2 text-[12px] sm:text-[13px] text-white/90"
+        <a
+            href="https://smartflowsa.ch"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="crafted by smartflow"
+            onMouseEnter={() => setHovering(true)}
+            onMouseLeave={() => setHovering(false)}
+            className="inline-flex items-baseline gap-0 no-underline transition-opacity duration-200"
+            style={{ opacity: hovering ? 0.65 : 0.45, color: "inherit", fontSize: "12.5px", fontWeight: 500, letterSpacing: "0.01em" }}
+        >
+            <span style={{ marginRight: "0.3em" }}>crafted by</span>
+            {letters.map((l, i) => (
+                <span
+                    key={i}
+                    className="inline-flex items-end"
+                    style={{
+                        height: 16,
+                        transition: "color 80ms ease, font-family 80ms step-end, font-size 80ms ease",
+                        fontFamily: glitched[i] ? "'Gliker', serif" : "inherit",
+                        fontSize: glitched[i] ? "15px" : "12.5px",
+                        color: glitched[i] ? "rgba(124, 92, 252, 0.62)" : "inherit",
+                    }}
+                >{l}</span>
+            ))}
+            <span
+                className="inline-flex items-center"
                 style={{
-                    background: "linear-gradient(90deg, rgba(11,11,18,0.97) 0%, rgba(30,20,50,0.97) 50%, rgba(11,11,18,0.97) 100%)",
-                    borderBottom: "1px solid rgba(168,85,247,0.25)",
-                    backdropFilter: "blur(12px)",
+                    marginLeft: 5,
+                    opacity: iconVisible ? 1 : 0,
+                    transform: iconVisible ? "translateX(0)" : "translateX(-4px)",
+                    transition: "opacity 180ms ease, transform 180ms ease",
                 }}
             >
+                <img src="/redirection-smartflowsa/smartflow-tag/SmartFlow.png" alt="" width="14" height="14" style={{ display: "block", objectFit: "contain", position: "relative", top: 1 }} />
+            </span>
+        </a>
+    );
+}
+
+function RedirectBanner() {
+    return (
+        <>
+            <style>{GLIKER_FONT_FACE}</style>
+            <div
+                className="fixed inset-0 z-[100] flex flex-col items-center justify-center"
+                style={{
+                    background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(30, 20, 55, 0.95) 0%, #070A10 70%)",
+                    animation: "sf-overlay-fade-in 0.6s ease-out both",
+                }}
+            >
+                {/* Glow decoratif */}
                 <div
                     aria-hidden
-                    className="pointer-events-none absolute bottom-0 left-0 right-0 h-[1px]"
-                    style={{ background: "linear-gradient(90deg, transparent 0%, #a78bfa 25%, #22d3ee 50%, #e879f9 75%, transparent 100%)", opacity: 0.5 }}
+                    className="pointer-events-none absolute"
+                    style={{
+                        width: "min(500px, 80vw)",
+                        height: "min(500px, 80vw)",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -55%)",
+                        background: "radial-gradient(circle, rgba(147,42,248,0.12) 0%, rgba(35,121,245,0.06) 40%, transparent 70%)",
+                        filter: "blur(40px)",
+                        animation: "sf-glow-pulse 6s ease-in-out infinite",
+                    }}
                 />
 
-                <span className="text-zinc-300 hidden sm:inline">
-                    SmartFlow a évolué.
-                </span>
-                <span className="text-zinc-300 sm:hidden">
-                    SmartFlow a évolué.
-                </span>
-                <a
-                    href="https://smartflowsa.ch"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-[11px] sm:text-[12px] font-medium text-white transition hover:brightness-110"
-                    style={{ background: "linear-gradient(120deg, #a78bfa 0%, #22d3ee 50%, #e879f9 100%)" }}
+                <div
+                    className="relative flex flex-col items-center gap-6 sm:gap-8 px-6 text-center"
+                    style={{ animation: "sf-overlay-rise 0.8s ease-out 0.2s both" }}
                 >
-                    Découvrir smartflowsa.ch
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d="M7 17L17 7M17 7H7M17 7V17" />
-                    </svg>
-                </a>
-                <button
-                    type="button"
-                    onClick={dismiss}
-                    aria-label="Fermer le bandeau"
-                    className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 rounded-md p-1 text-zinc-400 hover:text-white transition"
+                    {/* Logo icon */}
+                    <img
+                        src="/redirection-smartflowsa/icon/smartflow-logo.svg"
+                        alt="SmartFlow logo"
+                        className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24"
+                        style={{ filter: "drop-shadow(0 0 24px rgba(147,42,248,0.3))" }}
+                    />
+
+                    {/* Text logo */}
+                    <img
+                        src="/redirection-smartflowsa/logo-text/smartflow-text-white.svg"
+                        alt="smartflow"
+                        className="w-48 sm:w-56 md:w-64"
+                        style={{ opacity: 0.9 }}
+                    />
+
+                    {/* Message */}
+                    <div className="flex flex-col items-center gap-2 max-w-md">
+                        <p className="text-[13px] sm:text-[15px] text-zinc-400 leading-relaxed">
+                            SmartFlow a évolué. Retrouvez-nous sur notre nouveau site.
+                        </p>
+                    </div>
+
+                    {/* CTA */}
+                    <a
+                        href="https://smartflowsa.ch"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group relative inline-flex items-center gap-2 rounded-xl px-7 py-3 sm:px-8 sm:py-3.5 text-[13px] sm:text-[14px] font-medium text-white transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_32px_rgba(147,42,248,0.3)]"
+                        style={{
+                            background: "linear-gradient(135deg, #932af8 0%, #5b21b6 40%, #2563eb 100%)",
+                            boxShadow: "0 0 16px rgba(147,42,248,0.15), inset 0 1px 0 rgba(255,255,255,0.1)",
+                        }}
+                    >
+                        Découvrir smartflowsa.ch
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true">
+                            <path d="M7 17L17 7M17 7H7M17 7V17" />
+                        </svg>
+                    </a>
+                </div>
+
+                {/* Tag en bas */}
+                <div
+                    className="absolute bottom-6 sm:bottom-8 left-0 right-0 flex justify-center text-zinc-500"
+                    style={{ animation: "sf-overlay-rise 0.8s ease-out 0.6s both" }}
                 >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-                        <path d="M6 6l12 12M18 6L6 18" />
-                    </svg>
-                </button>
+                    <SmartFlowTag />
+                </div>
             </div>
         </>
     );
