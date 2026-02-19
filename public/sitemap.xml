@@ -1,33 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>https://www.smartflowgroup.ch/</loc>
-        <lastmod>2024-12-19</lastmod>
-        <changefreq>weekly</changefreq>
+        <loc>https://smartflowsa.ch/</loc>
+        <lastmod>2025-02-19</lastmod>
         <priority>1.0</priority>
-    </url>
-    <url>
-        <loc>https://www.smartflowgroup.ch/projects/web/</loc>
-        <lastmod>2024-12-19</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    <url>
-        <loc>https://www.smartflowgroup.ch/projects/apps/</loc>
-        <lastmod>2024-12-19</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    <url>
-        <loc>https://www.smartflowgroup.ch/projects/automation/</loc>
-        <lastmod>2024-12-19</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    <url>
-        <loc>https://www.smartflowgroup.ch/contact/</loc>
-        <lastmod>2024-12-19</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
     </url>
 </urlset>

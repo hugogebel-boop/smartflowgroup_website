@@ -1,19 +1,4 @@
 User-agent: *
 Allow: /
 
-# Sitemap
-Sitemap: https://www.smartflowgroup.ch/sitemap.xml
-
-# Crawl-delay supprimé (Google l'ignore)
-
-# Disallow pour les fichiers techniques
-Disallow: /node_modules/
-Disallow: /.git/
-Disallow: /src/
-Disallow: /*.ts
-Disallow: /*.tsx
-Disallow: /*.js.map
-Disallow: /*.css.map
-
-# Allow pour les assets publics
-Allow: /assets/
+Sitemap: https://smartflowgroup.ch/sitemap.xml
