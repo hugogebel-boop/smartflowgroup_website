@@ -842,6 +842,77 @@ function WorksSection() {
     );
 }
 
+/* ================= Redirect Banner ================= */
+function RedirectBanner() {
+    const [visible, setVisible] = useState(() => {
+        if (typeof window === "undefined") return true;
+        return sessionStorage.getItem("sf_banner_dismissed") !== "1";
+    });
+
+    if (!visible) return null;
+
+    const dismiss = () => {
+        setVisible(false);
+        try { sessionStorage.setItem("sf_banner_dismissed", "1"); } catch {}
+    };
+
+    return (
+        <>
+            <style>{`
+                .sf-redirect-banner ~ header,
+                .sf-redirect-banner ~ * header { top: 40px !important; }
+                @media (min-width: 640px) {
+                    .sf-redirect-banner ~ header,
+                    .sf-redirect-banner ~ * header { top: 36px !important; }
+                }
+            `}</style>
+            <div
+                className="sf-redirect-banner fixed top-0 left-0 right-0 z-[60] flex items-center justify-center gap-3 px-4 py-2.5 sm:py-2 text-[12px] sm:text-[13px] text-white/90"
+                style={{
+                    background: "linear-gradient(90deg, rgba(11,11,18,0.97) 0%, rgba(30,20,50,0.97) 50%, rgba(11,11,18,0.97) 100%)",
+                    borderBottom: "1px solid rgba(168,85,247,0.25)",
+                    backdropFilter: "blur(12px)",
+                }}
+            >
+                <div
+                    aria-hidden
+                    className="pointer-events-none absolute bottom-0 left-0 right-0 h-[1px]"
+                    style={{ background: "linear-gradient(90deg, transparent 0%, #a78bfa 25%, #22d3ee 50%, #e879f9 75%, transparent 100%)", opacity: 0.5 }}
+                />
+
+                <span className="text-zinc-300 hidden sm:inline">
+                    SmartFlow a évolué.
+                </span>
+                <span className="text-zinc-300 sm:hidden">
+                    SmartFlow a évolué.
+                </span>
+                <a
+                    href="https://smartflowsa.ch"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-[11px] sm:text-[12px] font-medium text-white transition hover:brightness-110"
+                    style={{ background: "linear-gradient(120deg, #a78bfa 0%, #22d3ee 50%, #e879f9 100%)" }}
+                >
+                    Découvrir smartflowsa.ch
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" />
+                    </svg>
+                </a>
+                <button
+                    type="button"
+                    onClick={dismiss}
+                    aria-label="Fermer le bandeau"
+                    className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 rounded-md p-1 text-zinc-400 hover:text-white transition"
+                >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+                        <path d="M6 6l12 12M18 6L6 18" />
+                    </svg>
+                </button>
+            </div>
+        </>
+    );
+}
+
 /* ================= APP ================= */
 export default function App() {
     const location = useLocation();
@@ -872,6 +943,7 @@ export default function App() {
 
     return (
         <>
+            <RedirectBanner />
             <Routes>
                 <Route path="/projects/web" element={
                 <Suspense fallback={<main className="min-h-screen text-white"><TopNav /><section className="px-6 py-16 max-w-5xl mx-auto">Chargement…</section></main>}>
