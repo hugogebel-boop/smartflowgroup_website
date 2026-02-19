@@ -1,21 +1,17 @@
 <!doctype html>
-<html>
+<html lang="fr">
 <head>
     <meta charset="utf-8" />
-    <title>Redirecting…</title>
-    <meta http-equiv="refresh" content="0; url=/" />
-    <script>
-        // Recompose l’URL demandée et la passe à index.html via ?p=
-        (function () {
-            var l = window.location;
-            var p = l.pathname + l.search + l.hash;
-            var target = "/" + (p.startsWith("/") ? "" : "") + "?p=" + encodeURIComponent(p);
-            // Remplace sans créer d’historique supplémentaire
-            window.location.replace(target);
-        })();
-    </script>
+    <title>SmartFlow a déménagé — smartflowsa.ch</title>
+    <meta name="robots" content="noindex, follow" />
+    <link rel="canonical" href="https://smartflowsa.ch/" />
+    <meta http-equiv="refresh" content="0; url=https://smartflowsa.ch/" />
+    <script>window.location.replace("https://smartflowsa.ch/");</script>
 </head>
-<body>
-    Redirecting…
+<body style="background:#110317;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;text-align:center">
+    <div>
+        <p style="font-size:1.25rem;margin-bottom:1rem">SmartFlow a évolué.</p>
+        <p>Redirection vers <a href="https://smartflowsa.ch" style="color:#932af8">smartflowsa.ch</a>…</p>
+    </div>
 </body>
 </html>

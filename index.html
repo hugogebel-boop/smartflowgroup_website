@@ -3,105 +3,77 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SmartFlow — Design & Développement web, une expérience numérique</title>
-    <meta name="description" content="Sites web, applications métier et outils d'automatisation sur mesure. SmartFlow conçoit des solutions digitales élégantes et performantes pour simplifier votre quotidien professionnel." />
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://www.smartflowgroup.ch/" />
-    <meta property="og:title" content="SmartFlow — Design & Développement web" />
-    <meta property="og:description" content="Sites web, applications métier et outils d'automatisation sur mesure. Solutions digitales élégantes et performantes." />
-    <meta property="og:image" content="https://www.smartflowgroup.ch/assets/og-image.png" />
-    <meta property="og:site_name" content="SmartFlow" />
-    
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://www.smartflowgroup.ch/" />
-    <meta name="twitter:title" content="SmartFlow — Design & Développement web" />
-    <meta name="twitter:description" content="Sites web, applications métier et outils d'automatisation sur mesure. Solutions digitales élégantes et performantes." />
-    <meta name="twitter:image" content="https://www.smartflowgroup.ch/assets/og-image.png" />
 
-    <!-- Préchargement des images déplacé côté pages pour éviter du travail inutile sur l'accueil -->
-    
-    <!-- Preconnect pour domaines tiers (à activer si ajout d'analytics/CDN) -->
-    <!-- <link rel="preconnect" href="https://www.google-analytics.com" crossorigin> -->
-    <!-- <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin> -->
-    <!-- <link rel="dns-prefetch" href="//formsubmit.co"> -->
-    
-    <!-- Données structurées JSON-LD -->
+    <!-- SEO: tell crawlers not to index this domain, but follow links to smartflowsa.ch -->
+    <meta name="robots" content="noindex, follow" />
+    <meta name="googlebot" content="noindex, follow" />
+
+    <!-- SEO: canonical points to the new domain -->
+    <link rel="canonical" href="https://smartflowsa.ch/" />
+
+    <!-- SEO: meta refresh redirect (crawlers + no-JS users), 3s delay so humans see the banner -->
+    <meta http-equiv="refresh" content="3; url=https://smartflowsa.ch/" />
+
+    <title>SmartFlow a déménagé — Retrouvez-nous sur smartflowsa.ch</title>
+    <meta name="description" content="SmartFlow a évolué. Retrouvez notre studio digital sur smartflowsa.ch — sites web sur mesure, SEO, identité visuelle et design UX/UI à Lausanne." />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://smartflowsa.ch/" />
+    <meta property="og:title" content="SmartFlow — Retrouvez-nous sur smartflowsa.ch" />
+    <meta property="og:description" content="SmartFlow a évolué. Studio digital à Lausanne — sites web, SEO, identité visuelle et design UX/UI." />
+    <meta property="og:site_name" content="SmartFlow" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="SmartFlow — Retrouvez-nous sur smartflowsa.ch" />
+    <meta name="twitter:description" content="SmartFlow a évolué. Studio digital à Lausanne — sites web, SEO, identité visuelle et design UX/UI." />
+
+    <!-- JSON-LD: signal to Google that the organization has moved -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "Organization",
         "name": "SmartFlow",
-        "url": "https://www.smartflowgroup.ch",
-        "logo": "https://www.smartflowgroup.ch/assets/icon/android-chrome-512x512.png",
-        "description": "Studio spécialisé dans le développement web, applications métier et outils d'automatisation sur mesure en Suisse",
-        "foundingDate": "2024",
-        "contactPoint": {
-            "@type": "ContactPoint",
-            "email": "contact@smartflowgroup.ch",
-            "contactType": "customer service",
-            "availableLanguage": ["French", "English"]
-        },
-        "areaServed": {
-            "@type": "Country",
-            "name": "Switzerland"
-        }
+        "alternateName": "SmartFlow SA",
+        "url": "https://smartflowsa.ch",
+        "sameAs": [
+            "https://smartflowgroup.ch",
+            "https://www.smartflowgroup.ch",
+            "https://linkedin.com/company/smartflowsa"
+        ],
+        "description": "Studio digital à Lausanne. Sites web sur mesure, SEO, identité visuelle et design UX/UI."
     }
     </script>
-    
+
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "WebSite",
-        "name": "SmartFlow - Développement web et logiciel sur mesure",
-        "url": "https://www.smartflowgroup.ch",
-        "description": "Site officiel de SmartFlow, studio de développement web et logiciel sur mesure en Suisse",
-        "inLanguage": "fr-CH"
+        "name": "SmartFlow",
+        "url": "https://smartflowsa.ch",
+        "description": "SmartFlow a déménagé de smartflowgroup.ch vers smartflowsa.ch"
     }
     </script>
 
-    <!-- 🖼️ Icônes du site -->
-    <link rel="icon" type="image/x-icon" href="https://www.smartflowgroup.ch/assets/icon/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="16x16" href="https://www.smartflowgroup.ch/assets/icon/favicon-16x16.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="https://www.smartflowgroup.ch/assets/icon/favicon-32x32.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="https://www.smartflowgroup.ch/assets/icon/apple-touch-icon.png" />
-    <link rel="icon" type="image/png" sizes="192x192" href="https://www.smartflowgroup.ch/assets/icon/android-chrome-192x192.png" />
-    <link rel="manifest" href="https://www.smartflowgroup.ch/assets/icon/site.webmanifest" />
-    <meta name="theme-color" content="#0B0B12" />
-
-    <!-- (Optionnel) Canonical dynamique simple -->
-    <link id="canonical" rel="canonical" href="https://www.smartflowgroup.ch/" />
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="/assets/icon/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/icon/favicon-32x32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/icon/apple-touch-icon.png" />
+    <meta name="theme-color" content="#110317" />
 </head>
 <body class="bg-black">
+    <!-- Fallback for users/crawlers without JS -->
+    <noscript>
+        <div style="background:#110317;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;text-align:center;padding:2rem">
+            <div>
+                <p style="font-size:1.25rem;margin-bottom:1rem">SmartFlow a évolué.</p>
+                <p>Vous allez être redirigé vers <a href="https://smartflowsa.ch" style="color:#932af8">smartflowsa.ch</a></p>
+            </div>
+        </div>
+    </noscript>
+
     <div id="root"></div>
-
-    <!-- 🔧 Restaurer l’URL propre si on vient de /404.html?p=... -->
-    <script>
-        (function () {
-            var params = new URLSearchParams(window.location.search);
-            var p = params.get("p");
-            if (p) {
-                var clean = decodeURIComponent(p);
-                // Enlève la query ?p=… visuellement, sans recharger
-                window.history.replaceState(null, "", clean);
-            }
-
-            // (Optionnel) Met à jour la canonical selon la route courante
-            var link = document.getElementById("canonical");
-            if (link) {
-                try {
-                    var u = new URL(window.location.href);
-                    u.search = "";
-                    if (u.pathname !== "/" && u.pathname.endsWith("/")) {
-                        u.pathname = u.pathname.replace(/\/+$/, "");
-                    }
-                    link.setAttribute("href", u.toString());
-                } catch { }
-            }
-        })();
-    </script>
 
     <script type="module" src="/src/main.tsx"></script>
 </body>
