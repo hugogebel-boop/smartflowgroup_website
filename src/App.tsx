@@ -851,10 +851,6 @@ const GLIKER_FONT_FACE = `
     font-style: normal;
     font-display: swap;
 }
-@keyframes sf-overlay-fade-in {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
 @keyframes sf-overlay-rise {
     from { opacity: 0; transform: translateY(18px); }
     to   { opacity: 1; transform: translateY(0); }

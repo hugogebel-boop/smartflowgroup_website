@@ -1,5 +1,6 @@
 // src/seo.ts
-const BASE_URL = "https://www.smartflowgroup.ch";
+const BASE_URL = "https://smartflowsa.ch";
+const OLD_URL = "https://www.smartflowgroup.ch";
 
 export interface SEOConfig {
     title?: string;
@@ -196,100 +197,31 @@ export function setHead(config: SEOConfig) {
     }
 }
 
-// Configuration SEO par défaut
+// Configuration SEO par défaut — noindex car le site redirige vers smartflowsa.ch
 export const DEFAULT_SEO = {
     author: "SmartFlow",
     ogSiteName: "SmartFlow",
     ogType: "website",
-    twitterCard: "summary_large_image",
-    twitterSite: "@smartflowgroup",
-    twitterCreator: "@smartflowgroup",
-    robots: "index, follow",
-    ogImage: `${BASE_URL}/assets/og-image.png`
+    twitterCard: "summary",
+    robots: "noindex, follow",
+    canonical: `${BASE_URL}/`,
+    ogUrl: `${BASE_URL}/`,
+    ogImage: `${OLD_URL}/assets/og-image.png`
 };
 
-// Configurations SEO spécifiques par page
+// Toutes les pages redirigent vers smartflowsa.ch — SEO unifié
 export const SEO_CONFIGS = {
     home: {
-        title: "SmartFlow — Design & Développement web, une expérience numérique",
-        description: "Sites web, applications métier et outils d'automatisation sur mesure. SmartFlow conçoit des solutions digitales élégantes et performantes pour simplifier votre quotidien professionnel.",
-        keywords: "développement web, design web, sites web, applications métier, automatisation, React, Next.js, WPF, .NET, Python, Suisse, Lausanne",
-        canonical: BASE_URL,
-        ogTitle: "SmartFlow — Design & Développement web",
-        ogDescription: "Sites web, applications métier et outils d'automatisation sur mesure. Solutions digitales élégantes et performantes.",
-        ogUrl: BASE_URL,
+        title: "SmartFlow a déménagé — Retrouvez-nous sur smartflowsa.ch",
+        description: "SmartFlow a évolué. Retrouvez notre studio digital sur smartflowsa.ch — sites web sur mesure, SEO, identité visuelle et design UX/UI à Lausanne.",
+        ogTitle: "SmartFlow — Retrouvez-nous sur smartflowsa.ch",
+        ogDescription: "SmartFlow a évolué. Studio digital à Lausanne — sites web, SEO, identité visuelle et design UX/UI.",
     },
-    
-    web: {
-        title: "Sites web — SmartFlow | Développement web moderne et élégant",
-        description: "Découvrez nos réalisations web : sites vitrine, portfolios et applications web modernes. Développement React, Next.js avec une attention particulière à l'expérience utilisateur.",
-        keywords: "sites web, développement web, React, Next.js, Tailwind, portfolio, site vitrine, expérience utilisateur, UX, UI, Suisse",
-        canonical: `${BASE_URL}/projects/web`,
-        ogTitle: "Sites web — SmartFlow",
-        ogDescription: "Sites web élégants et performants développés avec React et Next.js. Une expérience utilisateur soignée pour chaque projet.",
-        ogUrl: `${BASE_URL}/projects/web`,
-    },
-    
-    apps: {
-        title: "Applications métier — SmartFlow | Outils internes sur mesure",
-        description: "Applications métier WPF et .NET pour optimiser vos processus internes. LabApp, ComptaApp et autres outils conçus pour améliorer votre productivité quotidienne.",
-        keywords: "applications métier, WPF, .NET, applications desktop, outils internes, productivité, automatisation, EF Core, SQL Server",
-        canonical: `${BASE_URL}/projects/apps`,
-        ogTitle: "Applications métier — SmartFlow",
-        ogDescription: "Applications métier WPF et .NET sur mesure pour optimiser vos processus internes et améliorer votre productivité.",
-        ogUrl: `${BASE_URL}/projects/apps`,
-    },
-    
-    automation: {
-        title: "Programmes automatisés — SmartFlow | Scripts et automatisation",
-        description: "Outils d'automatisation Python et PowerShell pour connecter vos systèmes et automatiser vos tâches répétitives. Scripts sur mesure pour votre entreprise.",
-        keywords: "automatisation, Python, PowerShell, scripts, automatisation processus, Excel, intégration systèmes, données, productivité",
-        canonical: `${BASE_URL}/projects/automation`,
-        ogTitle: "Programmes automatisés — SmartFlow",
-        ogDescription: "Scripts et outils d'automatisation sur mesure pour connecter vos systèmes et automatiser vos processus métier.",
-        ogUrl: `${BASE_URL}/projects/automation`,
-    },
-    
-    mentions: {
-        title: "Mentions légales — SmartFlow",
-        description: "Mentions légales du site SmartFlow. Informations sur l'éditeur, droits d'auteur et conditions d'utilisation du contenu.",
-        keywords: "mentions légales, SmartFlow, droits d'auteur, propriété intellectuelle",
-        canonical: `${BASE_URL}/mentions`,
-        ogTitle: "Mentions légales — SmartFlow",
-        ogDescription: "Mentions légales et informations sur l'éditeur du site SmartFlow.",
-        ogUrl: `${BASE_URL}/mentions`,
-        robots: "noindex, follow"
-    },
-
-    privacy: {
-        title: "Politique de confidentialité — SmartFlow",
-        description: "Politique de confidentialité de SmartFlow Group. Informations sur le traitement des données personnelles, la sécurité et vos droits.",
-        keywords: "politique de confidentialité, données personnelles, LPD, RGPD, SmartFlow",
-        canonical: `${BASE_URL}/confidentialite`,
-        ogTitle: "Politique de confidentialité — SmartFlow",
-        ogDescription: "Politique de confidentialité de SmartFlow Group et informations sur la protection des données personnelles.",
-        ogUrl: `${BASE_URL}/confidentialite`,
-        robots: "noindex, follow"
-    },
-
-    conditions: {
-        title: "Conditions générales de vente — SmartFlow",
-        description: "Conditions générales de vente (CG) de SmartFlow Group : formation du contrat, obligations des parties, prix, propriété intellectuelle, responsabilité et droit applicable.",
-        keywords: "conditions générales, CGV, contrat, SmartFlow, Suisse, droit suisse, prestations numériques",
-        canonical: `${BASE_URL}/conditions-generales`,
-        ogTitle: "Conditions générales de vente — SmartFlow",
-        ogDescription: "Conditions générales de vente applicables aux prestations de SmartFlow Group en matière de sites web, applications métier et automatisations.",
-        ogUrl: `${BASE_URL}/conditions-generales`,
-        robots: "noindex, follow"
-    },
-    
-    contact: {
-        title: "Contact — SmartFlow | Parlez-nous de votre projet",
-        description: "Contactez SmartFlow pour discuter de votre projet. Sites web, applications métier et outils d'automatisation sur mesure. Réponse rapide et conseils concrets.",
-        keywords: "contact, SmartFlow, devis, projet web, application métier, automatisation, consultation, Suisse, Lausanne",
-        canonical: `${BASE_URL}/contact`,
-        ogTitle: "Contact — SmartFlow",
-        ogDescription: "Parlez-nous de votre projet. Réponse rapide et conseils concrets pour vos besoins en développement web et applications métier.",
-        ogUrl: `${BASE_URL}/contact`,
-    }
+    web: {},
+    apps: {},
+    automation: {},
+    mentions: {},
+    privacy: {},
+    conditions: {},
+    contact: {},
 };
