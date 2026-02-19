@@ -935,16 +935,31 @@ function SmartFlowTag() {
 }
 
 function RedirectBanner() {
+    useEffect(() => {
+        document.documentElement.style.overflow = "hidden";
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.documentElement.style.overflow = "";
+            document.body.style.overflow = "";
+        };
+    }, []);
+
     return (
         <>
             <style>{GLIKER_FONT_FACE}</style>
             <div
-                className="fixed inset-0 z-[100] flex flex-col items-center justify-center"
+                className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden"
                 style={{
-                    background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(30, 20, 55, 0.95) 0%, #070A10 70%)",
+                    background: "#070A10",
                     animation: "sf-overlay-fade-in 0.6s ease-out both",
                 }}
             >
+                {/* Fond radial decoratif par-dessus le noir opaque */}
+                <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0"
+                    style={{ background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(30, 20, 55, 0.7) 0%, transparent 70%)" }}
+                />
                 {/* Glow decoratif */}
                 <div
                     aria-hidden

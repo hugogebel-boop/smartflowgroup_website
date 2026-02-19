@@ -1,0 +1,75 @@
+/* SmartFlow Tag — smartflowsa.ch */
+
+@font-face {
+  font-family: 'Gliker';
+  src: url('Gliker-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.sf-tag {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0;
+  color: inherit;
+  opacity: .45;
+  font-size: 12.5px;
+  font-weight: 500;
+  font-family: inherit;
+  letter-spacing: .01em;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity .2s ease;
+}
+.sf-tag:hover {
+  opacity: .65;
+}
+
+.sf-tag .sf-static,
+.sf-tag .sf-letter,
+.sf-tag .sf-icon,
+.sf-tag .sf-icon img {
+  pointer-events: none;
+}
+
+.sf-tag .sf-static {
+  margin-right: .3em;
+}
+
+.sf-tag .sf-letter {
+  display: inline-flex;
+  align-items: flex-end;
+  font-family: inherit;
+  font-size: 12.5px;
+  height: 16px;
+  transition: color .08s ease, font-family .08s step-end, font-size .08s ease;
+}
+
+.sf-tag .sf-letter.glitch {
+  font-family: 'Gliker', serif;
+  font-size: 15px;
+  color: rgba(124, 92, 252, .62);
+}
+
+.sf-icon {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 5px;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity .18s ease, transform .18s ease;
+}
+.sf-icon.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.sf-icon img {
+  width: 14px;
+  height: 14px;
+  display: block;
+  object-fit: contain;
+  position: relative;
+  top: 1px;
+}
