@@ -949,7 +949,7 @@ function RedirectBanner() {
             <style>{GLIKER_FONT_FACE}</style>
             <div
                 className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden"
-                style={{ backgroundColor: "#110317", animation: "sf-overlay-fade-in 0.6s ease-out both" }}
+                style={{ backgroundColor: "#110317" }}
             >
                 {/* Glow ambiant */}
                 <div
@@ -989,18 +989,6 @@ function RedirectBanner() {
                         smartflow
                     </span>
 
-                    {/* Shimmer line */}
-                    <div className="h-[2px] w-20 sm:w-24 rounded-full overflow-hidden mb-8 sm:mb-10" style={{ background: "rgba(255,255,255,0.08)" }}>
-                        <div
-                            className="h-full w-full rounded-full"
-                            style={{
-                                background: "linear-gradient(90deg, #36affe, #932af8, #36affe)",
-                                backgroundSize: "200% 100%",
-                                animation: "loading-shimmer 1.4s ease-in-out infinite",
-                            }}
-                        />
-                    </div>
-
                     {/* Message */}
                     <p className="mb-8 sm:mb-10 max-w-sm text-[14px] sm:text-[16px] leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
                         SmartFlow a évolué.<br />
@@ -1034,12 +1022,6 @@ function RedirectBanner() {
                 </div>
             </div>
 
-            <style>{`
-                @keyframes loading-shimmer {
-                    0%   { background-position: 200% 0; }
-                    100% { background-position: -200% 0; }
-                }
-            `}</style>
         </>
     );
 }
